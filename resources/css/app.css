@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/* Aktifkan dark mode berbasis class (.dark), bukan hanya preferensi OS,
+   supaya toggle gelap/terang di navbar bisa mengontrolnya secara manual. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Transisi halus saat berpindah tema */
+html {
+    color-scheme: light;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
+body,
+.theme-transition {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Scrollbar tipis untuk sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.4);
+    border-radius: 9999px;
+}
