@@ -15,6 +15,7 @@ class Member extends Model
         'division_id',
         'position',
         'status',
+        'photo_path',
         'join_date',
         'exit_date',
         'notes'
@@ -23,6 +24,15 @@ class Member extends Model
     public function division()
     {
         return $this->belongsTo(Division::class);
+    }
+
+    /**
+     * URL publik foto pengurus. Mengembalikan null jika belum ada foto,
+     * sehingga tampilan bisa fallback ke inisial/avatar default.
+     */
+    public function getPhotoUrlAttribute(): ?string
+    {
+        return $this->photo_path ? asset('storage/' . $this->photo_path) : null;
     }
 
     public function attendances()
