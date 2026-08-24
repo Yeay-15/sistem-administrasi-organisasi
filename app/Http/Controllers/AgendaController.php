@@ -6,6 +6,7 @@ use App\Models\Agenda;
 use App\Models\Member;
 use App\Models\Division;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class AgendaController extends Controller
 {
@@ -143,6 +144,12 @@ class AgendaController extends Controller
 
     public function destroy(Agenda $agenda)
     {
+        // Contoh Gate::authorize eksplisit di level controller (Tahap 3).
+        // Seluruh resource 'agendas' sudah dilindungi middleware 'can:manage_agendas'
+        // di routes/web.php, jadi baris ini sifatnya defense-in-depth — pola yang sama
+        // bisa dipakai di controller lain untuk aturan yang lebih spesifik per-aksi.
+        Gate::authorize('manage_agendas');
+
         $agenda->delete();
         return redirect()->route('agendas.index')->with('success', 'Agenda dan data absensinya berhasil dihapus.');
     }

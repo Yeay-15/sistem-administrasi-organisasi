@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎓 Sistem Administrasi & Absensi Terpadu KATIBER
+# Sistem Administrasi & Absensi Terpadu KATIBER
 
 **Aplikasi web terpadu untuk pengelolaan SDM, absensi kegiatan, dan digitalisasi administrasi surat-menyurat**
 di lingkungan organisasi **Keluarga Mahasiswa Tebing Tinggi Bersatu (KATIBER)** — Lhokseumawe, Aceh Utara.
@@ -23,50 +23,42 @@ di lingkungan organisasi **Keluarga Mahasiswa Tebing Tinggi Bersatu (KATIBER)** 
 
 ---
 
-## 📑 Daftar Isi
+## Daftar Isi
 
-- [Fitur Utama](#-fitur-utama)
-- [Tech Stack](#️-tech-stack--library)
-- [Struktur Direktori](#-struktur-direktori-penting)
-- [Panduan Instalasi](#-panduan-instalasi-local-development)
-- [Kredensial Default](#-kredensial-default-login)
-
----
-
-## ✨ Fitur Utama
-
-Sistem ini terbagi menjadi dua pilar fungsional utama:
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### 👥 Pilar SDM & Absensi
-
-- 🗂️ **Manajemen Divisi** — Pengelolaan struktur divisi organisasi
-- 📋 **Manajemen Pengurus** — Pendataan pengurus lengkap dengan riwayat jabatan & status aktif
-- 🗓️ **Manajemen Agenda** — Pencatatan agenda rapat, pleno, dan kegiatan rutin
-- ✅ **Absensi Masal (Upsert)** — Pencatatan kehadiran (Hadir, Izin, Sakit, Alpha) dalam satu halaman
-- ⚠️ **Modul Pembinaan** — Rekam jejak pendisiplinan pengurus (Teguran, SP)
-- 📊 **Rekap Absensi (LPJ)** — Matriks kehadiran otomatis, ekspor ke PDF & Excel
-
-</td>
-<td width="50%" valign="top">
-
-### ✉️ Pilar Administrasi Surat
-
-- 📥 **Surat Masuk** — Pencatatan surat eksternal + unggah arsip (PDF)
-- 📤 **Surat Keluar** — Penomoran & pencatatan surat internal/eksternal
-- 🔍 **Register Surat (LPJ)** — Filter pencarian cerdas, ekspor ke PDF & Excel
-- 🛡️ **Audit Log** — Pencatatan otomatis riwayat aktivitas sistem untuk keamanan data
-
-</td>
-</tr>
-</table>
+- [Fitur Utama](#fitur-utama)
+- [Tech Stack & Library](#tech-stack--library)
+- [Struktur Direktori Penting](#struktur-direktori-penting)
+- [Panduan Instalasi](#panduan-instalasi-local-development)
+- [Kredensial Default](#kredensial-default-login)
 
 ---
 
-## 🛠️ Tech Stack & Library
+## Fitur Utama
+
+Sistem ini dirancang dengan arsitektur multi-modul yang terbagi menjadi tiga pilar fungsional utama:
+
+### Pilar SDM & Operasional
+- **Manajemen Divisi:** Pengelolaan struktur divisi organisasi.
+- **Manajemen Pengurus:** Pendataan pengurus lengkap dengan riwayat jabatan dan status keaktifan.
+- **Manajemen Agenda:** Pencatatan agenda rapat, pleno, dan kegiatan rutin, dilengkapi dengan visualisasi kalender interaktif yang mendukung agenda kolaborasi lintas divisi.
+- **Absensi Masal:** Pencatatan kehadiran (Hadir, Izin, Sakit, Alpha) secara kolektif dalam satu antarmuka.
+- **Rekapitulasi Absensi:** Pembuatan matriks kehadiran otomatis untuk keperluan LPJ dengan dukungan ekspor ke format PDF dan Excel.
+- **Buku Tamu:** Pencatatan dan dokumentasi kunjungan tamu organisasi.
+- **Modul Pembinaan:** Perekaman jejak pendisiplinan pengurus (Teguran Lisan, SP 1, SP 2, SP 3).
+
+### Pilar Administrasi Surat
+- **Surat Masuk:** Pencatatan surat dari pihak eksternal beserta fitur unggah arsip dokumen.
+- **Surat Keluar:** Penomoran otomatis dan pencatatan distribusi surat internal maupun eksternal.
+- **Laporan Persuratan:** Sistem filter pencarian dan rekapitulasi data surat untuk mempermudah penyusunan administrasi akhir tahun.
+
+### Pilar Keamanan & Hak Akses (RBAC)
+- **Role-Based Access Control:** Pembagian hak akses secara dinamis (Super Admin, Ketua Divisi, Anggota).
+- **Matrix Permission:** Pengaturan izin akses setiap modul melalui antarmuka toggle yang interaktif.
+- **Audit Log:** Perekaman otomatis terhadap seluruh riwayat aktivitas modifikasi data di dalam sistem untuk menjaga integritas informasi.
+
+---
+
+## Tech Stack & Library
 
 | Layer | Teknologi |
 |---|---|
@@ -78,42 +70,42 @@ Sistem ini terbagi menjadi dua pilar fungsional utama:
 
 ---
 
-## 📂 Struktur Direktori Penting
+## Struktur Direktori Penting
 
 ```text
 katiber-admin/
 ├── app/
-│   ├── Exports/            # Class untuk format file Excel/PDF (mis. AttendanceReportExport.php)
+│   ├── Exports/            # Modul untuk format file Excel/PDF
 │   ├── Http/
-│   │   ├── Controllers/    # Logika CRUD, filter, dan pemrosesan data sebelum dikirim ke View
-│   │   └── Middleware/     # Filter request masuk (mis. autentikasi login)
+│   │   ├── Controllers/    # Logika CRUD, pemrosesan data, dan RBAC
+│   │   └── Middleware/     # Filter request masuk (autentikasi dan autorisasi)
 │   └── Models/             # Representasi tabel database & relasi (Eloquent ORM)
 │
 ├── database/
-│   ├── migrations/         # Arsitektur tabel database (skema, tipe data, foreign key)
-│   └── seeders/             # Script pengisi data awal (akun Admin)
+│   ├── migrations/         # Arsitektur tabel database (skema, tipe data, relasi)
+│   └── seeders/            # Script pengisi data awal (termasuk Role & Permission)
 │
 ├── public/
-│   └── storage/            # Symlink ke folder storage untuk arsip surat (PDF)
+│   └── storage/            # Symlink ke direktori storage untuk akses arsip publik
 │
 ├── resources/
 │   ├── css/app.css         # Entry point Tailwind CSS v4
-│   └── views/               # Seluruh tampilan antarmuka (UI)
-│       ├── agendas/         # View CRUD Agenda & Input Absensi
-│       ├── audit_logs/      # View Riwayat Aktivitas
-│       ├── exports/         # Template khusus konversi PDF & Excel
-│       ├── layouts/         # Kerangka utama UI (Navbar, interaksi Alpine.js)
-│       └── ...               # Modul lainnya
+│   ├── js/app.js           # Konfigurasi JavaScript & Alpine.js
+│   └── views/              # Seluruh antarmuka pengguna (UI)
+│       ├── agendas/        # Modul Agenda & Kalender
+│       ├── roles/          # Modul Manajemen Peran & Akses (RBAC)
+│       ├── layouts/        # Kerangka utama UI (Navbar, Sidebar, Autentikasi)
+│       └── ...             # Direktori modul spesifik lainnya
 │
 ├── routes/
-│   └── web.php              # Pemetaan URL ke Controller yang sesuai
+│   └── web.php             # Pemetaan URL dan penegakan Middleware/Gates
 │
-└── .env                      # Konfigurasi environment (database, nama aplikasi)
+└── .env                    # Konfigurasi environment (database, sesi, variabel environment)
 ```
 
 ---
 
-## 🚀 Panduan Instalasi (Local Development)
+## Panduan Instalasi (Local Development)
 
 > **Persyaratan Sistem:** PHP ≥ 8.3 · Composer · Node.js & NPM · MySQL (XAMPP/Laragon/sejenisnya)
 
@@ -210,7 +202,7 @@ http://localhost:8000
 
 ---
 
-## 🔑 Kredensial Default (Login)
+## Kredensial Default (Login)
 
 Gunakan akun berikut untuk masuk ke dalam sistem pertama kali:
 

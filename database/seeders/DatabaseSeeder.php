@@ -33,5 +33,10 @@ class DatabaseSeeder extends Seeder
             DivisionSeeder::class,
             MemberSeeder::class,
         ]);
+
+        // 4. Role & Permission (aman dijalankan berkali-kali, tidak menghapus data)
+        $this->call([
+            RolePermissionSeeder::class,
+        ]);
     }
 }

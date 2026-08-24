@@ -34,4 +34,10 @@ class Member extends Model
     {
         return $this->hasMany(Guidance::class);
     }
+
+    // Akun login (users) yang terhubung dengan pengurus ini, jika ada
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
 }

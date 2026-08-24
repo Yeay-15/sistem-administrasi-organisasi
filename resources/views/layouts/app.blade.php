@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin KATIBER')</title>
 
-    {{-- Set tema sebelum halaman dirender, supaya tidak "berkedip" putih saat mode gelap aktif --}}
     <script>
         (function() {
             var stored = localStorage.getItem('katiber-theme');
@@ -43,15 +43,12 @@
 
     <div class="lg:flex lg:min-h-screen">
 
-        {{-- Overlay saat sidebar dibuka di mobile --}}
         <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false" x-transition.opacity
             class="fixed inset-0 z-30 bg-slate-900/50 lg:hidden"></div>
 
-        {{-- ============ SIDEBAR ============ --}}
         <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
             class="fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 dark:border-slate-800 dark:bg-slate-900 theme-transition">
 
-            {{-- Logo --}}
             <div class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200 px-6 dark:border-slate-800">
                 <div
                     class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-sm">
@@ -69,79 +66,109 @@
                 </button>
             </div>
 
-            {{-- Navigasi --}}
             <nav class="sidebar-scroll flex-1 space-y-1 overflow-y-auto px-3 py-4">
-                @include('layouts.partials.nav-item', [
-                    'route' => 'dashboard',
-                    'pattern' => 'dashboard',
-                    'label' => 'Dashboard',
-                    'icon' => 'home',
-                ])
-                @include('layouts.partials.nav-item', [
-                    'route' => 'divisions.index',
-                    'pattern' => 'divisions.*',
-                    'label' => 'Divisi',
-                    'icon' => 'office',
-                ])
-                @include('layouts.partials.nav-item', [
-                    'route' => 'members.index',
-                    'pattern' => 'members.*',
-                    'label' => 'Pengurus',
-                    'icon' => 'users',
-                ])
-                @include('layouts.partials.nav-item', [
-                    'route' => 'agendas.index',
-                    'pattern' => 'agendas.*',
-                    'label' => 'Input Agenda',
-                    'icon' => 'calendar',
-                ])
-                @include('layouts.partials.nav-item', [
-                    'route' => 'attendance-reports.index',
-                    'pattern' => 'attendance-reports.index',
-                    'label' => 'Rekap Absensi',
-                    'icon' => 'clipboard',
-                ])
-                @include('layouts.partials.nav-item', [
-                    'route' => 'guests.index',
-                    'pattern' => 'guests.*',
-                    'label' => 'Buku Tamu',
-                    'icon' => 'book',
-                ])
-                @include('layouts.partials.nav-item', [
-                    'route' => 'guidances.index',
-                    'pattern' => 'guidances.*',
-                    'label' => 'Pembinaan',
-                    'icon' => 'academic',
-                ])
+                @can('view_dashboard')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'dashboard',
+                        'pattern' => 'dashboard',
+                        'label' => 'Dashboard',
+                        'icon' => 'home',
+                    ])
+                @endcan
+                @can('manage_divisions')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'divisions.index',
+                        'pattern' => 'divisions.*',
+                        'label' => 'Divisi',
+                        'icon' => 'office',
+                    ])
+                @endcan
+                @can('manage_members')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'members.index',
+                        'pattern' => 'members.*',
+                        'label' => 'Pengurus',
+                        'icon' => 'users',
+                    ])
+                @endcan
+                @can('manage_agendas')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'agendas.index',
+                        'pattern' => 'agendas.*',
+                        'label' => 'Input Agenda',
+                        'icon' => 'calendar',
+                    ])
+                @endcan
+                @can('manage_attendances')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'attendance-reports.index',
+                        'pattern' => 'attendance-reports.index',
+                        'label' => 'Rekap Absensi',
+                        'icon' => 'clipboard',
+                    ])
+                @endcan
+                @can('manage_guests')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'guests.index',
+                        'pattern' => 'guests.*',
+                        'label' => 'Buku Tamu',
+                        'icon' => 'book',
+                    ])
+                @endcan
+                @can('manage_guidances')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'guidances.index',
+                        'pattern' => 'guidances.*',
+                        'label' => 'Pembinaan',
+                        'icon' => 'academic',
+                    ])
+                @endcan
 
-                <p
-                    class="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-600">
-                    Persuratan</p>
-                @include('layouts.partials.nav-item', [
-                    'route' => 'incoming-letters.index',
-                    'pattern' => 'incoming-letters.*',
-                    'label' => 'Surat Masuk',
-                    'icon' => 'inbox',
-                ])
-                @include('layouts.partials.nav-item', [
-                    'route' => 'outgoing-letters.index',
-                    'pattern' => 'outgoing-letters.*',
-                    'label' => 'Surat Keluar',
-                    'icon' => 'send',
-                ])
+                @canany(['manage_incoming_letters', 'manage_outgoing_letters'])
+                    <p
+                        class="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-600">
+                        Persuratan</p>
+                @endcanany
+                @can('manage_incoming_letters')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'incoming-letters.index',
+                        'pattern' => 'incoming-letters.*',
+                        'label' => 'Surat Masuk',
+                        'icon' => 'inbox',
+                    ])
+                @endcan
+                @can('manage_outgoing_letters')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'outgoing-letters.index',
+                        'pattern' => 'outgoing-letters.*',
+                        'label' => 'Surat Keluar',
+                        'icon' => 'send',
+                    ])
+                @endcan
 
-                <p
-                    class="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-600">
-                    Sistem</p>
-                @include('layouts.partials.nav-item', [
-                    'route' => 'audit-logs.index',
-                    'pattern' => 'audit-logs.index',
-                    'label' => 'Audit Log',
-                    'icon' => 'shield',
-                ])
+                @canany(['view_audit_logs', 'manage_roles'])
+                    <p
+                        class="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-600">
+                        Sistem</p>
+                @endcanany
+                @can('view_audit_logs')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'audit-logs.index',
+                        'pattern' => 'audit-logs.index',
+                        'label' => 'Audit Log',
+                        'icon' => 'shield',
+                    ])
+                @endcan
+                @can('manage_roles')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'roles-management.index',
+                        'pattern' => 'roles-management.*',
+                        'label' => 'Peran & Akses',
+                        'icon' => 'key',
+                    ])
+                @endcan
             </nav>
 
-            {{-- Logout --}}
             <div class="shrink-0 border-t border-slate-200 p-3 dark:border-slate-800">
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
@@ -158,10 +185,8 @@
             </div>
         </aside>
 
-        {{-- ============ MAIN COLUMN ============ --}}
         <div class="flex min-w-0 flex-1 flex-col">
 
-            {{-- Topbar --}}
             <header
                 class="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white/80 px-4 backdrop-blur md:px-8 dark:border-slate-800 dark:bg-slate-900/80 theme-transition">
                 <div class="flex items-center gap-3 min-w-0">
@@ -177,7 +202,6 @@
                 </div>
 
                 <div class="flex shrink-0 items-center gap-1.5 md:gap-3">
-                    {{-- Toggle mode gelap/terang --}}
                     <button @click="toggleDark()"
                         class="rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
                         :aria-label="dark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'"
@@ -196,7 +220,6 @@
 
                     <div class="hidden h-6 w-px bg-slate-200 sm:block dark:bg-slate-700"></div>
 
-                    {{-- Menu user --}}
                     <div class="relative">
                         <button @click="userMenuOpen = !userMenuOpen" @click.outside="userMenuOpen = false"
                             class="flex items-center gap-2 rounded-lg p-1.5 pr-2 transition hover:bg-slate-100 sm:pr-3 dark:hover:bg-slate-800">
@@ -238,7 +261,6 @@
                 </div>
             </header>
 
-            {{-- Konten utama --}}
             <main class="mx-auto w-full max-w-[1600px] flex-1 p-4 md:p-8">
                 @if (session('success'))
                     <div
