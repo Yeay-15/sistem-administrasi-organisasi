@@ -3,7 +3,7 @@
 # Sistem Administrasi & Absensi Terpadu KATIBER
 
 **Aplikasi web terpadu untuk pengelolaan SDM, absensi kegiatan, dan digitalisasi administrasi surat-menyurat**
-di lingkungan organisasi **Keluarga Mahasiswa Tebing Tinggi Bersatu (KATIBER)** — Lhokseumawe, Aceh Utara.
+dikembangkan untuk penggunaan pribadi di lingkungan organisasi **Keluarga Mahasiswa Tebing Tinggi Bersatu (KATIBER)** — Lhokseumawe, Aceh Utara.
 
 <br/>
 
