@@ -12,6 +12,8 @@ class Member extends Model
         'name',
         'student_id',
         'batch',
+        'major',
+        'university',
         'division_id',
         'position',
         'status',

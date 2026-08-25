@@ -50,24 +50,89 @@
             </a>
 
             <div class="hidden items-center gap-1 md:flex">
-                @php
-                    $publicNav = [
-                        ['route' => 'public.home', 'label' => 'Beranda'],
-                        ['route' => 'public.about', 'label' => 'Tentang Kami'],
-                        ['route' => 'public.news.index', 'label' => 'Berita & Artikel'],
-                        ['route' => 'public.gallery', 'label' => 'Galeri Kegiatan'],
-                        ['route' => 'public.contact', 'label' => 'Hubungi Kami'],
-                    ];
-                @endphp
-                @foreach ($publicNav as $item)
-                    <a href="{{ route($item['route']) }}"
-                        class="rounded-lg px-3.5 py-2 text-sm font-medium transition
-                            {{ request()->routeIs($item['route']) || ($item['route'] === 'public.news.index' && request()->routeIs('public.news.*'))
+                <a href="{{ route('public.home') }}"
+                    class="rounded-lg px-3.5 py-2 text-sm font-medium transition
+                        {{ request()->routeIs('public.home')
+                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200' }}">
+                    Beranda
+                </a>
+
+                {{-- Dropdown: Profil --}}
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                    <button @click="open = !open" type="button"
+                        class="flex items-center gap-1 rounded-lg px-3.5 py-2 text-sm font-medium transition
+                            {{ request()->routeIs('public.about*')
                                 ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
                                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200' }}">
-                        {{ $item['label'] }}
-                    </a>
-                @endforeach
+                        Profil
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"
+                            class="h-3.5 w-3.5 transition" :class="open ? 'rotate-180' : ''">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div x-show="open" x-cloak x-transition.origin.top.left
+                        class="absolute left-0 z-50 mt-2 w-56 rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                        <a href="{{ route('public.about') }}"
+                            class="mx-1.5 flex items-center rounded-lg px-3 py-2 text-sm transition {{ request()->routeIs('public.about') ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800' }}">
+                            Tentang Kami
+                        </a>
+                        <a href="{{ route('public.about.vision') }}"
+                            class="mx-1.5 flex items-center rounded-lg px-3 py-2 text-sm transition {{ request()->routeIs('public.about.vision') ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800' }}">
+                            Visi & Misi
+                        </a>
+                        <a href="{{ route('public.about.structure') }}"
+                            class="mx-1.5 flex items-center rounded-lg px-3 py-2 text-sm transition {{ request()->routeIs('public.about.structure') ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800' }}">
+                            Struktur Pengurus
+                        </a>
+                    </div>
+                </div>
+
+                <a href="{{ route('public.agenda.index') }}"
+                    class="rounded-lg px-3.5 py-2 text-sm font-medium transition
+                        {{ request()->routeIs('public.agenda.*')
+                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200' }}">
+                    Agenda Kegiatan
+                </a>
+
+                {{-- Dropdown: Media --}}
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                    <button @click="open = !open" type="button"
+                        class="flex items-center gap-1 rounded-lg px-3.5 py-2 text-sm font-medium transition
+                            {{ request()->routeIs('public.news.*') || request()->routeIs('public.reports.*') || request()->routeIs('public.gallery')
+                                ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200' }}">
+                        Media
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"
+                            class="h-3.5 w-3.5 transition" :class="open ? 'rotate-180' : ''">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div x-show="open" x-cloak x-transition.origin.top.left
+                        class="absolute left-0 z-50 mt-2 w-56 rounded-xl border border-slate-100 bg-white py-1.5 shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                        <a href="{{ route('public.news.index') }}"
+                            class="mx-1.5 flex items-center rounded-lg px-3 py-2 text-sm transition {{ request()->routeIs('public.news.*') ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800' }}">
+                            Artikel & Berita
+                        </a>
+                        <a href="{{ route('public.reports.index') }}"
+                            class="mx-1.5 flex items-center rounded-lg px-3 py-2 text-sm transition {{ request()->routeIs('public.reports.*') ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800' }}">
+                            Laporan Kegiatan
+                        </a>
+                        <a href="{{ route('public.gallery') }}"
+                            class="mx-1.5 flex items-center rounded-lg px-3 py-2 text-sm transition {{ request()->routeIs('public.gallery') ? 'bg-blue-50 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800' }}">
+                            Galeri
+                        </a>
+                    </div>
+                </div>
+
+                <a href="{{ route('public.contact') }}"
+                    class="rounded-lg px-3.5 py-2 text-sm font-medium transition
+                        {{ request()->routeIs('public.contact*')
+                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200' }}">
+                    Kontak & Aspirasi
+                </a>
             </div>
 
             <div class="flex items-center gap-1.5">
@@ -98,15 +163,50 @@
             </div>
         </nav>
 
+        {{-- ============ MOBILE MENU ============ --}}
         <div x-show="mobileOpen" x-cloak x-transition.opacity class="border-t border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950 md:hidden">
-            <div class="flex flex-col gap-1">
-                @foreach ($publicNav as $item)
-                    <a href="{{ route($item['route']) }}"
-                        class="rounded-lg px-3.5 py-2.5 text-sm font-medium transition
-                            {{ request()->routeIs($item['route']) ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400' }}">
-                        {{ $item['label'] }}
-                    </a>
-                @endforeach
+            <div class="flex flex-col gap-1" x-data="{ profilOpen: {{ request()->routeIs('public.about*') ? 'true' : 'false' }}, mediaOpen: {{ (request()->routeIs('public.news.*') || request()->routeIs('public.reports.*') || request()->routeIs('public.gallery')) ? 'true' : 'false' }} }">
+                <a href="{{ route('public.home') }}"
+                    class="rounded-lg px-3.5 py-2.5 text-sm font-medium transition {{ request()->routeIs('public.home') ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400' }}">
+                    Beranda
+                </a>
+
+                <button @click="profilOpen = !profilOpen" type="button"
+                    class="flex items-center justify-between rounded-lg px-3.5 py-2.5 text-left text-sm font-medium text-slate-600 dark:text-slate-400">
+                    Profil
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4 w-4 transition" :class="profilOpen ? 'rotate-180' : ''">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+                <div x-show="profilOpen" x-cloak class="flex flex-col gap-1 pl-4">
+                    <a href="{{ route('public.about') }}" class="rounded-lg px-3.5 py-2 text-sm text-slate-500 dark:text-slate-400">Tentang Kami</a>
+                    <a href="{{ route('public.about.vision') }}" class="rounded-lg px-3.5 py-2 text-sm text-slate-500 dark:text-slate-400">Visi & Misi</a>
+                    <a href="{{ route('public.about.structure') }}" class="rounded-lg px-3.5 py-2 text-sm text-slate-500 dark:text-slate-400">Struktur Pengurus</a>
+                </div>
+
+                <a href="{{ route('public.agenda.index') }}"
+                    class="rounded-lg px-3.5 py-2.5 text-sm font-medium transition {{ request()->routeIs('public.agenda.*') ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400' }}">
+                    Agenda Kegiatan
+                </a>
+
+                <button @click="mediaOpen = !mediaOpen" type="button"
+                    class="flex items-center justify-between rounded-lg px-3.5 py-2.5 text-left text-sm font-medium text-slate-600 dark:text-slate-400">
+                    Media
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4 w-4 transition" :class="mediaOpen ? 'rotate-180' : ''">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+                <div x-show="mediaOpen" x-cloak class="flex flex-col gap-1 pl-4">
+                    <a href="{{ route('public.news.index') }}" class="rounded-lg px-3.5 py-2 text-sm text-slate-500 dark:text-slate-400">Artikel & Berita</a>
+                    <a href="{{ route('public.reports.index') }}" class="rounded-lg px-3.5 py-2 text-sm text-slate-500 dark:text-slate-400">Laporan Kegiatan</a>
+                    <a href="{{ route('public.gallery') }}" class="rounded-lg px-3.5 py-2 text-sm text-slate-500 dark:text-slate-400">Galeri</a>
+                </div>
+
+                <a href="{{ route('public.contact') }}"
+                    class="rounded-lg px-3.5 py-2.5 text-sm font-medium transition {{ request()->routeIs('public.contact*') ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400' }}">
+                    Kontak & Aspirasi
+                </a>
+
                 <a href="{{ route('login') }}" class="mt-1 rounded-lg border border-slate-200 px-3.5 py-2.5 text-center text-sm font-semibold text-slate-600 dark:border-slate-700 dark:text-slate-300">
                     Login Pengurus
                 </a>
@@ -122,30 +222,35 @@
     {{-- ============ FOOTER ============ --}}
     <footer class="theme-transition border-t border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
         <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
-                <div>
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-4">
+                <div class="sm:col-span-2">
                     <div class="mb-3 flex items-center gap-2.5">
                         <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-xs font-bold text-white">
                             K
                         </div>
                         <span class="text-sm font-bold text-slate-800 dark:text-white">KATIBER</span>
                     </div>
-                    <p class="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                    <p class="max-w-sm text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                         Keluarga Mahasiswa Tebing Tinggi Bersatu — wadah silaturahmi dan pengembangan diri mahasiswa asal Tebing Tinggi di Lhokseumawe, Aceh Utara.
                     </p>
                 </div>
                 <div>
-                    <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Navigasi</p>
+                    <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Profil</p>
                     <div class="flex flex-col gap-2 text-sm text-slate-500 dark:text-slate-400">
                         <a href="{{ route('public.about') }}" class="transition hover:text-blue-600 dark:hover:text-blue-400">Tentang Kami</a>
-                        <a href="{{ route('public.news.index') }}" class="transition hover:text-blue-600 dark:hover:text-blue-400">Berita & Artikel</a>
-                        <a href="{{ route('public.gallery') }}" class="transition hover:text-blue-600 dark:hover:text-blue-400">Galeri Kegiatan</a>
-                        <a href="{{ route('public.contact') }}" class="transition hover:text-blue-600 dark:hover:text-blue-400">Hubungi Kami</a>
+                        <a href="{{ route('public.about.vision') }}" class="transition hover:text-blue-600 dark:hover:text-blue-400">Visi & Misi</a>
+                        <a href="{{ route('public.about.structure') }}" class="transition hover:text-blue-600 dark:hover:text-blue-400">Struktur Pengurus</a>
+                        <a href="{{ route('public.agenda.index') }}" class="transition hover:text-blue-600 dark:hover:text-blue-400">Agenda Kegiatan</a>
                     </div>
                 </div>
                 <div>
-                    <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Sekretariat</p>
-                    <p class="text-sm leading-relaxed text-slate-500 dark:text-slate-400">Lhokseumawe, Aceh Utara, Indonesia</p>
+                    <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Media</p>
+                    <div class="flex flex-col gap-2 text-sm text-slate-500 dark:text-slate-400">
+                        <a href="{{ route('public.news.index') }}" class="transition hover:text-blue-600 dark:hover:text-blue-400">Artikel & Berita</a>
+                        <a href="{{ route('public.reports.index') }}" class="transition hover:text-blue-600 dark:hover:text-blue-400">Laporan Kegiatan</a>
+                        <a href="{{ route('public.gallery') }}" class="transition hover:text-blue-600 dark:hover:text-blue-400">Galeri</a>
+                        <a href="{{ route('public.contact') }}" class="transition hover:text-blue-600 dark:hover:text-blue-400">Kontak & Aspirasi</a>
+                    </div>
                 </div>
             </div>
 

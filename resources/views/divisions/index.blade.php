@@ -50,6 +50,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-3.75-3.75" />
                                         </svg>
                                     </a>
+                                @endcan
+                                @can('delete_divisions')
                                     <form action="{{ route('divisions.destroy', $division->id) }}" method="POST"
                                         onsubmit="return confirm('Apakah Anda yakin ingin menghapus divisi ini?');">
                                         @csrf

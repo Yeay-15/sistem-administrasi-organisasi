@@ -17,8 +17,9 @@
             :class="noticeType === 'error'
                 ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-800/60 dark:bg-red-500/10 dark:text-red-400'
                 : 'border-green-200 bg-green-50 text-green-700 dark:border-green-800/60 dark:bg-green-500/10 dark:text-green-400'"
-            class="theme-transition flex items-start gap-3 rounded-xl border px-4 py-3 text-sm">
+            class="theme-transition flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-sm">
             <span x-text="notice"></span>
+            <button type="button" @click="notice = ''" class="shrink-0 text-xs font-semibold underline opacity-70 hover:opacity-100">Tutup</button>
         </div>
 
         {{-- ============ BAGIAN 1: MATRIX HAK AKSES PER PERAN ============ --}}
@@ -26,8 +27,10 @@
             <div class="border-b border-slate-100 px-5 pt-4 dark:border-slate-800">
                 <h2 class="text-base font-semibold text-slate-800 dark:text-white">Matrix Hak Akses per Peran</h2>
                 <p class="mb-1 mt-0.5 text-xs text-slate-400 dark:text-slate-500">
-                    Setiap modul punya dua kolom: <span class="font-medium text-slate-500 dark:text-slate-400">Lihat</span> (buka & baca halaman) dan
-                    <span class="font-medium text-slate-500 dark:text-slate-400">Kelola</span> (tambah/edit/hapus). Kelola otomatis mencakup Lihat.
+                    Setiap modul punya tiga toggle: <span class="font-medium text-slate-500 dark:text-slate-400">Lihat</span> (buka & baca halaman),
+                    <span class="font-medium text-slate-500 dark:text-slate-400">Kelola</span> (tambah/ubah — TIDAK termasuk hapus), dan
+                    <span class="font-medium text-red-500 dark:text-red-400">Hapus</span> (toggle terpisah &amp; eksklusif, sengaja tidak otomatis ikut nyala dengan Kelola).
+                    Kelola maupun Hapus otomatis mencakup Lihat.
                 </p>
                 <p class="mb-4 text-xs text-slate-400 dark:text-slate-500">Perubahan tersimpan otomatis.</p>
 
@@ -69,7 +72,7 @@
                                                 <span class="truncate text-sm text-slate-600 dark:text-slate-300">{{ $row['label'] }}</span>
 
                                                 <div class="flex shrink-0 items-center gap-3">
-                                                    @foreach ([['perm' => $row['view'], 'label' => 'Lihat'], ['perm' => $row['manage'], 'label' => 'Kelola']] as $col)
+                                                    @foreach ([['perm' => $row['view'], 'label' => 'Lihat'], ['perm' => $row['manage'], 'label' => 'Kelola'], ['perm' => $row['delete'], 'label' => 'Hapus']] as $col)
                                                         @if ($col['perm'])
                                                             @php
                                                                 $permission = $col['perm'];
@@ -87,7 +90,7 @@
                                                                     <button type="button" title="Toggle akses {{ $col['label'] }}"
                                                                         @click="loading = true; togglePermission({{ $role->id }}, {{ $permission->id }}, $data, () => loading = false)"
                                                                         :disabled="loading"
-                                                                        :class="active ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'"
+                                                                        :class="active ? '{{ $col['label'] === 'Hapus' ? 'bg-red-600' : 'bg-blue-600' }}' : 'bg-slate-200 dark:bg-slate-700'"
                                                                         class="inline-flex h-5 w-9 shrink-0 items-center rounded-full px-0.5 transition disabled:opacity-50">
                                                                         <span :class="active ? 'translate-x-4' : 'translate-x-0'"
                                                                             class="h-4 w-4 rounded-full bg-white shadow transition-transform"></span>
@@ -109,7 +112,7 @@
         </div>
 
         {{-- ============ BAGIAN 2: HAK AKSES EKSTRA PER DIVISI ============ --}}
-        @if ($divisionPermissions->isNotEmpty())
+        @if ($divisionPermissionMatrix->isNotEmpty())
             <div class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
                     <h2 class="text-base font-semibold text-slate-800 dark:text-white">Hak Akses Ekstra per Divisi</h2>
@@ -122,11 +125,23 @@
                     <table class="w-full text-left">
                         <thead>
                             <tr class="border-b border-slate-100 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/40">
-                                <th class="whitespace-nowrap px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Divisi</th>
-                                @foreach ($divisionPermissions as $permission)
-                                    <th class="whitespace-nowrap px-5 py-3.5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                                        {{ $permission->label }}
+                                <th rowspan="2" class="whitespace-nowrap px-5 py-3.5 align-bottom text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Divisi</th>
+                                @foreach ($divisionPermissionMatrix as $row)
+                                    <th colspan="{{ collect([$row['view'], $row['manage'], $row['delete']])->filter()->count() }}"
+                                        class="whitespace-nowrap border-l border-slate-100 px-5 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                                        {{ $row['label'] }}
                                     </th>
+                                @endforeach
+                            </tr>
+                            <tr class="border-b border-slate-100 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/40">
+                                @foreach ($divisionPermissionMatrix as $row)
+                                    @foreach ([['perm' => $row['view'], 'label' => 'Lihat'], ['perm' => $row['manage'], 'label' => 'Kelola'], ['perm' => $row['delete'], 'label' => 'Hapus']] as $col)
+                                        @if ($col['perm'])
+                                            <th class="whitespace-nowrap border-l border-slate-100 px-3 py-2 text-center text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:border-slate-800 dark:text-slate-500">
+                                                {{ $col['label'] }}
+                                            </th>
+                                        @endif
+                                    @endforeach
                                 @endforeach
                             </tr>
                         </thead>
@@ -137,27 +152,32 @@
                                         {{ $division->name }}
                                         <span class="ml-1 text-xs font-normal text-slate-400 dark:text-slate-500">({{ $division->abbreviation }})</span>
                                     </td>
-                                    @foreach ($divisionPermissions as $permission)
-                                        @php
-                                            $isActive = $division->permissions->contains('id', $permission->id);
-                                        @endphp
-                                        <td class="px-5 py-3.5 text-center">
-                                            <div class="inline-flex" x-data="{ active: {{ $isActive ? 'true' : 'false' }}, loading: false }">
-                                                <button type="button" title="Toggle {{ $permission->label }} untuk {{ $division->name }}"
-                                                    @click="loading = true; toggleDivisionPermission({{ $division->id }}, {{ $permission->id }}, $data, () => loading = false)"
-                                                    :disabled="loading"
-                                                    :class="active ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'"
-                                                    class="inline-flex h-6 w-11 shrink-0 items-center rounded-full px-0.5 transition disabled:opacity-50">
-                                                    <span :class="active ? 'translate-x-5' : 'translate-x-0'"
-                                                        class="h-5 w-5 rounded-full bg-white shadow transition-transform"></span>
-                                                </button>
-                                            </div>
-                                        </td>
+                                    @foreach ($divisionPermissionMatrix as $row)
+                                        @foreach ([['perm' => $row['view'], 'label' => 'Lihat'], ['perm' => $row['manage'], 'label' => 'Kelola'], ['perm' => $row['delete'], 'label' => 'Hapus']] as $col)
+                                            @if ($col['perm'])
+                                                @php
+                                                    $permission = $col['perm'];
+                                                    $isActive = $division->permissions->contains('id', $permission->id);
+                                                @endphp
+                                                <td class="border-l border-slate-100 px-3 py-3.5 text-center dark:border-slate-800">
+                                                    <div class="inline-flex" x-data="{ active: {{ $isActive ? 'true' : 'false' }}, loading: false }">
+                                                        <button type="button" title="Toggle {{ $col['label'] }} {{ $row['label'] }} untuk {{ $division->name }}"
+                                                            @click="loading = true; toggleDivisionPermission({{ $division->id }}, {{ $permission->id }}, $data, () => loading = false)"
+                                                            :disabled="loading"
+                                                            :class="active ? '{{ $col['label'] === 'Hapus' ? 'bg-red-600' : 'bg-blue-600' }}' : 'bg-slate-200 dark:bg-slate-700'"
+                                                            class="inline-flex h-5 w-9 shrink-0 items-center rounded-full px-0.5 transition disabled:opacity-50">
+                                                            <span :class="active ? 'translate-x-4' : 'translate-x-0'"
+                                                                class="h-4 w-4 rounded-full bg-white shadow transition-transform"></span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            @endif
+                                        @endforeach
                                     @endforeach
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $divisionPermissions->count() + 1 }}" class="px-5 py-12 text-center text-sm text-slate-400 dark:text-slate-500">
+                                    <td colspan="10" class="px-5 py-12 text-center text-sm text-slate-400 dark:text-slate-500">
                                         Belum ada data divisi.
                                     </td>
                                 </tr>
@@ -183,6 +203,9 @@
                             <th class="whitespace-nowrap px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Email Login</th>
                             <th class="whitespace-nowrap px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Pengurus / Divisi</th>
                             <th class="whitespace-nowrap px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Peran</th>
+                            @if (auth()->user()->isSuperAdmin())
+                                <th class="whitespace-nowrap px-5 py-3.5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Aksi</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -217,10 +240,23 @@
                                         @endforeach
                                     </select>
                                 </td>
+                                @if (auth()->user()->isSuperAdmin())
+                                    <td class="px-5 py-4 text-center">
+                                        @if ($user->id !== auth()->id())
+                                            <button type="button" title="Reset sandi akun ini ke sandi baru"
+                                                @click="if (confirm('Reset sandi untuk {{ $user->email }}? Sandi lama akan langsung tidak berlaku.')) resetPassword({{ $user->id }})"
+                                                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                                                Reset Sandi
+                                            </button>
+                                        @else
+                                            <span class="text-xs text-slate-300 dark:text-slate-600">-</span>
+                                        @endif
+                                    </td>
+                                @endif
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-5 py-16 text-center text-sm text-slate-400 dark:text-slate-500">Belum ada akun.</td>
+                                <td colspan="{{ auth()->user()->isSuperAdmin() ? 5 : 4 }}" class="px-5 py-16 text-center text-sm text-slate-400 dark:text-slate-500">Belum ada akun.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -236,11 +272,13 @@
                 notice: '',
                 noticeType: 'success',
 
-                showNotice(message, type = 'success') {
+                showNotice(message, type = 'success', persist = false) {
                     this.notice = message;
                     this.noticeType = type;
                     clearTimeout(this._noticeTimeout);
-                    this._noticeTimeout = setTimeout(() => (this.notice = ''), 4000);
+                    if (!persist) {
+                        this._noticeTimeout = setTimeout(() => (this.notice = ''), 4000);
+                    }
                 },
 
                 togglePermission(roleId, permissionId, itemData, done) {
@@ -293,6 +331,23 @@
                             const data = await res.json();
                             if (!res.ok) throw new Error(data.message || 'Gagal menyimpan perubahan.');
                             this.showNotice('Data akun berhasil diperbarui.');
+                        })
+                        .catch((err) => this.showNotice(err.message, 'error'));
+                },
+
+                resetPassword(userId) {
+                    fetch(`{{ url('roles-management/users') }}/${userId}/reset-password`, {
+                            method: 'PATCH',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                            },
+                        })
+                        .then(async (res) => {
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.message || 'Gagal mereset sandi.');
+                            // Sandi baru hanya ditampilkan sekali di sini — segera sampaikan ke pengguna secara langsung/pribadi.
+                            this.showNotice(`Sandi baru untuk ${data.email}: ${data.new_password} — segera sampaikan langsung ke pengguna.`, 'success', true);
                         })
                         .catch((err) => this.showNotice(err.message, 'error'));
                 },

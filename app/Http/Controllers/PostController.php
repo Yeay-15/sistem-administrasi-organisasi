@@ -34,6 +34,7 @@ class PostController extends Controller
 
         $data = [
             'title' => $validated['title'],
+            'category' => $validated['category'],
             'slug' => $this->generateUniqueSlug($validated['title']),
             'excerpt' => $validated['excerpt'] ?? null,
             'content' => $validated['content'],
@@ -62,6 +63,7 @@ class PostController extends Controller
 
         $data = [
             'title' => $validated['title'],
+            'category' => $validated['category'],
             'excerpt' => $validated['excerpt'] ?? null,
             'content' => $validated['content'],
             'status' => $validated['status'],
@@ -105,6 +107,7 @@ class PostController extends Controller
     {
         return $request->validate([
             'title' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'in:Artikel & Berita,Laporan Kegiatan'],
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['required', 'string'],
             'status' => ['required', 'in:draft,published'],

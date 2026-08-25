@@ -40,6 +40,15 @@
                     </button>
                 </div>
 
+                <a :href="exportPdfUrl()"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75"
+                        stroke="currentColor" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Cetak PDF
+                </a>
+
                 @can('manage_agendas')
                     <a href="{{ route('agendas.create') }}"
                         class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-blue-600/20">
@@ -226,6 +235,8 @@
                                                     d="M19.5 8.25l-3.75-3.75" />
                                             </svg>
                                         </a>
+                                        @endcan
+                                        @can('delete_agendas')
                                         <form action="{{ route('agendas.destroy', $agenda->id) }}" method="POST"
                                             onsubmit="return confirm('Hapus agenda ini beserta semua data absensinya?');">
                                             @csrf
@@ -334,6 +345,21 @@
                     let formattedDate = `${this.year}-${m}-${d}`;
 
                     return this.events.filter(e => e.date === formattedDate);
+                },
+
+                exportPdfUrl() {
+                    let params = new URLSearchParams({
+                        view: this.view,
+                        month: this.month,
+                        year: this.year,
+                    });
+
+                    let search = {{ Illuminate\Support\Js::from(request('search')) }};
+                    if (search) {
+                        params.set('search', search);
+                    }
+
+                    return '{{ route('agendas.export-pdf') }}?' + params.toString();
                 }
             }))
         });

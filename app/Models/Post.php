@@ -11,6 +11,7 @@ class Post extends Model
 
     protected $fillable = [
         'title',
+        'category',
         'slug',
         'excerpt',
         'content',
@@ -33,5 +34,10 @@ class Post extends Model
     {
         return $query->where('status', 'published')
             ->where('published_at', '<=', now());
+    }
+
+    public function scopeCategory($query, string $category)
+    {
+        return $query->where('category', $category);
     }
 }

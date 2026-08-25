@@ -58,10 +58,6 @@
 </head>
 
 <body>
-    <div class="header">
-        <h2>KELUARGA MAHASISWA TEBING TINGGI BERSATU (KATIBER)</h2>
-        <p>Lhokseumawe - Aceh Utara</p>
-    </div>
     <div class="title">REKAPITULASI KEHADIRAN PENGURUS - PERIODE {{ strtoupper($monthName) }}</div>
 
     <table>

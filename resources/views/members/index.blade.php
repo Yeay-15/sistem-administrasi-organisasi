@@ -49,7 +49,14 @@
                                 @endif
                             </td>
                             <td class="px-5 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $member->student_id }}</td>
-                            <td class="px-5 py-4 text-sm font-semibold text-slate-800 dark:text-white">{{ $member->name }}</td>
+                            <td class="px-5 py-4 text-sm font-semibold text-slate-800 dark:text-white">
+                                {{ $member->name }}
+                                @if ($member->major || $member->university)
+                                    <p class="mt-0.5 text-xs font-normal text-slate-400 dark:text-slate-500">
+                                        {{ $member->major }}{{ $member->major && $member->university ? ' — ' : '' }}{{ $member->university }}
+                                    </p>
+                                @endif
+                            </td>
                             <td class="px-5 py-4">
                                 <span class="block text-sm font-semibold text-blue-600 dark:text-blue-400">{{ $member->division->name ?? '-' }}</span>
                                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ $member->position }}</span>
@@ -76,6 +83,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-3.75-3.75" />
                                         </svg>
                                     </a>
+                                    @endcan
+                                    @can('delete_members')
                                     <form action="{{ route('members.destroy', $member->id) }}" method="POST"
                                         onsubmit="return confirm('Hapus data pengurus ini?');">
                                         @csrf

@@ -74,11 +74,6 @@
 
 <body>
 
-    <div class="header">
-        <h2>KELUARGA MAHASISWA TEBING TINGGI BERSATU (KATIBER)</h2>
-        <p>Lhokseumawe - Aceh Utara</p>
-    </div>
-
     <div class="title">REGISTER SURAT MASUK</div>
 
     <table>
@@ -110,23 +105,6 @@
                 </tr>
             @endforelse
         </tbody>
-    </table>
-
-    <table class="signature-table">
-        <tr>
-            <td>
-                Mengetahui,<br>
-                <strong>Ketua Umum</strong>
-                <br><br><br><br>
-                ( ......................................... )
-            </td>
-            <td>
-                Lhokseumawe, {{ \Carbon\Carbon::now()->format('d F Y') }}<br>
-                <strong>Sekretaris Umum</strong>
-                <br><br><br><br>
-                ( ......................................... )
-            </td>
-        </tr>
     </table>
 
 </body>

@@ -36,8 +36,11 @@ class OutgoingLetterController extends Controller
             });
         }
 
-        // PERBAIKAN: Urutkan berdasarkan tanggal menurun, LALU berdasarkan ID menurun
-        $filteredLetters = $query->orderBy('date', 'desc')->orderBy('id', 'desc')->get();
+        // Pengurutan dinamis: 'asc' (terlama dulu) atau 'desc' (terbaru dulu, default).
+        // Nilai ini juga dipakai apa adanya oleh Excel/PDF di bawah supaya berkas yang
+        // diunduh selalu menghormati urutan yang sedang aktif di layar.
+        $sort = $request->get('sort', 'desc') === 'asc' ? 'asc' : 'desc';
+        $filteredLetters = $query->orderBy('date', $sort)->orderBy('id', $sort)->get();
 
         // 2. Logika Export Excel
         if ($request->export === 'excel') {
@@ -53,7 +56,7 @@ class OutgoingLetterController extends Controller
         }
 
         // 4. Jika bukan export, tampilkan halaman HTML biasa
-        return view('outgoing_letters.index', compact('filteredLetters'));
+        return view('outgoing_letters.index', compact('filteredLetters', 'sort'));
     }
 
     public function create()

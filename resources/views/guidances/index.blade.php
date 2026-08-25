@@ -67,6 +67,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-3.75-3.75" />
                                         </svg>
                                     </a>
+                                    @endcan
+                                    @can('delete_guidances')
                                     <form action="{{ route('guidances.destroy', $guidance->id) }}" method="POST"
                                         onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan pembinaan ini?');">
                                         @csrf

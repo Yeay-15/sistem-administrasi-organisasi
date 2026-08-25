@@ -31,6 +31,8 @@ class MemberController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'student_id' => ['required', 'string', 'max:50', Rule::unique('members', 'student_id')->whereNull('deleted_at')],
             'batch' => ['required', 'string', 'max:10'],
+            'major' => ['nullable', 'string', 'max:150'],
+            'university' => ['nullable', 'string', 'max:150'],
             'division_id' => ['required', 'exists:divisions,id'],
             'position' => ['required', 'string', 'max:100'],
             'status' => ['required', 'string'],
@@ -63,6 +65,8 @@ class MemberController extends Controller
             // Pengecualian validasi unique untuk ID pengurus yang sedang diedit
             'student_id' => ['required', 'string', 'max:50', 'unique:members,student_id,' . $member->id],
             'batch' => ['required', 'string', 'max:10'],
+            'major' => ['nullable', 'string', 'max:150'],
+            'university' => ['nullable', 'string', 'max:150'],
             'division_id' => ['required', 'exists:divisions,id'],
             'position' => ['required', 'string', 'in:Ketua Umum,Sekretaris Umum,Bendahara Umum,Ketua Divisi,Sekretaris Divisi,Anggota Divisi'],
             'status' => ['required', 'string'],

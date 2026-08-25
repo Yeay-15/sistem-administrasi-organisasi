@@ -22,7 +22,7 @@
     <!-- Form Filter -->
     <form action="{{ route('outgoing-letters.index') }}" method="GET"
         class="theme-transition mb-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-6">
             <div>
                 <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Mulai Tanggal</label>
                 <input type="date" name="start_date" value="{{ request('start_date') }}"
@@ -32,6 +32,14 @@
                 <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Sampai Tanggal</label>
                 <input type="date" name="end_date" value="{{ request('end_date') }}"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:[color-scheme:dark]">
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Urutan</label>
+                <select name="sort" onchange="this.form.submit()"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                    <option value="desc" @selected($sort === 'desc')>Tanggal Terbaru</option>
+                    <option value="asc" @selected($sort === 'asc')>Tanggal Terlama</option>
+                </select>
             </div>
             <div>
                 <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Jenis</label>
@@ -156,6 +164,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-3.75-3.75" />
                                         </svg>
                                     </a>
+                                    @endcan
+                                    @can('delete_outgoing_letters')
                                     <form action="{{ route('outgoing-letters.destroy', $letter->id) }}" method="POST"
                                         onsubmit="return confirm('Hapus surat keluar ini beserta file arsipnya secara permanen?');">
                                         @csrf

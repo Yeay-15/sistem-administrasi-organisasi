@@ -10,6 +10,8 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class RoleManagementController extends Controller
 {
@@ -19,11 +21,14 @@ class RoleManagementController extends Controller
         $permissionMatrix = $this->buildPermissionMatrix(Permission::orderBy('group')->orderBy('label')->get());
 
         // Hak akses per-Divisi hanya menampilkan permission grup "Konten"
-        // (mis. Kelola Berita, Kelola Galeri) — permission lain (mis. Kelola
-        // Agenda) memang secara desain hanya diatur lewat peran (Role), bukan
-        // divisi. Menambah permission baru ke grup ini otomatis muncul di
-        // sini tanpa perlu ubah kode apa pun.
-        $divisionPermissions = Permission::where('group', 'Konten')->orderBy('label')->get();
+        // (mis. Berita, Galeri) — permission lain (mis. Kelola Agenda) memang
+        // secara desain hanya diatur lewat peran (Role), bukan divisi.
+        // Menambah permission baru ke grup ini otomatis muncul di sini tanpa
+        // perlu ubah kode apa pun. Dipakai struktur baris yang sama (3 toggle:
+        // Lihat/Kelola/Hapus) seperti matrix peran di atas.
+        $divisionPermissionMatrix = $this->buildPermissionMatrix(
+            Permission::where('group', 'Konten')->orderBy('label')->get()
+        )->get('Konten', collect());
         $divisions = Division::with('permissions')->orderBy('name')->get();
 
         $users = User::with(['role', 'member.division'])->orderBy('name')->get();
@@ -33,7 +38,7 @@ class RoleManagementController extends Controller
             'roles',
             'permissionMatrix',
             'divisions',
-            'divisionPermissions',
+            'divisionPermissionMatrix',
             'users',
             'members'
         ));
@@ -41,32 +46,36 @@ class RoleManagementController extends Controller
 
     /**
      * Susun daftar permission menjadi baris-baris matrix: satu baris untuk
-     * pasangan 'view_xxx' + 'manage_xxx' (ditampilkan sebagai dua toggle,
-     * "Lihat" & "Kelola"), atau satu baris dengan satu toggle untuk
-     * permission yang berdiri sendiri (mis. 'manage_roles').
+     * trio 'view_xxx' + 'manage_xxx' + 'delete_xxx' (ditampilkan sebagai
+     * hingga tiga toggle — "Lihat", "Kelola", "Hapus"), atau baris dengan
+     * lebih sedikit toggle untuk permission yang tidak lengkap trio-nya
+     * (mis. 'manage_roles' yang cuma berdiri sendiri).
      *
      * Hasilnya dikelompokkan per 'group' (Pengurus, Kegiatan, dst) supaya
-     * tampilannya tetap sama seperti matrix sebelumnya.
+     * tampilannya tetap konsisten.
      */
     private function buildPermissionMatrix($permissions)
     {
         $rows = [];
 
         foreach ($permissions as $permission) {
-            $base = preg_replace('/^(view_|manage_)/', '', $permission->slug);
+            $base = preg_replace('/^(view_|manage_|delete_)/', '', $permission->slug);
             $key = $permission->group . '|' . $base;
 
             if (! isset($rows[$key])) {
                 $rows[$key] = [
                     'group' => $permission->group,
-                    'label' => preg_replace('/^(Lihat|Kelola)\s+/', '', $permission->label),
+                    'label' => preg_replace('/^(Lihat|Kelola|Hapus)\s+/', '', $permission->label),
                     'view' => null,
                     'manage' => null,
+                    'delete' => null,
                 ];
             }
 
             if (str_starts_with($permission->slug, 'view_')) {
                 $rows[$key]['view'] = $permission;
+            } elseif (str_starts_with($permission->slug, 'delete_')) {
+                $rows[$key]['delete'] = $permission;
             } else {
                 $rows[$key]['manage'] = $permission;
             }
@@ -168,5 +177,36 @@ class RoleManagementController extends Controller
         );
 
         return response()->json(['status' => 'ok']);
+    }
+
+    /**
+     * "Reset by Admin" — Super Admin mengembalikan sandi akun pengguna ke
+     * sandi acak baru (menghindari kerumitan konfigurasi email reset-password
+     * di fase awal). Sandi baru ditampilkan SEKALI di respons ini supaya
+     * Super Admin bisa menyampaikannya langsung ke pengguna.
+     */
+    public function resetPassword(Request $request, User $user)
+    {
+        abort_unless(Auth::user()->isSuperAdmin(), 403, 'Hanya Super Admin yang dapat mereset sandi pengguna lain.');
+
+        if ($user->id === Auth::id()) {
+            return response()->json([
+                'message' => 'Gunakan halaman Pengaturan Akun untuk mengubah sandi Anda sendiri.',
+            ], 422);
+        }
+
+        $newPassword = Str::password(10, symbols: false);
+        $user->password = Hash::make($newPassword);
+        $user->save();
+
+        AuditLog::record(
+            'Reset Sandi Pengguna',
+            sprintf('Mereset sandi akun "%s" ke sandi baru.', $user->email)
+        );
+
+        return response()->json([
+            'email' => $user->email,
+            'new_password' => $newPassword,
+        ]);
     }
 }

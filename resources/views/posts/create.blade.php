@@ -36,6 +36,19 @@
                 </div>
 
                 <div class="mt-5">
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Kategori</label>
+                    <select name="category"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        <option value="Artikel & Berita" {{ old('category') === 'Artikel & Berita' ? 'selected' : '' }}>Artikel & Berita</option>
+                        <option value="Laporan Kegiatan" {{ old('category') === 'Laporan Kegiatan' ? 'selected' : '' }}>Laporan Kegiatan</option>
+                    </select>
+                    <p class="mt-1 text-xs text-slate-400">Menentukan tampil di menu Media mana pada Portal Publik.</p>
+                    @error('category')
+                        <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="mt-5">
                     <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Ringkasan (Opsional)</label>
                     <textarea name="excerpt" rows="2" maxlength="500" placeholder="Ringkasan singkat yang tampil di daftar berita portal publik."
                         class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">{{ old('excerpt') }}</textarea>

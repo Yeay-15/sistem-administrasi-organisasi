@@ -106,6 +106,25 @@
 
                 <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
                     <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Jurusan (Opsional)</label>
+                        <input type="text" name="major" value="{{ old('major') }}" placeholder="Contoh: Teknik Informatika"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">
+                        @error('major')
+                            <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Universitas (Opsional)</label>
+                        <input type="text" name="university" value="{{ old('university') }}" placeholder="Contoh: Universitas Malikussaleh"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">
+                        @error('university')
+                            <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Tanggal Masuk</label>
                         <input type="date" name="join_date" value="{{ old('join_date') }}" required
                             class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:[color-scheme:dark]">

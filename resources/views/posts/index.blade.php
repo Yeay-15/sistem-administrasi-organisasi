@@ -8,6 +8,7 @@
             <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Kelola Berita</h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Tulis dan terbitkan berita/artikel yang akan tampil di portal publik.</p>
         </div>
+        @can('manage_news')
         <a href="{{ route('posts.create') }}"
             class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-blue-600/20">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
@@ -15,6 +16,7 @@
             </svg>
             Tulis Berita
         </a>
+        @endcan
     </div>
 
     <form method="GET" class="mb-5">
@@ -58,7 +60,10 @@
                             </td>
                             <td class="px-5 py-3 max-w-xs">
                                 <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $post->title }}</p>
-                                <p class="truncate text-xs text-slate-400 dark:text-slate-500">/{{ $post->slug }}</p>
+                                <p class="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+                                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">{{ $post->category }}</span>
+                                    <span>/{{ $post->slug }}</span>
+                                </p>
                             </td>
                             <td class="px-5 py-3 text-sm text-slate-600 dark:text-slate-300">{{ $post->author->name ?? '-' }}</td>
                             <td class="px-5 py-3 text-center">
@@ -77,6 +82,7 @@
                             </td>
                             <td class="px-5 py-3">
                                 <div class="flex items-center justify-center gap-1.5">
+                                    @can('manage_news')
                                     <a href="{{ route('posts.edit', $post->id) }}" title="Edit"
                                         class="rounded-lg p-2 text-amber-600 transition hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5">
@@ -84,6 +90,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-3.75-3.75" />
                                         </svg>
                                     </a>
+                                    @endcan
+                                    @can('delete_news')
                                     <form action="{{ route('posts.destroy', $post->id) }}" method="POST" onsubmit="return confirm('Hapus berita ini?');">
                                         @csrf
                                         @method('DELETE')
@@ -94,6 +102,7 @@
                                             </svg>
                                         </button>
                                     </form>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

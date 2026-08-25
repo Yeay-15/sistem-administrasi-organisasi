@@ -8,6 +8,7 @@
             <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Kelola Galeri Kegiatan</h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Dokumentasi visual kegiatan yang akan tampil di portal publik.</p>
         </div>
+        @can('manage_gallery')
         <a href="{{ route('galleries.create') }}"
             class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-blue-600/20">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
@@ -15,6 +16,7 @@
             </svg>
             Unggah Foto
         </a>
+        @endcan
     </div>
 
     @if ($galleries->isEmpty())
@@ -35,12 +37,15 @@
                             <p class="truncate text-xs font-semibold text-white">{{ $item->title }}</p>
                         @endif
                         <div class="mt-2 flex items-center gap-1.5">
+                            @can('manage_gallery')
                             <a href="{{ route('galleries.edit', $item->id) }}" title="Edit keterangan"
                                 class="rounded-lg bg-white/90 p-1.5 text-amber-600 transition hover:bg-white">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4 w-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
                                 </svg>
                             </a>
+                            @endcan
+                            @can('delete_gallery')
                             <form action="{{ route('galleries.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus foto ini dari galeri?');">
                                 @csrf
                                 @method('DELETE')
@@ -50,6 +55,7 @@
                                     </svg>
                                 </button>
                             </form>
+                            @endcan
                         </div>
                     </div>
                 </div>

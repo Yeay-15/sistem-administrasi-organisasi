@@ -1,12 +1,12 @@
 @extends('layouts.public')
 
-@section('title', 'Berita & Artikel - KATIBER')
+@section('title', $pageTitle . ' - KATIBER')
 
 @section('content')
     <section class="border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40">
         <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold text-slate-800 dark:text-white">Berita & Artikel</h1>
-            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Kabar, kegiatan, dan cerita seputar KATIBER.</p>
+            <h1 class="text-3xl font-bold text-slate-800 dark:text-white">{{ $pageTitle }}</h1>
+            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ $pageDescription }}</p>
 
             <form method="GET" class="mt-6 max-w-md">
                 <div class="relative">
@@ -14,7 +14,7 @@
                         class="pointer-events-none absolute left-3 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                     </svg>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari berita..."
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari {{ strtolower($pageTitle) }}..."
                         class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">
                 </div>
             </form>
@@ -23,17 +23,11 @@
 
     <section class="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
         @if ($posts->isEmpty())
-            <p class="text-center text-sm text-slate-400 dark:text-slate-500">
-                @if (request('search'))
-                    Tidak ada berita yang cocok dengan pencarian "{{ request('search') }}".
-                @else
-                    Belum ada berita yang diterbitkan.
-                @endif
-            </p>
+            <p class="text-center text-sm text-slate-400 dark:text-slate-500">Belum ada konten yang diterbitkan.</p>
         @else
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($posts as $post)
-                    <a href="{{ route('public.news.show', $post->slug) }}"
+                    <a href="{{ route($routeShow, $post->slug) }}"
                         class="theme-transition group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
                         <div class="aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                             @if ($post->cover_path)
@@ -48,12 +42,14 @@
                             @endif
                         </div>
                         <div class="p-5">
-                            <p class="text-xs text-slate-400 dark:text-slate-500">{{ $post->published_at?->translatedFormat('d F Y') }}</p>
+                            <p class="text-xs text-slate-400 dark:text-slate-500">{{ $post->published_at?->translatedFormat('d F Y') }} &middot; {{ $post->author->name ?? 'Admin' }}</p>
                             <h3 class="mt-1.5 line-clamp-2 text-base font-bold text-slate-800 transition group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
                                 {{ $post->title }}
                             </h3>
                             @if ($post->excerpt)
                                 <p class="mt-2 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">{{ $post->excerpt }}</p>
+                            @else
+                                <p class="mt-2 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">{{ Str::limit(strip_tags($post->content), 120) }}</p>
                             @endif
                         </div>
                     </a>
