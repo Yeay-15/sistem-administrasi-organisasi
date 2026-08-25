@@ -75,7 +75,7 @@
                         'icon' => 'home',
                     ])
                 @endcan
-                @can('manage_divisions')
+                @can('view_divisions')
                     @include('layouts.partials.nav-item', [
                         'route' => 'divisions.index',
                         'pattern' => 'divisions.*',
@@ -83,7 +83,7 @@
                         'icon' => 'office',
                     ])
                 @endcan
-                @can('manage_members')
+                @can('view_members')
                     @include('layouts.partials.nav-item', [
                         'route' => 'members.index',
                         'pattern' => 'members.*',
@@ -91,7 +91,7 @@
                         'icon' => 'users',
                     ])
                 @endcan
-                @can('manage_agendas')
+                @can('view_agendas')
                     @include('layouts.partials.nav-item', [
                         'route' => 'agendas.index',
                         'pattern' => 'agendas.*',
@@ -107,7 +107,7 @@
                         'icon' => 'clipboard',
                     ])
                 @endcan
-                @can('manage_guests')
+                @can('view_guests')
                     @include('layouts.partials.nav-item', [
                         'route' => 'guests.index',
                         'pattern' => 'guests.*',
@@ -115,7 +115,7 @@
                         'icon' => 'book',
                     ])
                 @endcan
-                @can('manage_guidances')
+                @can('view_guidances')
                     @include('layouts.partials.nav-item', [
                         'route' => 'guidances.index',
                         'pattern' => 'guidances.*',
@@ -124,12 +124,34 @@
                     ])
                 @endcan
 
-                @canany(['manage_incoming_letters', 'manage_outgoing_letters'])
+                @canany(['manage_news', 'manage_gallery'])
+                    <p
+                        class="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-600">
+                        Konten</p>
+                @endcanany
+                @can('manage_news')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'posts.index',
+                        'pattern' => 'posts.*',
+                        'label' => 'Berita',
+                        'icon' => 'newspaper',
+                    ])
+                @endcan
+                @can('manage_gallery')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'galleries.index',
+                        'pattern' => 'galleries.*',
+                        'label' => 'Galeri',
+                        'icon' => 'photo',
+                    ])
+                @endcan
+
+                @canany(['view_incoming_letters', 'view_outgoing_letters'])
                     <p
                         class="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-600">
                         Persuratan</p>
                 @endcanany
-                @can('manage_incoming_letters')
+                @can('view_incoming_letters')
                     @include('layouts.partials.nav-item', [
                         'route' => 'incoming-letters.index',
                         'pattern' => 'incoming-letters.*',
@@ -137,7 +159,7 @@
                         'icon' => 'inbox',
                     ])
                 @endcan
-                @can('manage_outgoing_letters')
+                @can('view_outgoing_letters')
                     @include('layouts.partials.nav-item', [
                         'route' => 'outgoing-letters.index',
                         'pattern' => 'outgoing-letters.*',

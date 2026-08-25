@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Models\Division;
 use App\Models\Member;
 use App\Models\Permission;
 use App\Models\Role;
@@ -15,11 +16,63 @@ class RoleManagementController extends Controller
     public function index()
     {
         $roles = Role::with('permissions')->orderBy('id')->get();
-        $permissions = Permission::orderBy('group')->orderBy('label')->get()->groupBy('group');
+        $permissionMatrix = $this->buildPermissionMatrix(Permission::orderBy('group')->orderBy('label')->get());
+
+        // Hak akses per-Divisi hanya menampilkan permission grup "Konten"
+        // (mis. Kelola Berita, Kelola Galeri) — permission lain (mis. Kelola
+        // Agenda) memang secara desain hanya diatur lewat peran (Role), bukan
+        // divisi. Menambah permission baru ke grup ini otomatis muncul di
+        // sini tanpa perlu ubah kode apa pun.
+        $divisionPermissions = Permission::where('group', 'Konten')->orderBy('label')->get();
+        $divisions = Division::with('permissions')->orderBy('name')->get();
+
         $users = User::with(['role', 'member.division'])->orderBy('name')->get();
         $members = Member::where('status', 'Aktif')->orderBy('name')->get();
 
-        return view('roles_management.index', compact('roles', 'permissions', 'users', 'members'));
+        return view('roles_management.index', compact(
+            'roles',
+            'permissionMatrix',
+            'divisions',
+            'divisionPermissions',
+            'users',
+            'members'
+        ));
+    }
+
+    /**
+     * Susun daftar permission menjadi baris-baris matrix: satu baris untuk
+     * pasangan 'view_xxx' + 'manage_xxx' (ditampilkan sebagai dua toggle,
+     * "Lihat" & "Kelola"), atau satu baris dengan satu toggle untuk
+     * permission yang berdiri sendiri (mis. 'manage_roles').
+     *
+     * Hasilnya dikelompokkan per 'group' (Pengurus, Kegiatan, dst) supaya
+     * tampilannya tetap sama seperti matrix sebelumnya.
+     */
+    private function buildPermissionMatrix($permissions)
+    {
+        $rows = [];
+
+        foreach ($permissions as $permission) {
+            $base = preg_replace('/^(view_|manage_)/', '', $permission->slug);
+            $key = $permission->group . '|' . $base;
+
+            if (! isset($rows[$key])) {
+                $rows[$key] = [
+                    'group' => $permission->group,
+                    'label' => preg_replace('/^(Lihat|Kelola)\s+/', '', $permission->label),
+                    'view' => null,
+                    'manage' => null,
+                ];
+            }
+
+            if (str_starts_with($permission->slug, 'view_')) {
+                $rows[$key]['view'] = $permission;
+            } else {
+                $rows[$key]['manage'] = $permission;
+            }
+        }
+
+        return collect($rows)->values()->groupBy('group');
     }
 
     /**
@@ -35,7 +88,7 @@ class RoleManagementController extends Controller
 
         $isActive = $role->permissions()->where('permission_id', $permission->id)->exists();
 
-        // Cegah admin yang sedang login menonaktifkan akses "Manajemen Peran & Akses"
+        // Cegah admin yang sedang login menonaktifkan akses \"Manajemen Peran & Akses\"
         // untuk perannya sendiri, supaya tidak langsung terkunci dari halaman ini.
         if ($isActive && $permission->slug === 'manage_roles' && $role->id === Auth::user()->role_id) {
             return response()->json([
@@ -56,6 +109,33 @@ class RoleManagementController extends Controller
                 $isActive ? 'Menonaktifkan' : 'Mengaktifkan',
                 $permission->label,
                 $role->name
+            )
+        );
+
+        return response()->json(['active' => ! $isActive]);
+    }
+
+    /**
+     * Menyalakan/mematikan satu permission untuk satu Divisi (hak akses
+     * ekstra per-divisi, terlepas dari peran anggotanya).
+     */
+    public function toggleDivisionPermission(Request $request, Division $division, Permission $permission)
+    {
+        $isActive = $division->permissions()->where('permission_id', $permission->id)->exists();
+
+        if ($isActive) {
+            $division->permissions()->detach($permission->id);
+        } else {
+            $division->permissions()->attach($permission->id);
+        }
+
+        AuditLog::record(
+            'Ubah Hak Akses Divisi',
+            sprintf(
+                '%s hak akses "%s" untuk Divisi "%s".',
+                $isActive ? 'Menonaktifkan' : 'Mengaktifkan',
+                $permission->label,
+                $division->name
             )
         );
 

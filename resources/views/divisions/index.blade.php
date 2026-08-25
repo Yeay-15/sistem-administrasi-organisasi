@@ -8,13 +8,15 @@
             <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Manajemen Divisi</h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Kelola struktur divisi di lingkungan organisasi.</p>
         </div>
-        <a href="{{ route('divisions.create') }}"
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-blue-600/20">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Tambah Divisi
-        </a>
+        @can('manage_divisions')
+            <a href="{{ route('divisions.create') }}"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-blue-600/20">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Tambah Divisi
+            </a>
+        @endcan
     </div>
 
     <div class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -40,6 +42,7 @@
                             </td>
                             <td class="px-5 py-4">
                                 <div class="flex items-center justify-center gap-1.5">
+                                @can('manage_divisions')
                                     <a href="{{ route('divisions.edit', $division->id) }}" title="Edit"
                                         class="rounded-lg p-2 text-amber-600 transition hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5">
@@ -58,6 +61,7 @@
                                             </svg>
                                         </button>
                                     </form>
+                                @endcan
                                 </div>
                             </td>
                         </tr>

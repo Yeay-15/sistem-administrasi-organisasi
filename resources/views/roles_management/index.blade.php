@@ -8,7 +8,7 @@
         <div>
             <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Manajemen Peran & Akses</h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                Atur hak akses tiap peran, lalu petakan akun login ke peran &amp; data pengurus yang sesuai.
+                Atur hak akses tiap peran, hak akses ekstra per divisi, lalu petakan akun login ke peran &amp; data pengurus yang sesuai.
             </p>
         </div>
 
@@ -21,11 +21,15 @@
             <span x-text="notice"></span>
         </div>
 
-        {{-- ============ BAGIAN ATAS: MATRIX HAK AKSES ============ --}}
+        {{-- ============ BAGIAN 1: MATRIX HAK AKSES PER PERAN ============ --}}
         <div class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="border-b border-slate-100 px-5 pt-4 dark:border-slate-800">
-                <h2 class="text-base font-semibold text-slate-800 dark:text-white">Matrix Hak Akses</h2>
-                <p class="mb-4 mt-0.5 text-xs text-slate-400 dark:text-slate-500">Nyalakan/matikan modul yang boleh diakses tiap peran. Perubahan tersimpan otomatis.</p>
+                <h2 class="text-base font-semibold text-slate-800 dark:text-white">Matrix Hak Akses per Peran</h2>
+                <p class="mb-1 mt-0.5 text-xs text-slate-400 dark:text-slate-500">
+                    Setiap modul punya dua kolom: <span class="font-medium text-slate-500 dark:text-slate-400">Lihat</span> (buka & baca halaman) dan
+                    <span class="font-medium text-slate-500 dark:text-slate-400">Kelola</span> (tambah/edit/hapus). Kelola otomatis mencakup Lihat.
+                </p>
+                <p class="mb-4 text-xs text-slate-400 dark:text-slate-500">Perubahan tersimpan otomatis.</p>
 
                 {{-- Tabs --}}
                 <div class="flex gap-1 overflow-x-auto">
@@ -54,34 +58,45 @@
                         @endif
 
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            @foreach ($permissions as $group => $groupPermissions)
+                            @foreach ($permissionMatrix as $group => $rows)
                                 <div>
                                     <p class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-600">
                                         {{ $group ?: 'Lainnya' }}
                                     </p>
                                     <div class="space-y-1">
-                                        @foreach ($groupPermissions as $permission)
-                                            @php
-                                                $isActive = $role->isSuperAdmin() || $role->permissions->contains('id', $permission->id);
-                                            @endphp
-                                            <div class="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/60"
-                                                x-data="{ active: {{ $isActive ? 'true' : 'false' }}, loading: false }">
-                                                <span class="text-sm text-slate-600 dark:text-slate-300">{{ $permission->label }}</span>
+                                        @foreach ($rows as $row)
+                                            <div class="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                                                <span class="truncate text-sm text-slate-600 dark:text-slate-300">{{ $row['label'] }}</span>
 
-                                                @if ($role->isSuperAdmin())
-                                                    <span class="inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-blue-600 px-0.5">
-                                                        <span class="h-5 w-5 translate-x-5 rounded-full bg-white shadow"></span>
-                                                    </span>
-                                                @else
-                                                    <button type="button" title="Toggle akses"
-                                                        @click="loading = true; togglePermission({{ $role->id }}, {{ $permission->id }}, $data, () => loading = false)"
-                                                        :disabled="loading"
-                                                        :class="active ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'"
-                                                        class="inline-flex h-6 w-11 shrink-0 items-center rounded-full px-0.5 transition disabled:opacity-50">
-                                                        <span :class="active ? 'translate-x-5' : 'translate-x-0'"
-                                                            class="h-5 w-5 rounded-full bg-white shadow transition-transform"></span>
-                                                    </button>
-                                                @endif
+                                                <div class="flex shrink-0 items-center gap-3">
+                                                    @foreach ([['perm' => $row['view'], 'label' => 'Lihat'], ['perm' => $row['manage'], 'label' => 'Kelola']] as $col)
+                                                        @if ($col['perm'])
+                                                            @php
+                                                                $permission = $col['perm'];
+                                                                $isActive = $role->isSuperAdmin() || $role->permissions->contains('id', $permission->id);
+                                                            @endphp
+                                                            <div class="flex flex-col items-center gap-1"
+                                                                x-data="{ active: {{ $isActive ? 'true' : 'false' }}, loading: false }">
+                                                                <span class="text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ $col['label'] }}</span>
+
+                                                                @if ($role->isSuperAdmin())
+                                                                    <span class="inline-flex h-5 w-9 shrink-0 items-center rounded-full bg-blue-600 px-0.5">
+                                                                        <span class="h-4 w-4 translate-x-4 rounded-full bg-white shadow"></span>
+                                                                    </span>
+                                                                @else
+                                                                    <button type="button" title="Toggle akses {{ $col['label'] }}"
+                                                                        @click="loading = true; togglePermission({{ $role->id }}, {{ $permission->id }}, $data, () => loading = false)"
+                                                                        :disabled="loading"
+                                                                        :class="active ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'"
+                                                                        class="inline-flex h-5 w-9 shrink-0 items-center rounded-full px-0.5 transition disabled:opacity-50">
+                                                                        <span :class="active ? 'translate-x-4' : 'translate-x-0'"
+                                                                            class="h-4 w-4 rounded-full bg-white shadow transition-transform"></span>
+                                                                    </button>
+                                                                @endif
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
                                             </div>
                                         @endforeach
                                     </div>
@@ -93,7 +108,67 @@
             </div>
         </div>
 
-        {{-- ============ BAGIAN BAWAH: MAPPING AKUN PENGURUS ============ --}}
+        {{-- ============ BAGIAN 2: HAK AKSES EKSTRA PER DIVISI ============ --}}
+        @if ($divisionPermissions->isNotEmpty())
+            <div class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+                    <h2 class="text-base font-semibold text-slate-800 dark:text-white">Hak Akses Ekstra per Divisi</h2>
+                    <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
+                        Berikan hak akses tambahan langsung ke sebuah Divisi, terlepas dari peran (Role) anggotanya — mis. Divisi Infokom boleh mengelola Berita &amp; Galeri tanpa perlu peran khusus. Nyalakan toggle di bawah untuk divisi lain kapan pun tanpa perlu mengubah kode.
+                    </p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-slate-100 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/40">
+                                <th class="whitespace-nowrap px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Divisi</th>
+                                @foreach ($divisionPermissions as $permission)
+                                    <th class="whitespace-nowrap px-5 py-3.5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                                        {{ $permission->label }}
+                                    </th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                            @forelse ($divisions as $division)
+                                <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                                    <td class="px-5 py-3.5 text-sm font-semibold text-slate-800 dark:text-white">
+                                        {{ $division->name }}
+                                        <span class="ml-1 text-xs font-normal text-slate-400 dark:text-slate-500">({{ $division->abbreviation }})</span>
+                                    </td>
+                                    @foreach ($divisionPermissions as $permission)
+                                        @php
+                                            $isActive = $division->permissions->contains('id', $permission->id);
+                                        @endphp
+                                        <td class="px-5 py-3.5 text-center">
+                                            <div class="inline-flex" x-data="{ active: {{ $isActive ? 'true' : 'false' }}, loading: false }">
+                                                <button type="button" title="Toggle {{ $permission->label }} untuk {{ $division->name }}"
+                                                    @click="loading = true; toggleDivisionPermission({{ $division->id }}, {{ $permission->id }}, $data, () => loading = false)"
+                                                    :disabled="loading"
+                                                    :class="active ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'"
+                                                    class="inline-flex h-6 w-11 shrink-0 items-center rounded-full px-0.5 transition disabled:opacity-50">
+                                                    <span :class="active ? 'translate-x-5' : 'translate-x-0'"
+                                                        class="h-5 w-5 rounded-full bg-white shadow transition-transform"></span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    @endforeach
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="{{ $divisionPermissions->count() + 1 }}" class="px-5 py-12 text-center text-sm text-slate-400 dark:text-slate-500">
+                                        Belum ada data divisi.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
+        {{-- ============ BAGIAN 3: MAPPING AKUN PENGURUS ============ --}}
         <div class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
                 <h2 class="text-base font-semibold text-slate-800 dark:text-white">Mapping Akun Pengurus</h2>
@@ -181,6 +256,24 @@
                             if (!res.ok) throw new Error(data.message || 'Gagal menyimpan perubahan.');
                             itemData.active = data.active;
                             this.showNotice('Hak akses berhasil diperbarui.');
+                        })
+                        .catch((err) => this.showNotice(err.message, 'error'))
+                        .finally(() => done());
+                },
+
+                toggleDivisionPermission(divisionId, permissionId, itemData, done) {
+                    fetch(`{{ url('roles-management/division-permissions') }}/${divisionId}/${permissionId}/toggle`, {
+                            method: 'PATCH',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                            },
+                        })
+                        .then(async (res) => {
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.message || 'Gagal menyimpan perubahan.');
+                            itemData.active = data.active;
+                            this.showNotice('Hak akses divisi berhasil diperbarui.');
                         })
                         .catch((err) => this.showNotice(err.message, 'error'))
                         .finally(() => done());

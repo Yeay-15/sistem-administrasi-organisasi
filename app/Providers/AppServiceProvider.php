@@ -23,9 +23,14 @@ class AppServiceProvider extends ServiceProvider
     {
         // Sistem Role & Permission dinamis (data-driven, bukan hard-coded).
         // Setiap kali ada pengecekan Gate::authorize('slug_permission') atau
-        // @can('slug_permission') di Blade, keputusannya diambil dari sini:
+        // @can('slug_permission') di Blade/route, keputusannya diambil dari sini:
         // - Super Admin selalu diloloskan.
-        // - Role lain dicek dari tabel permission_role lewat User::hasPermission().
+        // - Ability lainnya dicek lewat User::hasPermission(), yang sudah
+        //   menggabungkan hak akses dari Role MAUPUN dari Division secara
+        //   otomatis (lihat App\Models\User::hasPermission()). Ini sengaja
+        //   tidak lagi hardcode nama divisi tertentu (mis. "Infokom") — hak
+        //   akses per-divisi sepenuhnya diatur lewat tabel division_permission
+        //   via halaman Manajemen Peran & Akses.
         Gate::before(function (?User $user, string $ability) {
             if (! $user) {
                 return null; // Tidak ada keputusan — biarkan guard 'auth' yang menangani.

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Division;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -18,16 +19,30 @@ class RolePermissionSeeder extends Seeder
     {
         $permissions = [
             ['slug' => 'view_dashboard', 'label' => 'Lihat Dashboard', 'group' => 'Umum'],
+
+            ['slug' => 'view_divisions', 'label' => 'Lihat Divisi', 'group' => 'Pengurus'],
             ['slug' => 'manage_divisions', 'label' => 'Kelola Divisi', 'group' => 'Pengurus'],
-            ['slug' => 'manage_members', 'label' => 'Edit Data Pengurus', 'group' => 'Pengurus'],
-            ['slug' => 'manage_agendas', 'label' => 'Akses Menu Agenda', 'group' => 'Kegiatan'],
+            ['slug' => 'view_members', 'label' => 'Lihat Pengurus', 'group' => 'Pengurus'],
+            ['slug' => 'manage_members', 'label' => 'Kelola Pengurus', 'group' => 'Pengurus'],
+
+            ['slug' => 'view_agendas', 'label' => 'Lihat Agenda', 'group' => 'Kegiatan'],
+            ['slug' => 'manage_agendas', 'label' => 'Kelola Agenda', 'group' => 'Kegiatan'],
             ['slug' => 'manage_attendances', 'label' => 'Kelola Absensi', 'group' => 'Kegiatan'],
+            ['slug' => 'view_guidances', 'label' => 'Lihat Pembinaan', 'group' => 'Kegiatan'],
             ['slug' => 'manage_guidances', 'label' => 'Kelola Pembinaan', 'group' => 'Kegiatan'],
+            ['slug' => 'view_guests', 'label' => 'Lihat Buku Tamu', 'group' => 'Kegiatan'],
             ['slug' => 'manage_guests', 'label' => 'Kelola Buku Tamu', 'group' => 'Kegiatan'],
+
+            ['slug' => 'view_incoming_letters', 'label' => 'Lihat Surat Masuk', 'group' => 'Persuratan'],
             ['slug' => 'manage_incoming_letters', 'label' => 'Kelola Surat Masuk', 'group' => 'Persuratan'],
+            ['slug' => 'view_outgoing_letters', 'label' => 'Lihat Surat Keluar', 'group' => 'Persuratan'],
             ['slug' => 'manage_outgoing_letters', 'label' => 'Kelola Surat Keluar', 'group' => 'Persuratan'],
+
             ['slug' => 'view_audit_logs', 'label' => 'Akses Audit Log', 'group' => 'Sistem'],
             ['slug' => 'manage_roles', 'label' => 'Manajemen Peran & Akses', 'group' => 'Sistem'],
+
+            ['slug' => 'manage_news', 'label' => 'Kelola Berita', 'group' => 'Konten'],
+            ['slug' => 'manage_gallery', 'label' => 'Kelola Galeri', 'group' => 'Konten'],
         ];
 
         foreach ($permissions as $permission) {
@@ -58,9 +73,12 @@ class RolePermissionSeeder extends Seeder
             $kadiv->permissions()->sync(
                 Permission::whereIn('slug', [
                     'view_dashboard',
+                    'view_agendas',
                     'manage_agendas',
                     'manage_attendances',
+                    'view_guests',
                     'manage_guests',
+                    'view_guidances',
                     'manage_guidances',
                 ])->pluck('id')
             );
@@ -69,6 +87,18 @@ class RolePermissionSeeder extends Seeder
         if ($anggota->permissions()->count() === 0) {
             $anggota->permissions()->sync(
                 Permission::whereIn('slug', ['view_dashboard'])->pluck('id')
+            );
+        }
+
+        // Hak akses per-Divisi (bukan per-Role). Secara default, Divisi Infokom
+        // diberi 'manage_news' & 'manage_gallery' di sini SEKALI SAJA — supaya
+        // perilaku sebelum & sesudah fitur "Hak Akses per Divisi" ini terpasang
+        // tetap sama. Setelah ini, semuanya diatur lewat toggle di halaman
+        // Manajemen Peran & Akses, bukan lewat kode.
+        $infokom = Division::where('abbreviation', 'Infokom')->first();
+        if ($infokom && $infokom->permissions()->count() === 0) {
+            $infokom->permissions()->sync(
+                Permission::whereIn('slug', ['manage_news', 'manage_gallery'])->pluck('id')
             );
         }
 
