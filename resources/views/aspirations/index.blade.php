@@ -8,12 +8,31 @@
             <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Aspirasi Mahasiswa</h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Pesan yang dikirim mahasiswa melalui formulir Kontak & Aspirasi di Portal Publik.</p>
         </div>
-        @if ($unreadCount > 0)
-            <span class="inline-flex w-fit items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 dark:bg-red-500/10 dark:text-red-400">
-                <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
-                {{ $unreadCount }} belum dibaca
-            </span>
-        @endif
+        <div class="flex flex-wrap items-center gap-2">
+            @if ($unreadCount > 0)
+                <span class="inline-flex w-fit items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 dark:bg-red-500/10 dark:text-red-400">
+                    <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+                    {{ $unreadCount }} belum dibaca
+                </span>
+            @endif
+            @if ($aspirations->isNotEmpty())
+                {{-- Export mengikuti filter kategori/unread_only yang sedang aktif --}}
+                <a href="{{ request()->fullUrlWithQuery(['export' => 'excel']) }}"
+                    class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3.5 w-3.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Excel
+                </a>
+                <a href="{{ request()->fullUrlWithQuery(['export' => 'pdf']) }}"
+                    class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-red-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3.5 w-3.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    PDF
+                </a>
+            @endif
+        </div>
     </div>
 
     <form method="GET" class="mb-5 flex flex-wrap gap-2">

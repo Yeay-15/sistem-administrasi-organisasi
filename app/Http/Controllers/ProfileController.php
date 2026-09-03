@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
@@ -26,19 +27,32 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update data akun: nama tampilan & avatar.
+     * Update data akun: nama tampilan & avatar. Email login hanya bisa
+     * diubah lewat sini oleh Super Admin sendiri — untuk peran lain, email
+     * tetap terkunci dan harus dimintakan ke Super Admin lewat menu
+     * Manajemen Peran & Akses.
      */
     public function update(Request $request)
     {
         $user = Auth::user();
 
-        $request->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_avatar' => ['nullable', 'boolean'],
-        ]);
+        ];
 
-        $user->name = $request->name;
+        if ($user->isSuperAdmin()) {
+            $rules['email'] = ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)];
+        }
+
+        $validated = $request->validate($rules);
+
+        $user->name = $validated['name'];
+
+        if ($user->isSuperAdmin()) {
+            $user->email = $validated['email'];
+        }
 
         if ($request->hasFile('avatar')) {
             $this->deleteAvatar($user);

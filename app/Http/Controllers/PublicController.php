@@ -9,6 +9,7 @@ use App\Models\Division;
 use App\Models\Gallery;
 use App\Models\HomeSetting;
 use App\Models\Member;
+use App\Models\OrganizationLeader;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
@@ -18,9 +19,13 @@ class PublicController extends Controller
     {
         $settings = HomeSetting::current();
 
-        $latestPosts = Post::published()->latest('published_at')->take(3)->get();
+        // Dipisah agar Beranda menampilkan Laporan Kegiatan dan Artikel & Berita
+        // sebagai dua bagian yang berbeda (mengikuti pola situs Ormawa UT),
+        // bukan digabung jadi satu daftar "Berita Terbaru".
+        $latestReports = Post::published()->category('Laporan Kegiatan')->latest('published_at')->take(3)->get();
+        $latestArticles = Post::published()->category('Artikel & Berita')->latest('published_at')->take(3)->get();
 
-        $upcomingAgendas = Agenda::where('date', '>=', now()->toDateString())
+        $upcomingAgendas = Agenda::publicOnly()->where('date', '>=', now()->toDateString())
             ->orderBy('date')
             ->take(3)
             ->get();
@@ -28,22 +33,26 @@ class PublicController extends Controller
         $achievements = Achievement::orderBy('order')->latest()->take(8)->get();
 
         $totalMembers = Member::where('status', 'Aktif')->count();
-        $totalDivisions = Division::count();
 
         return view('public.home', compact(
             'settings',
-            'latestPosts',
+            'latestReports',
+            'latestArticles',
             'upcomingAgendas',
             'achievements',
-            'totalMembers',
-            'totalDivisions'
+            'totalMembers'
         ));
     }
 
     // Profil > Tentang Kami
     public function about()
     {
-        return view('public.about');
+        // Estafet Kepemimpinan — dikelola dari dashboard admin (menu
+        // "Estafet Kepemimpinan"), diurutkan sesuai kolom "order" lalu
+        // tahun mulai menjabat.
+        $leaders = OrganizationLeader::orderBy('order')->orderBy('period_start')->get();
+
+        return view('public.about', compact('leaders'));
     }
 
     // Profil > Visi & Misi
@@ -74,7 +83,10 @@ class PublicController extends Controller
     // Agenda Kegiatan
     public function agenda(Request $request)
     {
-        $query = Agenda::query();
+        // Portal Publik hanya boleh menampilkan agenda yang ditandai
+        // is_public — agenda internal (mis. rapat pembentukan panitia)
+        // tetap ada di kalender admin tapi disaring di sini.
+        $query = Agenda::publicOnly();
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
@@ -91,7 +103,7 @@ class PublicController extends Controller
             ->withQueryString();
 
         // Untuk tampilan kalender publik — memakai skema warna yang sama dengan admin
-        $allAgendas = Agenda::orderBy('date')->get();
+        $allAgendas = Agenda::publicOnly()->orderBy('date')->get();
         $calendarEvents = Agenda::buildCalendarEvents($allAgendas);
 
         return view('public.agenda', compact('upcomingAgendas', 'pastAgendas', 'calendarEvents'));
@@ -200,9 +212,12 @@ class PublicController extends Controller
             'message' => ['required', 'string', 'max:3000'],
         ]);
 
-        // Mode "Hanya Pengurus" tidak mengizinkan pengiriman anonim, karena tujuannya
-        // justru untuk melacak aspirasi internal dari pengurus yang teridentifikasi.
-        $isAnonymous = $settings->aspiration_mode === 'pengurus_only' ? false : $request->boolean('is_anonymous');
+        // Mode "Hanya Pengurus" hanya membatasi SIAPA yang boleh membuka
+        // formulir (harus login) — bukan berarti melarang kirim anonim.
+        // Login di sini berfungsi sebagai gerbang akses, bukan syarat
+        // keterbukaan identitas, supaya pengurus tetap bisa menyampaikan
+        // aspirasi internal secara anonim bila diperlukan.
+        $isAnonymous = $request->boolean('is_anonymous');
 
         Aspiration::create([
             'name' => $isAnonymous ? null : ($validated['name'] ?? null),

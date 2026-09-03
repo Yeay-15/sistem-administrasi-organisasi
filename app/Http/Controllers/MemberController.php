@@ -4,18 +4,62 @@ namespace App\Http\Controllers;
 
 use App\Models\Member;
 use App\Models\Division;
+use App\Exports\MembersExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MemberController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Menggunakan with('division') untuk Eager Loading relasi divisi
-        $members = Member::with('division')->latest()->get();
-        return view('members.index', compact('members'));
+        // 1. Inisialisasi Query Builder dengan relasi
+        $query = Member::with('division');
+
+        // 2. Cek dan terapkan filter Divisi jika dipilih
+        if ($request->filled('division_id')) {
+            $query->where('division_id', $request->division_id);
+        }
+
+        // 3. Cek dan terapkan filter Angkatan jika dipilih
+        if ($request->filled('batch')) {
+            $query->where('batch', $request->batch);
+        }
+
+        // 4. Lakukan pengurutan hierarki seperti biasa, lalu ambil datanya (get)
+        $members = $query->orderBy('division_id', 'asc')
+            ->orderByRaw("
+                CASE position
+                    WHEN 'Ketua Umum' THEN 1
+                    WHEN 'Sekretaris Umum' THEN 2
+                    WHEN 'Bendahara Umum' THEN 3
+                    WHEN 'Ketua Divisi' THEN 4
+                    WHEN 'Sekretaris Divisi' THEN 5
+                    ELSE 6
+                END
+            ")
+            ->orderBy('name', 'asc')
+            ->get();
+
+        // 5. Fitur Export (Otomatis akan mengekspor data yang sudah difilter saja)
+        if ($request->export === 'excel') {
+            return Excel::download(new MembersExport($members), 'Data_Pengurus_KATIBER.xlsx');
+        }
+
+        if ($request->export === 'pdf') {
+            $pdf = Pdf::loadView('exports.members_pdf', compact('members'))->setPaper('a4', 'landscape');
+            return $pdf->download('Data_Pengurus_KATIBER.pdf');
+        }
+
+        // 6. Ambil data untuk opsi Dropdown Filter di View
+        $divisions = Division::all();
+        // Mengambil daftar angkatan yang unik dari tabel members (misal: 2023, 2024)
+        $batches = Member::select('batch')->distinct()->orderBy('batch', 'desc')->pluck('batch');
+
+        return view('members.index', compact('members', 'divisions', 'batches'));
     }
 
     public function create()

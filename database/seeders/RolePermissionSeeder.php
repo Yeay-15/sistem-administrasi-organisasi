@@ -65,6 +65,10 @@ class RolePermissionSeeder extends Seeder
             ['slug' => 'manage_achievements', 'label' => 'Kelola Prestasi', 'group' => 'Konten'],
             ['slug' => 'delete_achievements', 'label' => 'Hapus Prestasi', 'group' => 'Konten'],
 
+            ['slug' => 'view_leaders', 'label' => 'Lihat Estafet Kepemimpinan', 'group' => 'Konten'],
+            ['slug' => 'manage_leaders', 'label' => 'Kelola Estafet Kepemimpinan', 'group' => 'Konten'],
+            ['slug' => 'delete_leaders', 'label' => 'Hapus Estafet Kepemimpinan', 'group' => 'Konten'],
+
             ['slug' => 'view_aspirations', 'label' => 'Lihat Aspirasi Mahasiswa', 'group' => 'Konten'],
             ['slug' => 'delete_aspirations', 'label' => 'Hapus Aspirasi Mahasiswa', 'group' => 'Konten'],
         ];

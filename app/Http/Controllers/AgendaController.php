@@ -46,7 +46,12 @@ class AgendaController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        Agenda::create($request->all());
+        Agenda::create(array_merge($request->all(), [
+            // Checkbox HTML tidak mengirim apa pun saat tidak dicentang,
+            // jadi statusnya dihitung eksplisit di sini alih-alih ikut
+            // $request->all() begitu saja.
+            'is_public' => $request->boolean('is_public', true),
+        ]));
 
         return redirect()->route('agendas.index')->with('success', 'Agenda berhasil ditambahkan.');
     }
@@ -77,9 +82,26 @@ class AgendaController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
 
-        $agenda->update($request->all());
+        $agenda->update(array_merge($request->all(), [
+            'is_public' => $request->boolean('is_public', true),
+        ]));
 
         return redirect()->route('agendas.index')->with('success', 'Agenda berhasil diperbarui.');
+    }
+
+    /**
+     * Toggle cepat status tampil-ke-publik lewat ikon mata di daftar agenda —
+     * tanpa perlu masuk ke form edit.
+     */
+    public function togglePublic(Agenda $agenda)
+    {
+        Gate::authorize('manage_agendas');
+
+        $agenda->update(['is_public' => ! $agenda->is_public]);
+
+        return back()->with('success', $agenda->is_public
+            ? 'Agenda "' . $agenda->name . '" sekarang tampil ke publik.'
+            : 'Agenda "' . $agenda->name . '" disembunyikan dari publik.');
     }
 
     public function destroy(Agenda $agenda)

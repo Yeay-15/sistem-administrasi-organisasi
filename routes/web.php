@@ -14,35 +14,59 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\RoleManagementController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AchievementController;
+use App\Http\Controllers\LeaderController;
 use App\Http\Controllers\AspirationController;
 
+// ============ SITEMAP.XML & ROBOTS.TXT (SEO) ============
+// Di luar grup "track.visit" — ini feed untuk mesin pencari, bukan halaman
+// yang dikunjungi manusia, jadi tidak perlu ikut tercatat sebagai kunjungan.
+// robots.txt sengaja dibuat sebagai ROUTE (bukan file statis di public/)
+// supaya baris "Sitemap:" di dalamnya otomatis mengikuti domain yang
+// sedang dipakai — tidak perlu diedit manual saat pindah dari domain
+// development ke domain production.
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
+
 // ============ PORTAL PUBLIK ============
-Route::get('/', [PublicController::class, 'home'])->name('public.home');
+// Dibungkus middleware "track.visit" agar tiap kunjungan halaman publik
+// tercatat ringan untuk Statistik Website di Dashboard admin.
+Route::middleware('track.visit')->group(function () {
+    Route::get('/', [PublicController::class, 'home'])->name('public.home');
 
-Route::get('/profil', [PublicController::class, 'about'])->name('public.about');
-Route::get('/profil/visi-misi', [PublicController::class, 'vision'])->name('public.about.vision');
-Route::get('/profil/struktur-pengurus', [PublicController::class, 'structure'])->name('public.about.structure');
+    Route::get('/profil', [PublicController::class, 'about'])->name('public.about');
+    Route::get('/profil/visi-misi', [PublicController::class, 'vision'])->name('public.about.vision');
+    Route::get('/profil/struktur-pengurus', [PublicController::class, 'structure'])->name('public.about.structure');
 
-Route::get('/agenda-kegiatan', [PublicController::class, 'agenda'])->name('public.agenda.index');
+    Route::get('/agenda-kegiatan', [PublicController::class, 'agenda'])->name('public.agenda.index');
 
-Route::get('/media/artikel-berita', [PublicController::class, 'news'])->name('public.news.index');
-Route::get('/media/artikel-berita/{post:slug}', [PublicController::class, 'newsShow'])->name('public.news.show');
-Route::get('/media/laporan-kegiatan', [PublicController::class, 'reports'])->name('public.reports.index');
-Route::get('/media/laporan-kegiatan/{post:slug}', [PublicController::class, 'reportShow'])->name('public.reports.show');
-Route::get('/media/galeri', [PublicController::class, 'gallery'])->name('public.gallery');
+    Route::get('/media/artikel-berita', [PublicController::class, 'news'])->name('public.news.index');
+    Route::get('/media/artikel-berita/{post:slug}', [PublicController::class, 'newsShow'])->name('public.news.show');
+    Route::get('/media/laporan-kegiatan', [PublicController::class, 'reports'])->name('public.reports.index');
+    Route::get('/media/laporan-kegiatan/{post:slug}', [PublicController::class, 'reportShow'])->name('public.reports.show');
+    Route::get('/media/galeri', [PublicController::class, 'gallery'])->name('public.gallery');
 
-Route::get('/kontak-aspirasi', [PublicController::class, 'contact'])->name('public.contact');
-Route::post('/kontak-aspirasi', [PublicController::class, 'contactStore'])->name('public.contact.store');
+    Route::get('/kontak-aspirasi', [PublicController::class, 'contact'])->name('public.contact');
+    // Formulir ini publik dan sebagian modenya boleh anonim, jadi rawan
+    // disasar bot spam — dibatasi maksimal 5 kali kirim per jam per IP.
+    Route::post('/kontak-aspirasi', [PublicController::class, 'contactStore'])
+        ->middleware('throttle:5,60')->name('public.contact.store');
+});
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    // Lapisan pertahanan tambahan di level route (di luar rate limiting
+    // per-email di AuthController::login) — membatasi request POST /login
+    // secara umum per-IP, supaya request brute force tidak bisa dikirim
+    // bertubi-tubi walau mencoba banyak alamat email berbeda.
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:20,1');
 });
 
 Route::middleware('auth')->group(function () {
@@ -74,6 +98,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('agendas', AgendaController::class)->only(['index', 'show'])->middleware('can:view_agendas');
     Route::resource('agendas', AgendaController::class)->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_agendas');
     Route::resource('agendas', AgendaController::class)->only(['destroy'])->middleware('can:delete_agendas');
+    Route::patch('/agendas/{agenda}/toggle-public', [AgendaController::class, 'togglePublic'])
+        ->name('agendas.toggle-public')->middleware('can:manage_agendas');
     Route::post('/agendas/{agenda}/attendances', [AttendanceController::class, 'store'])
         ->name('attendances.store')->middleware('can:manage_attendances');
     Route::get('/agendas-export/pdf', [AgendaController::class, 'exportPdf'])
@@ -118,6 +144,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('achievements', AchievementController::class)->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_achievements');
     Route::resource('achievements', AchievementController::class)->only(['destroy'])->middleware('can:delete_achievements');
 
+    Route::resource('leaders', LeaderController::class)->only(['index'])->middleware('can:view_leaders');
+    Route::resource('leaders', LeaderController::class)->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_leaders');
+    Route::resource('leaders', LeaderController::class)->only(['destroy'])->middleware('can:delete_leaders');
+
     Route::get('/aspirasi', [AspirationController::class, 'index'])
         ->name('aspirations.index')->middleware('can:view_aspirations');
     Route::patch('/aspirasi/{aspiration}/tandai-dibaca', [AspirationController::class, 'markAsRead'])
@@ -134,7 +164,19 @@ Route::middleware('auth')->group(function () {
             ->name('toggle-permission');
         Route::patch('/division-permissions/{division}/{permission}/toggle', [RoleManagementController::class, 'toggleDivisionPermission'])
             ->name('toggle-division-permission');
+        Route::post('/users', [RoleManagementController::class, 'storeUser'])->name('users.store');
         Route::patch('/users/{user}', [RoleManagementController::class, 'updateUser'])->name('update-user');
+        Route::delete('/users/{user}', [RoleManagementController::class, 'destroyUser'])->name('users.destroy');
         Route::patch('/users/{user}/reset-password', [RoleManagementController::class, 'resetPassword'])->name('reset-password');
+    });
+
+    // Khusus Super Admin — dicek eksplisit di dalam controller (bukan lewat
+    // sistem permission role/divisi biasa), karena berisi seluruh data
+    // organisasi termasuk hash password akun.
+    Route::prefix('cadangan-data')->name('backups.')->group(function () {
+        Route::get('/', [BackupController::class, 'index'])->name('index');
+        Route::post('/', [BackupController::class, 'store'])->name('store');
+        Route::get('/{filename}/unduh', [BackupController::class, 'download'])->name('download');
+        Route::delete('/{filename}', [BackupController::class, 'destroy'])->name('destroy');
     });
 });

@@ -22,6 +22,21 @@
             <button type="button" @click="notice = ''" class="shrink-0 text-xs font-semibold underline opacity-70 hover:opacity-100">Tutup</button>
         </div>
 
+        {{-- Sandi awal akun baru — sengaja ditampilkan lewat flash session (bukan AJAX)
+             supaya tetap terlihat jelas meski halaman ini reload setelah submit form. --}}
+        @if (session('generated_account'))
+            <div x-data="{ show: true }" x-show="show" x-cloak x-transition.opacity
+                class="theme-transition flex items-start justify-between gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800/60 dark:bg-green-500/10 dark:text-green-400">
+                <span>
+                    Akun untuk <strong>{{ session('generated_account')['name'] }}</strong> berhasil dibuat.
+                    Email: <strong>{{ session('generated_account')['email'] }}</strong> —
+                    Sandi awal: <strong>{{ session('generated_account')['password'] }}</strong>
+                    — segera sampaikan langsung ke pengurus yang bersangkutan, sandi ini tidak akan ditampilkan lagi.
+                </span>
+                <button type="button" @click="show = false" class="shrink-0 text-xs font-semibold underline opacity-70 hover:opacity-100">Tutup</button>
+            </div>
+        @endif
+
         {{-- ============ BAGIAN 1: MATRIX HAK AKSES PER PERAN ============ --}}
         <div class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="border-b border-slate-100 px-5 pt-4 dark:border-slate-800">
@@ -189,11 +204,88 @@
         @endif
 
         {{-- ============ BAGIAN 3: MAPPING AKUN PENGURUS ============ --}}
-        <div class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-                <h2 class="text-base font-semibold text-slate-800 dark:text-white">Mapping Akun Pengurus</h2>
-                <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">Hubungkan akun login dengan data pengurus &amp; tentukan perannya.</p>
+        <div class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            x-data="{ showAddAccount: {{ $errors->hasAny(['member_id', 'email', 'role_id']) ? 'true' : 'false' }} }">
+            <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-base font-semibold text-slate-800 dark:text-white">Mapping Akun Pengurus</h2>
+                    <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">Hubungkan akun login dengan data pengurus &amp; tentukan perannya.</p>
+                </div>
+                @if (auth()->user()->isSuperAdmin())
+                    <button type="button" @click="showAddAccount = !showAddAccount"
+                        class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-blue-600/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        <span x-text="showAddAccount ? 'Tutup Form' : 'Buatkan Akun Login'"></span>
+                    </button>
+                @endif
             </div>
+
+            @if (auth()->user()->isSuperAdmin())
+                <div x-show="showAddAccount" x-cloak x-transition
+                    class="border-b border-slate-100 bg-slate-50/70 px-5 py-5 dark:border-slate-800 dark:bg-slate-800/30">
+                    @if ($membersWithoutAccount->isEmpty())
+                        <p class="text-sm text-slate-500 dark:text-slate-400">
+                            Semua pengurus aktif sudah memiliki akun login. Tambahkan data pengurus baru dulu di menu
+                            <a href="{{ route('members.index') }}" class="font-semibold text-blue-600 hover:underline dark:text-blue-400">Data Pengurus</a>
+                            sebelum membuatkan akun untuknya.
+                        </p>
+                    @else
+                        <form action="{{ route('roles-management.users.store') }}" method="POST"
+                            class="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-end">
+                            @csrf
+                            <div>
+                                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Pengurus</label>
+                                <select name="member_id" required
+                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <option value="">Pilih pengurus...</option>
+                                    @foreach ($membersWithoutAccount as $member)
+                                        <option value="{{ $member->id }}" {{ old('member_id') == $member->id ? 'selected' : '' }}>
+                                            {{ $member->name }}@if ($member->division) — {{ $member->division->name }}@endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('member_id')
+                                    <p class="mt-1 text-xs text-red-500 dark:text-red-400">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Email Login</label>
+                                <input type="email" name="email" value="{{ old('email') }}" required
+                                    placeholder="nama@email.com"
+                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">
+                                @error('email')
+                                    <p class="mt-1 text-xs text-red-500 dark:text-red-400">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="flex-1">
+                                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Peran</label>
+                                    <select name="role_id" required
+                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                        <option value="">Pilih peran...</option>
+                                        @foreach ($assignableRoles as $role)
+                                            <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>{{ $role->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('role_id')
+                                        <p class="mt-1 text-xs text-red-500 dark:text-red-400">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <button type="submit"
+                                    class="mb-[1px] shrink-0 rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600">
+                                    Buat
+                                </button>
+                            </div>
+                        </form>
+                        <p class="mt-3 text-xs text-slate-400 dark:text-slate-500">
+                            Sandi awal akan dibuat otomatis dan ditampilkan sekali setelah akun berhasil dibuat —
+                            segera sampaikan langsung ke pengurus yang bersangkutan.
+                        </p>
+                    @endif
+                </div>
+            @endif
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
@@ -217,7 +309,19 @@
                                         <span class="ml-1.5 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">Anda</span>
                                     @endif
                                 </td>
-                                <td class="px-5 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $user->email }}</td>
+                                <td class="px-5 py-4">
+                                    @if ($user->id === auth()->id() || ! auth()->user()->isSuperAdmin())
+                                        <span class="text-sm text-slate-500 dark:text-slate-400"
+                                            title="{{ $user->id === auth()->id() ? 'Ubah email Anda sendiri lewat Pengaturan Akun' : 'Hanya Super Admin yang dapat mengubah email login pengguna lain' }}">
+                                            {{ $user->email }}
+                                        </span>
+                                    @else
+                                        <input type="email"
+                                            value="{{ $user->email }}"
+                                            @change="updateUserField({{ $user->id }}, 'email', $event.target.value)"
+                                            class="w-full min-w-[200px] rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-700 focus:border-blue-400 focus:ring-blue-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                    @endif
+                                </td>
                                 <td class="px-5 py-4">
                                     <select @if($user->id === auth()->id()) disabled title="Tidak dapat mengubah data akun sendiri di sini"
                                         @else @change="updateUserField({{ $user->id }}, 'member_id', $event.target.value)" @endif
@@ -243,11 +347,20 @@
                                 @if (auth()->user()->isSuperAdmin())
                                     <td class="px-5 py-4 text-center">
                                         @if ($user->id !== auth()->id())
-                                            <button type="button" title="Reset sandi akun ini ke sandi baru"
-                                                @click="if (confirm('Reset sandi untuk {{ $user->email }}? Sandi lama akan langsung tidak berlaku.')) resetPassword({{ $user->id }})"
-                                                class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
-                                                Reset Sandi
-                                            </button>
+                                            <div class="flex items-center justify-center gap-1.5">
+                                                <button type="button" title="Reset sandi akun ini ke sandi baru"
+                                                    @click="if (confirm('Reset sandi untuk {{ $user->email }}? Sandi lama akan langsung tidak berlaku.')) resetPassword({{ $user->id }})"
+                                                    class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                                                    Reset Sandi
+                                                </button>
+                                                <button type="button" title="Hapus akun login ini"
+                                                    @click="if (confirm('Hapus akun login \'{{ $user->email }}\'? Data pengurus di Data Pengurus TIDAK ikut terhapus, hanya akses loginnya. Tindakan ini tidak dapat dibatalkan.')) deleteUser({{ $user->id }}, $el)"
+                                                    class="rounded-lg border border-red-200 p-1.5 text-red-500 transition hover:bg-red-50 dark:border-red-800/60 dark:text-red-400 dark:hover:bg-red-500/10">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4 w-4">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         @else
                                             <span class="text-xs text-slate-300 dark:text-slate-600">-</span>
                                         @endif
@@ -348,6 +461,24 @@
                             if (!res.ok) throw new Error(data.message || 'Gagal mereset sandi.');
                             // Sandi baru hanya ditampilkan sekali di sini — segera sampaikan ke pengguna secara langsung/pribadi.
                             this.showNotice(`Sandi baru untuk ${data.email}: ${data.new_password} — segera sampaikan langsung ke pengguna.`, 'success', true);
+                        })
+                        .catch((err) => this.showNotice(err.message, 'error'));
+                },
+
+                deleteUser(userId, buttonEl) {
+                    fetch(`{{ url('roles-management/users') }}/${userId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                            },
+                        })
+                        .then(async (res) => {
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.message || 'Gagal menghapus akun.');
+                            // Baris akun langsung dihapus dari tabel tanpa perlu reload halaman.
+                            buttonEl.closest('tr')?.remove();
+                            this.showNotice('Akun login berhasil dihapus.');
                         })
                         .catch((err) => this.showNotice(err.message, 'error'));
                 },

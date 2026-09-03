@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class RoleManagementController extends Controller
 {
@@ -34,13 +35,28 @@ class RoleManagementController extends Controller
         $users = User::with(['role', 'member.division'])->orderBy('name')->get();
         $members = Member::where('status', 'Aktif')->orderBy('name')->get();
 
+        // Hanya pengurus aktif yang BELUM punya akun login — jadi dropdown
+        // "Buatkan Akun Login" tidak akan pernah menampilkan orang yang
+        // sudah punya akun (mencegah satu pengurus punya 2 akun sekaligus).
+        $membersWithoutAccount = Member::where('status', 'Aktif')
+            ->whereDoesntHave('user')
+            ->orderBy('name')
+            ->get();
+
+        // Peran "Super Admin" sengaja tidak ditawarkan di form pembuatan
+        // akun cepat ini — mencegah akun setingkat Super Admin dibuat tanpa
+        // sengaja lewat jalur pintas.
+        $assignableRoles = $roles->reject(fn ($role) => $role->isSuperAdmin());
+
         return view('roles_management.index', compact(
             'roles',
             'permissionMatrix',
             'divisions',
             'divisionPermissionMatrix',
             'users',
-            'members'
+            'members',
+            'membersWithoutAccount',
+            'assignableRoles'
         ));
     }
 
@@ -152,6 +168,54 @@ class RoleManagementController extends Controller
     }
 
     /**
+     * Membuat akun login baru untuk pengurus yang sudah tercatat di Data
+     * Pengurus tapi belum bisa login. Sandi awal di-generate otomatis (sama
+     * seperti "Reset Sandi") dan hanya ditampilkan SEKALI lewat flash
+     * session setelah redirect — Super Admin bertanggung jawab
+     * menyampaikannya langsung ke pengurus yang bersangkutan.
+     */
+    public function storeUser(Request $request)
+    {
+        abort_unless(Auth::user()->isSuperAdmin(), 403, 'Hanya Super Admin yang dapat membuat akun login baru.');
+
+        $validated = $request->validate([
+            'member_id' => ['required', 'exists:members,id', Rule::unique('users', 'member_id')],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
+            'role_id' => ['required', 'exists:roles,id'],
+        ], [
+            'member_id.unique' => 'Pengurus ini sudah memiliki akun login.',
+        ]);
+
+        $role = Role::findOrFail($validated['role_id']);
+        abort_if($role->isSuperAdmin(), 422, 'Tidak dapat membuat akun dengan peran Super Admin lewat menu ini.');
+
+        $member = Member::findOrFail($validated['member_id']);
+
+        $newPassword = Str::password(10, symbols: false);
+
+        $user = User::create([
+            'name' => $member->name,
+            'email' => $validated['email'],
+            'password' => Hash::make($newPassword),
+            'role_id' => $role->id,
+            'member_id' => $member->id,
+        ]);
+
+        AuditLog::record(
+            'Buat Akun Login',
+            sprintf('Membuat akun login baru untuk pengurus "%s" (%s) dengan peran "%s".', $member->name, $user->email, $role->name)
+        );
+
+        return redirect()->route('roles-management.index')
+            ->with('success', 'Akun login berhasil dibuat.')
+            ->with('generated_account', [
+                'name' => $member->name,
+                'email' => $user->email,
+                'password' => $newPassword,
+            ]);
+    }
+
+    /**
      * Update pemetaan role/member untuk satu akun (dari dropdown di tabel akun).
      * Hanya field yang benar-benar dikirim yang akan diperbarui.
      */
@@ -159,13 +223,23 @@ class RoleManagementController extends Controller
     {
         if ($user->id === Auth::id()) {
             return response()->json([
-                'message' => 'Anda tidak dapat mengubah peran akun Anda sendiri di sini.',
+                'message' => 'Anda tidak dapat mengubah data akun Anda sendiri di sini.',
             ], 422);
+        }
+
+        // Mengganti email login pengguna lain sengaja dibatasi ke Super Admin
+        // saja — field lain (role_id/member_id) tetap terbuka untuk siapa
+        // pun yang punya akses "manage_roles", seperti sebelumnya.
+        if ($request->has('email') && ! Auth::user()->isSuperAdmin()) {
+            return response()->json([
+                'message' => 'Hanya Super Admin yang dapat mengubah email login pengguna lain.',
+            ], 403);
         }
 
         $validated = $request->validate([
             'role_id' => ['sometimes', 'nullable', 'exists:roles,id'],
             'member_id' => ['sometimes', 'nullable', 'exists:members,id'],
+            'email' => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
         ]);
 
         $user->fill($validated);
@@ -174,6 +248,33 @@ class RoleManagementController extends Controller
         AuditLog::record(
             'Ubah Akses Akun',
             sprintf('Memperbarui pemetaan peran/pengurus untuk akun "%s".', $user->email)
+        );
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    /**
+     * Menghapus akun login (mis. akun uji coba). Data pengurus di tabel
+     * `members` TIDAK ikut terhapus — hanya akses loginnya yang dicabut.
+     * Kalau kelak pengurus itu perlu login lagi, tinggal buatkan akun baru
+     * lewat "Buatkan Akun Login" seperti biasa.
+     */
+    public function destroyUser(Request $request, User $user)
+    {
+        abort_unless(Auth::user()->isSuperAdmin(), 403, 'Hanya Super Admin yang dapat menghapus akun login.');
+
+        if ($user->id === Auth::id()) {
+            return response()->json([
+                'message' => 'Anda tidak dapat menghapus akun Anda sendiri.',
+            ], 422);
+        }
+
+        $email = $user->email;
+        $user->delete();
+
+        AuditLog::record(
+            'Hapus Akun Login',
+            sprintf('Menghapus akun login "%s".', $email)
         );
 
         return response()->json(['status' => 'ok']);

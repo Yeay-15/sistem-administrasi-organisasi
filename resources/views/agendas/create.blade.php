@@ -158,6 +158,16 @@
                         class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">{{ old('notes') }}</textarea>
                 </div>
 
+                <div class="mt-5 flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                    <input type="checkbox" id="is_public" name="is_public" value="1"
+                        {{ old('is_public', true) ? 'checked' : '' }}
+                        class="mt-0.5 h-4.5 w-4.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 dark:border-slate-600 dark:bg-slate-800">
+                    <label for="is_public" class="cursor-pointer text-sm">
+                        <span class="block font-medium text-slate-700 dark:text-slate-300">Tampilkan ke publik</span>
+                        <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Jika dicentang, agenda ini muncul di kalender Portal Publik. Matikan untuk agenda internal seperti rapat pembentukan panitia — tetap tercatat di kalender pengurus.</span>
+                    </label>
+                </div>
+
                 <div class="mt-8 flex items-center justify-end gap-3 border-t border-slate-100 pt-6 dark:border-slate-800">
                     <a href="{{ route('agendas.index') }}"
                         class="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Batal</a>

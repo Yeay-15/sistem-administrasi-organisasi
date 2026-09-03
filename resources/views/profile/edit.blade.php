@@ -64,9 +64,18 @@
 
                 <div class="mt-5">
                     <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Email Login</label>
-                    <input type="text" value="{{ $user->email }}" disabled
-                        class="w-full max-w-sm rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-400 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-500">
-                    <p class="mt-1 text-xs text-slate-400">Hubungi Super Admin jika perlu mengganti email login.</p>
+                    @if ($user->isSuperAdmin())
+                        <input type="email" name="email" value="{{ old('email', $user->email) }}" required
+                            class="w-full max-w-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        <p class="mt-1 text-xs text-slate-400">Sebagai Super Admin, Anda dapat mengubah email login sendiri di sini.</p>
+                        @error('email')
+                            <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    @else
+                        <input type="text" value="{{ $user->email }}" disabled
+                            class="w-full max-w-sm rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-400 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-500">
+                        <p class="mt-1 text-xs text-slate-400">Hubungi Super Admin jika perlu mengganti email login.</p>
+                    @endif
                 </div>
 
                 <div class="mt-6 flex justify-end">

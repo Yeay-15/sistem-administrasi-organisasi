@@ -7,12 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class HomeSetting extends Model
 {
     protected $fillable = [
+        'logo_path',
         'hero_image_path',
         'hero_title',
         'hero_subtitle',
         'chairman_name',
         'chairman_photo_path',
         'chairman_message',
+        'instagram_url',
+        'whatsapp_number',
+        'contact_email',
         'aspiration_mode',
     ];
 
@@ -32,9 +36,23 @@ class HomeSetting extends Model
         return static::firstOrCreate(['id' => 1]);
     }
 
+    public function getLogoUrlAttribute(): ?string
+    {
+        return $this->logo_path ? asset('storage/' . $this->logo_path) : null;
+    }
+
     public function getHeroImageUrlAttribute(): ?string
     {
         return $this->hero_image_path ? asset('storage/' . $this->hero_image_path) : null;
+    }
+
+    public function getWhatsappLinkAttribute(): ?string
+    {
+        if (! $this->whatsapp_number) {
+            return null;
+        }
+
+        return 'https://wa.me/' . preg_replace('/\D/', '', $this->whatsapp_number);
     }
 
     public function getChairmanPhotoUrlAttribute(): ?string

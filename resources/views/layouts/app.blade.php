@@ -50,10 +50,15 @@
             class="fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col border-r border-slate-200 bg-white transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 dark:border-slate-800 dark:bg-slate-900 theme-transition">
 
             <div class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200 px-6 dark:border-slate-800">
-                <div
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-sm">
-                    K
-                </div>
+                @if ($homeSettings->logo_url ?? null)
+                    <img src="{{ $homeSettings->logo_url }}" alt="Logo KATIBER"
+                        class="h-9 w-9 shrink-0 rounded-xl object-contain">
+                @else
+                    <div
+                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-sm">
+                        K
+                    </div>
+                @endif
                 <div class="leading-tight">
                     <p class="text-sm font-bold text-slate-800 dark:text-white">Sistem KATIBER</p>
                     <p class="text-[11px] text-slate-400 dark:text-slate-500">Panel Administrasi</p>
@@ -64,6 +69,19 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
+            </div>
+
+            {{-- Tombol kembali ke situs publik --}}
+            <div class="shrink-0 px-3 pt-3">
+                <a href="{{ route('public.home') }}"
+                    class="flex items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:border-navy-200 hover:bg-navy-50 hover:text-navy-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75"
+                        stroke="currentColor" class="h-4.5 w-4.5 shrink-0">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    Lihat Situs Publik
+                </a>
             </div>
 
             <nav class="sidebar-scroll flex-1 space-y-1 overflow-y-auto px-3 py-4">
@@ -153,6 +171,14 @@
                         'icon' => 'trophy',
                     ])
                 @endcan
+                @can('view_leaders')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'leaders.index',
+                        'pattern' => 'leaders.*',
+                        'label' => 'Estafet Kepemimpinan',
+                        'icon' => 'crown',
+                    ])
+                @endcan
                 @can('manage_settings')
                     @include('layouts.partials.nav-item', [
                         'route' => 'settings.edit',
@@ -167,6 +193,7 @@
                         'pattern' => 'aspirations.*',
                         'label' => 'Aspirasi Mahasiswa',
                         'icon' => 'chat',
+                        'badge' => $unreadAspirationsCount ?? null,
                     ])
                 @endcan
 
@@ -213,6 +240,14 @@
                         'icon' => 'key',
                     ])
                 @endcan
+                @if (auth()->user()->isSuperAdmin())
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'backups.index',
+                        'pattern' => 'backups.*',
+                        'label' => 'Cadangan Data',
+                        'icon' => 'archive',
+                    ])
+                @endif
             </nav>
 
             <div class="shrink-0 border-t border-slate-200 p-3 dark:border-slate-800">
@@ -248,6 +283,56 @@
                 </div>
 
                 <div class="flex shrink-0 items-center gap-1.5 md:gap-3">
+                    @can('view_aspirations')
+                        <div class="relative" x-data="{ notifOpen: false }">
+                            <button @click="notifOpen = !notifOpen" @click.outside="notifOpen = false"
+                                class="relative rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                                aria-label="Notifikasi" title="Notifikasi">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75"
+                                    stroke="currentColor" class="h-5 w-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                                </svg>
+                                @if (($unreadAspirationsCount ?? 0) > 0)
+                                    <span
+                                        class="absolute right-1.5 top-1.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                                        {{ $unreadAspirationsCount > 99 ? '99+' : $unreadAspirationsCount }}
+                                    </span>
+                                @endif
+                            </button>
+                            <div x-show="notifOpen" x-cloak x-transition.origin.top.right
+                                class="absolute right-0 z-30 mt-2 w-80 overflow-hidden rounded-xl border border-slate-100 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                                <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+                                    <p class="text-sm font-semibold text-slate-800 dark:text-white">Aspirasi Belum Dibaca</p>
+                                    @if (($unreadAspirationsCount ?? 0) > 0)
+                                        <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-red-600 dark:bg-red-500/10 dark:text-red-400">
+                                            {{ $unreadAspirationsCount }} baru
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="max-h-80 overflow-y-auto">
+                                    @forelse ($latestUnreadAspirations ?? [] as $item)
+                                        <a href="{{ route('aspirations.index') }}"
+                                            class="block border-b border-slate-50 px-4 py-3 transition hover:bg-slate-50 dark:border-slate-800/60 dark:hover:bg-slate-800/60">
+                                            <p class="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                                {{ $item->display_name }}
+                                                <span class="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">{{ $item->category }}</span>
+                                            </p>
+                                            <p class="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">{{ $item->message }}</p>
+                                            <p class="mt-1 text-[11px] text-slate-400 dark:text-slate-500">{{ $item->created_at->diffForHumans() }}</p>
+                                        </a>
+                                    @empty
+                                        <p class="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">Tidak ada aspirasi baru.</p>
+                                    @endforelse
+                                </div>
+                                <a href="{{ route('aspirations.index') }}"
+                                    class="block border-t border-slate-100 px-4 py-2.5 text-center text-xs font-semibold text-blue-600 transition hover:bg-slate-50 dark:border-slate-800 dark:text-blue-400 dark:hover:bg-slate-800/60">
+                                    Lihat Semua Aspirasi
+                                </a>
+                            </div>
+                        </div>
+                    @endcan
+
                     <button @click="toggleDark()"
                         class="rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
                         :aria-label="dark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'"

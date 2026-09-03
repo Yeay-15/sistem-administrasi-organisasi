@@ -16,12 +16,28 @@ class Agenda extends Model
         'person_in_charge',
         'notes',
         'status',
+        'is_public',
+    ];
+
+    protected $casts = [
+        'is_public' => 'boolean',
     ];
 
     // Relasi One-to-Many: 1 Agenda memiliki banyak Absensi
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * Hanya agenda yang boleh ditampilkan ke halaman publik (is_public = true).
+     * Dipakai oleh PublicController — agenda internal seperti "Rapat
+     * Pembentukan Panitia" tetap ada di kalender admin tapi disaring dari
+     * sini.
+     */
+    public function scopePublicOnly($query)
+    {
+        return $query->where('is_public', true);
     }
 
     public function guests()

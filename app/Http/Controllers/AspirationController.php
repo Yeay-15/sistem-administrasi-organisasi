@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Aspiration;
+use App\Exports\AspirationsExport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AspirationController extends Controller
 {
@@ -17,6 +20,16 @@ class AspirationController extends Controller
 
         if ($request->boolean('unread_only')) {
             $query->where('is_read', false);
+        }
+
+        if ($request->export === 'excel') {
+            return Excel::download(new AspirationsExport($query->get()), 'Laporan_Aspirasi_KATIBER.xlsx');
+        }
+
+        if ($request->export === 'pdf') {
+            $aspirations = $query->get();
+            $pdf = Pdf::loadView('exports.aspirations_pdf', compact('aspirations'))->setPaper('a4', 'landscape');
+            return $pdf->download('Laporan_Aspirasi_KATIBER.pdf');
         }
 
         $aspirations = $query->paginate(15)->withQueryString();

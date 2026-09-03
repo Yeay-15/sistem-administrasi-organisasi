@@ -124,9 +124,11 @@
                             toolbar: [
                                 [{ header: [2, 3, false] }],
                                 ['bold', 'italic', 'underline'],
+                                [{ align: [] }],
                                 [{ list: 'ordered' }, { list: 'bullet' }],
+                                ['blockquote'],
                                 ['link', 'image'],
-                                ['clean'],
+                                ['clean'],  
                             ],
                         },
                     });

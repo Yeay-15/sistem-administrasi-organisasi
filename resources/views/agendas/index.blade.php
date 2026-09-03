@@ -198,7 +198,19 @@
                                 <td class="px-5 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $agenda->agenda_code }}
                                 </td>
                                 <td class="px-5 py-4 text-sm font-semibold text-slate-800 dark:text-white">
-                                    {{ $agenda->name }}</td>
+                                    {{ $agenda->name }}
+                                    @unless ($agenda->is_public)
+                                        <span
+                                            class="ml-1.5 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="2" stroke="currentColor" class="h-2.5 w-2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                            </svg>
+                                            Internal
+                                        </span>
+                                    @endunless
+                                </td>
                                 <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">
                                     {{ $agenda->person_in_charge }}</td>
                                 <td class="px-5 py-4 text-center">
@@ -224,6 +236,32 @@
                                                     d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </a>
+                                        @can('manage_agendas')
+                                        <form action="{{ route('agendas.toggle-public', $agenda->id) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            @if ($agenda->is_public)
+                                                <button type="submit" title="Tampil ke publik — klik untuk sembunyikan"
+                                                    class="rounded-lg p-2 text-emerald-600 transition hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                        stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                </button>
+                                            @else
+                                                <button type="submit" title="Disembunyikan dari publik — klik untuk tampilkan"
+                                                    class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 dark:text-slate-500 dark:hover:bg-slate-800">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                        stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                                    </svg>
+                                                </button>
+                                            @endif
+                                        </form>
+                                        @endcan
                                         @can('manage_agendas')
                                         <a href="{{ route('agendas.edit', $agenda->id) }}" title="Edit"
                                             class="rounded-lg p-2 text-amber-600 transition hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10">

@@ -13,6 +13,45 @@
             @csrf
             @method('PUT')
 
+            {{-- ============ LOGO ORGANISASI ============ --}}
+            <div class="theme-transition rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8"
+                x-data="{ preview: @js($setting->logo_url), removed: false }">
+                <h2 class="text-base font-bold text-slate-800 dark:text-white">Logo Organisasi</h2>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Tampil di pojok kiri atas navbar dan di footer seluruh halaman publik.</p>
+
+                <div class="mt-5">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-1.5 dark:border-slate-700 dark:bg-slate-800">
+                            <template x-if="preview && !removed">
+                                <img :src="preview" alt="Preview logo" class="h-full w-full object-contain">
+                            </template>
+                            <template x-if="!preview || removed">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-7 w-7 text-slate-300 dark:text-slate-600">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159M3 8.25V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V8.25M3 8.25l9-6 9 6" />
+                                </svg>
+                            </template>
+                        </div>
+                        <div class="flex-1">
+                            <input type="file" name="logo" accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                                @change="if ($event.target.files.length) { preview = URL.createObjectURL($event.target.files[0]); removed = false }"
+                                class="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-navy-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-navy-800 hover:file:bg-navy-100 dark:text-slate-300 dark:file:bg-slate-800 dark:file:text-navy-400">
+                            <p class="mt-1 text-xs text-slate-400">Disarankan gambar persegi (PNG transparan). Maks. 1MB.</p>
+                            @error('logo')
+                                <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                            @enderror
+
+                            @if ($setting->logo_path)
+                                <label class="mt-2 inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                                    <input type="checkbox" name="remove_logo" value="1" x-model="removed"
+                                        class="rounded border-slate-300 text-red-600 focus:ring-red-500 dark:border-slate-600 dark:bg-slate-800">
+                                    Hapus logo saat ini
+                                </label>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- ============ HERO ============ --}}
             <div class="theme-transition rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8"
                 x-data="{ preview: @js($setting->hero_image_url), removed: false }">
@@ -129,6 +168,42 @@
                     @error('chairman_message')
                         <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                     @enderror
+                </div>
+            </div>
+
+            {{-- ============ KONTAK & MEDIA SOSIAL ============ --}}
+            <div class="theme-transition mt-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+                <h2 class="text-base font-bold text-slate-800 dark:text-white">Kontak & Media Sosial</h2>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Ditampilkan pada bagian "Hubungi Kami" dan "Ikuti Kami" di footer halaman publik.</p>
+
+                <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Nomor WhatsApp</label>
+                        <input type="text" name="whatsapp_number" value="{{ old('whatsapp_number', $setting->whatsapp_number) }}"
+                            placeholder="Contoh: 6281234567890"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">
+                        @error('whatsapp_number')
+                            <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Email Resmi</label>
+                        <input type="email" name="contact_email" value="{{ old('contact_email', $setting->contact_email) }}"
+                            placeholder="Contoh: katiber@gmail.com"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">
+                        @error('contact_email')
+                            <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Tautan Instagram</label>
+                        <input type="text" name="instagram_url" value="{{ old('instagram_url', $setting->instagram_url) }}"
+                            placeholder="Contoh: https://instagram.com/katiber.lhokacut"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">
+                        @error('instagram_url')
+                            <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
 
