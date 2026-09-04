@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\UploadBackupToGoogleDrive;
 use App\Models\Aspiration;
+use App\Models\FeaturedEvent;
 use App\Models\HomeSetting;
 use App\Models\User;
 use App\Support\DatabaseDumpBinaryResolver;
@@ -99,6 +100,20 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $view->with('homeSettings', $homeSettings);
+        });
+
+        // Pita pengumuman Event Unggulan (mis. "Pendaftaran KATIBER Cup
+        // 2026 Telah Dibuka!") — ditarget ke 'layouts.public' saja karena
+        // hanya dipakai di markup layout itu sendiri, muncul di SEMUA
+        // halaman publik selama admin menyalakan show_announcement_bar
+        // pada sebuah event aktif. Dibungkus try/catch dengan alasan yang
+        // sama seperti composer $homeSettings di atas.
+        View::composer('layouts.public', function ($view) {
+            try {
+                $view->with('announcementEvent', FeaturedEvent::withAnnouncementBar()->latest('event_start_date')->first());
+            } catch (\Throwable $e) {
+                $view->with('announcementEvent', null);
+            }
         });
 
         // Badge "Aspirasi Mahasiswa" di sidebar + dropdown notifikasi di

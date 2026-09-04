@@ -6,6 +6,7 @@ use App\Models\Achievement;
 use App\Models\Agenda;
 use App\Models\Aspiration;
 use App\Models\Division;
+use App\Models\FeaturedEvent;
 use App\Models\Gallery;
 use App\Models\HomeSetting;
 use App\Models\Member;
@@ -18,6 +19,12 @@ class PublicController extends Controller
     public function home()
     {
         $settings = HomeSetting::current();
+
+        // Event unggulan yang sedang ditandai admin untuk tampil sebagai
+        // hero banner beranda (mis. KATIBER Cup menjelang & selama acara
+        // berlangsung). Kosong secara default — beranda kembali normal
+        // begitu admin mematikan switch "Tampil di Beranda".
+        $featuredEvent = FeaturedEvent::onHomepage()->latest('event_start_date')->first();
 
         // Dipisah agar Beranda menampilkan Laporan Kegiatan dan Artikel & Berita
         // sebagai dua bagian yang berbeda (mengikuti pola situs Ormawa UT),
@@ -36,12 +43,35 @@ class PublicController extends Controller
 
         return view('public.home', compact(
             'settings',
+            'featuredEvent',
             'latestReports',
             'latestArticles',
             'upcomingAgendas',
             'achievements',
             'totalMembers'
         ));
+    }
+
+    // Event Unggulan > Daftar (aktif & arsip)
+    public function events()
+    {
+        $activeEvents = FeaturedEvent::active()->orderBy('event_start_date')->get();
+        $archivedEvents = FeaturedEvent::where('status', 'archived')
+            ->orderByDesc('event_start_date')
+            ->paginate(9);
+
+        return view('public.events.index', compact('activeEvents', 'archivedEvents'));
+    }
+
+    // Event Unggulan > Halaman Detail (microsite)
+    public function eventShow(FeaturedEvent $event)
+    {
+        abort_unless(in_array($event->status, ['active', 'archived']), 404);
+
+        $bracketRounds = $event->has_bracket ? $event->bracketRounds() : collect();
+        $updates = $event->updates()->published()->get();
+
+        return view('public.events.show', compact('event', 'bracketRounds', 'updates'));
     }
 
     // Profil > Tentang Kami

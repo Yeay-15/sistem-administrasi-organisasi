@@ -71,6 +71,10 @@ class RolePermissionSeeder extends Seeder
 
             ['slug' => 'view_aspirations', 'label' => 'Lihat Aspirasi Mahasiswa', 'group' => 'Konten'],
             ['slug' => 'delete_aspirations', 'label' => 'Hapus Aspirasi Mahasiswa', 'group' => 'Konten'],
+
+            ['slug' => 'view_events', 'label' => 'Lihat Event Unggulan', 'group' => 'Konten'],
+            ['slug' => 'manage_events', 'label' => 'Kelola Event Unggulan', 'group' => 'Konten'],
+            ['slug' => 'delete_events', 'label' => 'Hapus Event Unggulan', 'group' => 'Konten'],
         ];
 
         foreach ($permissions as $permission) {

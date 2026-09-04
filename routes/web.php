@@ -24,6 +24,10 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\LeaderController;
 use App\Http\Controllers\AspirationController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventBracketController;
+use App\Http\Controllers\EventMatchController;
+use App\Http\Controllers\EventUpdateController;
 
 // ============ SITEMAP.XML & ROBOTS.TXT (SEO) ============
 // Di luar grup "track.visit" — ini feed untuk mesin pencari, bukan halaman
@@ -46,6 +50,12 @@ Route::middleware('track.visit')->group(function () {
     Route::get('/profil/struktur-pengurus', [PublicController::class, 'structure'])->name('public.about.structure');
 
     Route::get('/agenda-kegiatan', [PublicController::class, 'agenda'])->name('public.agenda.index');
+
+    // Event Unggulan — microsite untuk acara besar seperti KATIBER Cup.
+    // Rute sengaja diletakkan sebelum rute /media/* & lain-lain yang pakai
+    // parameter slug serupa, supaya tidak tertukar oleh router.
+    Route::get('/event', [PublicController::class, 'events'])->name('public.events.index');
+    Route::get('/event/{event:slug}', [PublicController::class, 'eventShow'])->name('public.events.show');
 
     Route::get('/media/artikel-berita', [PublicController::class, 'news'])->name('public.news.index');
     Route::get('/media/artikel-berita/{post:slug}', [PublicController::class, 'newsShow'])->name('public.news.show');
@@ -147,6 +157,34 @@ Route::middleware('auth')->group(function () {
     Route::resource('leaders', LeaderController::class)->only(['index'])->middleware('can:view_leaders');
     Route::resource('leaders', LeaderController::class)->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_leaders');
     Route::resource('leaders', LeaderController::class)->only(['destroy'])->middleware('can:delete_leaders');
+
+    // Modul Event Unggulan: highlight beranda + microsite untuk acara besar
+    // (mis. KATIBER Cup). Mengikuti pola 3-tier yang sama seperti modul CMS
+    // lainnya. Tidak ada 'show' publik lewat auth group — halaman publik
+    // dilayani PublicController::eventShow di atas.
+    Route::resource('events', EventController::class)->only(['index'])->middleware('can:view_events');
+    Route::resource('events', EventController::class)->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_events');
+    Route::resource('events', EventController::class)->only(['destroy'])->middleware('can:delete_events');
+    Route::patch('/events/{event}/toggle-homepage', [EventController::class, 'toggleHomepage'])
+        ->name('events.toggle-homepage')->middleware('can:manage_events');
+    Route::patch('/events/{event}/toggle-announcement', [EventController::class, 'toggleAnnouncement'])
+        ->name('events.toggle-announcement')->middleware('can:manage_events');
+
+    Route::middleware('can:view_events')->group(function () {
+        Route::get('/events/{event}/bagan', [EventBracketController::class, 'show'])->name('events.bracket');
+        Route::get('/events/{event}/info-terkini', [EventUpdateController::class, 'index'])->name('events.updates.index');
+    });
+    Route::middleware('can:manage_events')->group(function () {
+        Route::post('/events/{event}/bagan/tim', [EventBracketController::class, 'storeTeam'])->name('events.bracket.teams.store');
+        Route::delete('/events/{event}/bagan/tim/{team}', [EventBracketController::class, 'destroyTeam'])->name('events.bracket.teams.destroy');
+        Route::post('/events/{event}/bagan/generate', [EventBracketController::class, 'generate'])->name('events.bracket.generate');
+        Route::delete('/events/{event}/bagan/reset', [EventBracketController::class, 'reset'])->name('events.bracket.reset');
+        Route::patch('/events-matches/{match}', [EventMatchController::class, 'update'])->name('events.matches.update');
+
+        Route::post('/events/{event}/info-terkini', [EventUpdateController::class, 'store'])->name('events.updates.store');
+        Route::patch('/events/{event}/info-terkini/{update}', [EventUpdateController::class, 'update'])->name('events.updates.update');
+        Route::delete('/events/{event}/info-terkini/{update}', [EventUpdateController::class, 'destroy'])->name('events.updates.destroy');
+    });
 
     Route::get('/aspirasi', [AspirationController::class, 'index'])
         ->name('aspirations.index')->middleware('can:view_aspirations');

@@ -4,6 +4,63 @@
 @section('meta_description', 'Portal resmi KATIBER — Keluarga Mahasiswa Tebing Tinggi Bersatu, wadah silaturahmi dan pengembangan diri mahasiswa asal Tebing Tinggi di Lhokseumawe, Aceh Utara.')
 
 @section('content')
+    {{-- ============ HERO EVENT UNGGULAN ============
+         Tampil HANYA saat admin menandai satu event aktif untuk "tampil di
+         beranda" (lihat PublicController::home() & tombol switch di daftar
+         Event Unggulan pada dashboard admin). Diletakkan di atas Hero
+         organisasi supaya acara besar seperti KATIBER Cup langsung jadi
+         pusat perhatian saat beranda dibuka, tapi beranda kembali normal
+         otomatis begitu switch-nya dimatikan atau event diarsipkan. --}}
+    @if ($featuredEvent)
+        <section class="relative overflow-hidden border-t-4 border-amber-400 bg-gradient-to-br from-navy-800 via-navy-900 to-navy-950">
+            <div class="navy-dot-pattern absolute inset-0"></div>
+            <div class="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-amber-400/10 blur-3xl"></div>
+            <div class="relative mx-auto flex max-w-6xl flex-col items-center gap-8 px-4 py-14 sm:px-6 lg:flex-row lg:px-8 lg:py-16">
+                @if ($featuredEvent->poster_url)
+                    <img src="{{ $featuredEvent->poster_url }}" alt="Poster {{ $featuredEvent->title }}"
+                        class="reveal h-56 w-auto shrink-0 rounded-xl object-cover shadow-2xl ring-4 ring-amber-400/30 sm:h-64">
+                @endif
+                <div class="reveal text-center lg:text-left">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-400 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-navy-950">
+                        🏆 Event Unggulan
+                    </span>
+                    <h2 class="mt-4 text-3xl font-extrabold leading-tight text-white sm:text-4xl">
+                        {{ $featuredEvent->title }}
+                    </h2>
+                    @if ($featuredEvent->short_description)
+                        <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-navy-100 sm:text-base lg:mx-0">
+                            {{ $featuredEvent->short_description }}
+                        </p>
+                    @endif
+                    <p class="mt-3 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-sm font-semibold text-navy-100 lg:justify-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                        {{ $featuredEvent->event_start_date->translatedFormat('d F Y') }}
+                        @if ($featuredEvent->event_end_date && ! $featuredEvent->event_end_date->isSameDay($featuredEvent->event_start_date))
+                            &ndash; {{ $featuredEvent->event_end_date->translatedFormat('d F Y') }}
+                        @endif
+                        @if ($featuredEvent->location)
+                            <span class="mx-1">&bull;</span> {{ $featuredEvent->location }}
+                        @endif
+                    </p>
+                    <div class="mt-6 flex flex-wrap justify-center gap-3 lg:justify-start">
+                        <a href="{{ route('public.events.show', $featuredEvent) }}"
+                            class="inline-flex items-center gap-2 rounded-lg bg-amber-400 px-6 py-3 text-sm font-bold text-navy-950 shadow-lg shadow-amber-400/20 transition hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-xl hover:shadow-amber-400/30">
+                            Lihat Info Lengkap
+                        </a>
+                        @if ($featuredEvent->registration_url)
+                            <a href="{{ $featuredEvent->registration_url }}" target="_blank" rel="noopener"
+                                class="inline-flex items-center gap-2 rounded-lg border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10">
+                                {{ $featuredEvent->cta_label }}
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- ============ HERO ============ --}}
     <section class="relative overflow-hidden bg-gradient-to-br from-navy-800 via-navy-900 to-navy-950">
         @if ($settings->hero_image_url)

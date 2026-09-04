@@ -66,6 +66,25 @@
         }
     }">
 
+    {{-- ============ PITA PENGUMUMAN EVENT UNGGULAN ============
+         Muncul di ATAS navbar di semua halaman publik, hanya selama admin
+         menyalakan show_announcement_bar pada satu event aktif (lihat
+         AppServiceProvider -> composer 'layouts.public'). Dibuat "sticky
+         top-0" bersanding dengan header (yang juga sticky) lewat urutan DOM
+         normal, jadi pita ini otomatis berada di atas header saat scroll. --}}
+    @if ($announcementEvent ?? null)
+        <a href="{{ route('public.events.show', $announcementEvent) }}"
+            class="theme-transition sticky top-0 z-50 flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2 text-center text-xs font-semibold text-navy-950 transition hover:from-amber-300 hover:to-amber-400 sm:text-sm">
+            <span>🏆 {{ $announcementEvent->title }}@if ($announcementEvent->short_description) — {{ Str::limit($announcementEvent->short_description, 60) }}@endif</span>
+            <span class="hidden items-center gap-0.5 underline underline-offset-2 sm:inline-flex">Lihat detail
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="h-3.5 w-3.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+            </span>
+        </a>
+    @endif
+
     {{-- ============ NAVBAR ============ --}}
     <header
         class="theme-transition sticky top-0 z-40 border-b border-slate-100 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">

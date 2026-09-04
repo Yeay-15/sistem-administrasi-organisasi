@@ -163,6 +163,14 @@
                         'icon' => 'photo',
                     ])
                 @endcan
+                @can('view_events')
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'events.index',
+                        'pattern' => 'events.*',
+                        'label' => 'Event Unggulan',
+                        'icon' => 'star',
+                    ])
+                @endcan
                 @can('view_achievements')
                     @include('layouts.partials.nav-item', [
                         'route' => 'achievements.index',
