@@ -52,7 +52,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75"
                                 stroke="currentColor" class="h-3.5 w-3.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.106A12.318 12.318 0 008.624 15c-2.331 0-4.512.645-6.374 1.766L2.25 17c0 1.6.5 3.086 1.352 4.31M15 19.128V21m-6.75-3.235A4.125 4.125 0 0112 14.25a4.125 4.125 0 013.75 3.515M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                             </svg>
                             Kepengurusan
                         </button>
@@ -93,7 +93,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75"
                                 stroke="currentColor" class="h-5.5 w-5.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.106A12.318 12.318 0 008.624 15c-2.331 0-4.512.645-6.374 1.766L2.25 17c0 1.6.5 3.086 1.352 4.31M15 19.128V21m-6.75-3.235A4.125 4.125 0 0112 14.25a4.125 4.125 0 013.75 3.515M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                             </svg>
                         </div>
                     </div>
@@ -202,8 +202,7 @@
                             <h4 class="mb-3 flex items-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.75" stroke="currentColor" class="mr-2 h-4.5 w-4.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                                 </svg>
                                 Surat Masuk Terbaru
                             </h4>
@@ -230,8 +229,7 @@
                             <h4 class="mb-3 flex items-center text-sm font-semibold text-purple-600 dark:text-purple-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.75" stroke="currentColor" class="mr-2 h-4.5 w-4.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                                 </svg>
                                 Surat Keluar Terbaru
                             </h4>
@@ -265,10 +263,11 @@
                 {{-- Widget 1: Agenda Terdekat --}}
                 <div
                     class="theme-transition rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                    <div
+                        class="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                         <h3 class="flex items-center text-base font-bold text-slate-800 dark:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75"
-                                stroke="currentColor" class="mr-2 h-5 w-5 text-emerald-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.75" stroke="currentColor" class="mr-2 h-5 w-5 text-emerald-500">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                             </svg>
@@ -310,10 +309,11 @@
                 {{-- Widget 2: Radar Pembinaan Aktif --}}
                 <div
                     class="theme-transition rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                    <div
+                        class="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
                         <h3 class="flex items-center text-base font-bold text-slate-800 dark:text-white">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75"
-                                stroke="currentColor" class="mr-2 h-5 w-5 text-red-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.75" stroke="currentColor" class="mr-2 h-5 w-5 text-red-500">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
@@ -376,11 +376,12 @@
                         </div>
                         <div
                             class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75"
-                                stroke="currentColor" class="h-5.5 w-5.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.75" stroke="currentColor" class="h-5.5 w-5.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
                     </div>
@@ -397,8 +398,8 @@
                         </div>
                         <div
                             class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75"
-                                stroke="currentColor" class="h-5.5 w-5.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.75" stroke="currentColor" class="h-5.5 w-5.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                             </svg>
@@ -417,8 +418,8 @@
                         </div>
                         <div
                             class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75"
-                                stroke="currentColor" class="h-5.5 w-5.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.75" stroke="currentColor" class="h-5.5 w-5.5">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
@@ -595,7 +596,8 @@
                         chart.options.plugins.legend.labels.color = dark ? '#cbd5e1' : '#475569';
                     } else if (type === 'line') {
                         chart.options.scales.y.ticks.color = dark ? '#94a3b8' : '#64748b';
-                        chart.options.scales.y.grid.color = dark ? 'rgba(148,163,184,0.1)' : 'rgba(148,163,184,0.2)';
+                        chart.options.scales.y.grid.color = dark ? 'rgba(148,163,184,0.1)' :
+                            'rgba(148,163,184,0.2)';
                         chart.options.scales.x.ticks.color = dark ? '#94a3b8' : '#64748b';
                     }
                     chart.update();

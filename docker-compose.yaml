@@ -1,0 +1,12 @@
+services:
+  app:
+    # Nama image sudah diperbarui ke fpm-nginx
+    image: serversideup/php:8.3-fpm-nginx
+    container_name: katiber_app
+    restart: unless-stopped
+    ports:
+      - "8000:8080"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - PHP_OPCACHE_ENABLE=1
