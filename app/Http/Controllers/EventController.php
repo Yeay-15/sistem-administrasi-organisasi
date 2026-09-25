@@ -43,7 +43,6 @@ class EventController extends Controller
             'registration_url' => $validated['registration_url'] ?? null,
             'cta_label' => $validated['cta_label'] ?? 'Daftar Sekarang',
             'has_bracket' => $request->boolean('has_bracket'),
-            'team_count' => $request->boolean('has_bracket') ? $validated['team_count'] : null,
             'status' => $validated['status'],
             'show_on_homepage' => $request->boolean('show_on_homepage'),
             'show_announcement_bar' => $request->boolean('show_announcement_bar'),
@@ -57,7 +56,7 @@ class EventController extends Controller
 
         return redirect()->route('events.index')
             ->with('success', 'Event "' . $event->title . '" berhasil dibuat.' . ($event->has_bracket
-                ? ' Lanjutkan dengan menambahkan tim di menu "Kelola Bagan".'
+                ? ' Lanjutkan dengan menambahkan tim &amp; grup di menu "Kelola Bagan".'
                 : ''));
     }
 
@@ -79,20 +78,11 @@ class EventController extends Controller
             'event_end_date' => $validated['event_end_date'] ?? null,
             'registration_url' => $validated['registration_url'] ?? null,
             'cta_label' => $validated['cta_label'] ?? 'Daftar Sekarang',
+            'has_bracket' => $request->boolean('has_bracket'),
             'status' => $validated['status'],
             'show_on_homepage' => $request->boolean('show_on_homepage'),
             'show_announcement_bar' => $request->boolean('show_announcement_bar'),
         ];
-
-        // has_bracket & team_count sengaja TIDAK bisa diubah lagi lewat form
-        // ini begitu event sudah dibuat & bagan sudah digenerate — mengubah
-        // ukuran bagan di tengah jalan akan merusak seluruh struktur
-        // pertandingan yang sudah diisi. Kalau memang keliru, buat ulang
-        // event baru.
-        if (! $event->has_bracket) {
-            $data['has_bracket'] = $request->boolean('has_bracket');
-            $data['team_count'] = $request->boolean('has_bracket') ? $validated['team_count'] : null;
-        }
 
         if ($validated['title'] !== $event->title) {
             $data['slug'] = $this->generateUniqueSlug($validated['title'], $event->id);
@@ -162,7 +152,6 @@ class EventController extends Controller
             'registration_url' => ['nullable', 'url', 'max:255'],
             'cta_label' => ['nullable', 'string', 'max:50'],
             'has_bracket' => ['nullable', 'boolean'],
-            'team_count' => ['required_if:has_bracket,1', 'nullable', 'integer', 'in:' . implode(',', FeaturedEvent::TEAM_COUNTS)],
             'status' => ['required', 'in:draft,active,archived'],
             'poster' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
             'remove_poster' => ['nullable', 'boolean'],

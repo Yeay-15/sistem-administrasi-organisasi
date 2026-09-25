@@ -109,32 +109,16 @@
     </div>
 </div>
 
-<div class="mt-6 rounded-xl border border-slate-200 p-4 dark:border-slate-700" x-data="{ hasBracket: {{ old('has_bracket', $event->has_bracket ?? false) ? 'true' : 'false' }} }">
+<div class="mt-6 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
     <label class="flex items-center gap-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300">
-        <input type="checkbox" name="has_bracket" value="1" x-model="hasBracket"
-            {{ isset($event) && $event->has_bracket ? 'disabled' : '' }}
+        <input type="checkbox" name="has_bracket" value="1"
             {{ old('has_bracket', $event->has_bracket ?? false) ? 'checked' : '' }}
             class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-        Event ini berbentuk turnamen dengan bagan pertandingan (mis. futsal)
+        Event ini berbentuk turnamen (mis. futsal) — pakai fase grup, klasemen &amp; babak gugur
     </label>
-    @if (isset($event) && $event->has_bracket)
-        <input type="hidden" name="has_bracket" value="1">
-        <p class="mt-1.5 text-xs text-slate-400">Ukuran bagan tidak bisa diubah lagi setelah dibuat. Kelola tim &amp; skor lewat menu "Kelola Bagan" di daftar event.</p>
-    @endif
-
-    <div x-show="hasBracket" x-cloak class="mt-4">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Jumlah Tim/Slot Bagan</label>
-        <select name="team_count" {{ isset($event) && $event->has_bracket ? 'disabled' : '' }}
-            class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-            @foreach (\App\Models\FeaturedEvent::TEAM_COUNTS as $count)
-                <option value="{{ $count }}" {{ (int) old('team_count', $event->team_count ?? 32) === $count ? 'selected' : '' }}>{{ $count }} Tim</option>
-            @endforeach
-        </select>
-        @error('team_count')
-            <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
-        @enderror
-    </div>
+    <p class="mt-1.5 text-xs text-slate-400">Jumlah tim, pembagian grup, dan pasangan pertandingan diatur belakangan lewat menu "Kelola Bagan" di daftar event — tidak perlu ditentukan di sini, dan bisa menyesuaikan berapa pun tim yang mendaftar.</p>
 </div>
+
 
 <div class="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
     <div>

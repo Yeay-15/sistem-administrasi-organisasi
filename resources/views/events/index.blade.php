@@ -59,8 +59,8 @@
                         @endif
                     </p>
                     @if ($event->has_bracket)
-                        <p class="mt-1.5 inline-flex w-fit items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-400">
-                            🏆 Bagan {{ $event->team_count }} Tim &bull; {{ $event->teams_count }}/{{ $event->team_count }} terdaftar
+                        <p class="mt-1.5 inline-flex w-fit items-center gap-1 rounded-full bg-navy-50 px-2 py-0.5 text-[11px] font-semibold text-navy-700 dark:bg-navy-500/15 dark:text-navy-400">
+                            🏆 Turnamen &bull; {{ $event->teams_count }} tim terdaftar
                         </p>
                     @endif
 

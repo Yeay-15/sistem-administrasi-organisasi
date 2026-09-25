@@ -9,6 +9,7 @@ class EventTeam extends Model
 {
     protected $fillable = [
         'featured_event_id',
+        'event_group_id',
         'name',
         'logo_path',
         'seed',
@@ -17,6 +18,11 @@ class EventTeam extends Model
     public function featuredEvent(): BelongsTo
     {
         return $this->belongsTo(FeaturedEvent::class);
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(EventGroup::class, 'event_group_id');
     }
 
     public function getLogoUrlAttribute(): ?string

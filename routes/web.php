@@ -177,8 +177,13 @@ Route::middleware('auth')->group(function () {
     Route::middleware('can:manage_events')->group(function () {
         Route::post('/events/{event}/bagan/tim', [EventBracketController::class, 'storeTeam'])->name('events.bracket.teams.store');
         Route::delete('/events/{event}/bagan/tim/{team}', [EventBracketController::class, 'destroyTeam'])->name('events.bracket.teams.destroy');
-        Route::post('/events/{event}/bagan/generate', [EventBracketController::class, 'generate'])->name('events.bracket.generate');
-        Route::delete('/events/{event}/bagan/reset', [EventBracketController::class, 'reset'])->name('events.bracket.reset');
+        Route::patch('/events/{event}/bagan/tim/{team}/grup', [EventBracketController::class, 'assignTeamGroup'])->name('events.bracket.teams.assign-group');
+
+        Route::post('/events/{event}/bagan/grup', [EventBracketController::class, 'storeGroup'])->name('events.bracket.groups.store');
+        Route::delete('/events/{event}/bagan/grup/{group}', [EventBracketController::class, 'destroyGroup'])->name('events.bracket.groups.destroy');
+
+        Route::post('/events/{event}/bagan/pertandingan', [EventBracketController::class, 'storeMatch'])->name('events.bracket.matches.store');
+        Route::delete('/events/{event}/bagan/pertandingan/{match}', [EventBracketController::class, 'destroyMatch'])->name('events.bracket.matches.destroy');
         Route::patch('/events-matches/{match}', [EventMatchController::class, 'update'])->name('events.matches.update');
 
         Route::post('/events/{event}/info-terkini', [EventUpdateController::class, 'store'])->name('events.updates.store');

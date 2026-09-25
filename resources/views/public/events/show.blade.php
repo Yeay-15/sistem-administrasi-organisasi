@@ -53,10 +53,7 @@
             </div>
         @endif
 
-        {{-- ============ INFO TERKINI ============
-             Gaya timeline mengikuti pola "Estafet Kepemimpinan" di halaman
-             Profil: garis vertikal gradasi navy, ikon bulat ber-ring putih,
-             kartu putih, dan badge navy — item terbaru ditandai gold. --}}
+        {{-- ============ INFO TERKINI ============ --}}
         @if ($updates->isNotEmpty())
             <div class="reveal mt-14">
                 <h2 class="mb-5 text-lg font-bold text-slate-800 dark:text-white">📣 Info Terkini</h2>
@@ -89,23 +86,71 @@
             </div>
         @endif
 
-        {{-- ============ BAGAN TURNAMEN ============ --}}
-        @if ($event->has_bracket && $bracketRounds->isNotEmpty())
+        {{-- ============ FASE GRUP: KLASEMEN ============ --}}
+        @if ($groupsWithStandings->isNotEmpty())
             <div class="reveal mt-14">
-                <h2 class="mb-5 text-lg font-bold text-slate-800 dark:text-white">🏆 Bagan Pertandingan</h2>
-                <div class="theme-transition overflow-x-auto rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <div class="flex min-w-max items-start gap-6">
-                        @foreach ($bracketRounds as $roundData)
-                            <div class="w-60 shrink-0">
-                                <h3 class="mb-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ $roundData['label'] }}</h3>
-                                <div class="flex h-full flex-col justify-around gap-6">
-                                    @foreach ($roundData['matches'] as $match)
+                <h2 class="mb-5 text-lg font-bold text-slate-800 dark:text-white">📊 Klasemen Grup</h2>
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    @foreach ($groupsWithStandings as $data)
+                        @php [$group, $standings] = [$data['group'], $data['standings']]; @endphp
+                        <div class="theme-transition rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                            <h3 class="mb-3 text-sm font-bold text-navy-800 dark:text-navy-300">{{ $group->name }}</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-xs">
+                                    <thead>
+                                        <tr class="border-b border-slate-100 text-left text-slate-400 dark:border-slate-800">
+                                            <th class="py-1.5 pr-2 font-semibold">Tim</th>
+                                            <th class="px-1 py-1.5 text-center font-semibold">M</th>
+                                            <th class="px-1 py-1.5 text-center font-semibold">S</th>
+                                            <th class="px-1 py-1.5 text-center font-semibold">K</th>
+                                            <th class="px-1 py-1.5 text-center font-semibold">SG</th>
+                                            <th class="px-1 py-1.5 text-center font-semibold">Poin</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse ($standings as $i => $row)
+                                            <tr class="border-b border-slate-50 dark:border-slate-800/60 {{ $i < 2 ? 'bg-amber-50/50 dark:bg-amber-500/5' : '' }}">
+                                                <td class="py-1.5 pr-2 font-semibold text-slate-700 dark:text-slate-200">{{ $row['team']->name }}</td>
+                                                <td class="px-1 py-1.5 text-center text-slate-500 dark:text-slate-400">{{ $row['won'] }}</td>
+                                                <td class="px-1 py-1.5 text-center text-slate-500 dark:text-slate-400">{{ $row['draw'] }}</td>
+                                                <td class="px-1 py-1.5 text-center text-slate-500 dark:text-slate-400">{{ $row['lost'] }}</td>
+                                                <td class="px-1 py-1.5 text-center text-slate-500 dark:text-slate-400">{{ $row['gd'] > 0 ? '+' : '' }}{{ $row['gd'] }}</td>
+                                                <td class="px-1 py-1.5 text-center font-bold text-navy-800 dark:text-navy-300">{{ $row['points'] }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="6" class="py-4 text-center text-slate-400">Belum ada data.</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                            @if ($group->matches->isNotEmpty())
+                                <div class="mt-4 space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+                                    @foreach ($group->matches as $match)
                                         @include('events._match-card', ['match' => $match, 'editable' => false])
                                     @endforeach
                                 </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        {{-- ============ BABAK GUGUR ============ --}}
+        @if ($knockoutStages->isNotEmpty())
+            <div class="reveal mt-14">
+                <h2 class="mb-5 text-lg font-bold text-slate-800 dark:text-white">🏆 Babak Gugur</h2>
+                <div class="space-y-6">
+                    @foreach ($knockoutStages as $stageData)
+                        <div>
+                            <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ $stageData['label'] }}</h3>
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                @foreach ($stageData['matches'] as $match)
+                                    @include('events._match-card', ['match' => $match, 'editable' => false])
+                                @endforeach
                             </div>
-                        @endforeach
-                    </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         @endif

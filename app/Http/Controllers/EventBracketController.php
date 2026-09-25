@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EventGroup;
 use App\Models\EventMatch;
 use App\Models\EventTeam;
 use App\Models\FeaturedEvent;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -14,43 +14,44 @@ use Illuminate\Support\Str;
 class EventBracketController extends Controller
 {
     /**
-     * Halaman "Kelola Bagan" — daftar tim yang sudah didaftarkan, form
-     * tambah tim, tombol generate bagan, dan (jika bagan sudah ada)
-     * tampilan bagan yang bisa diisi skornya langsung dari sini.
+     * Halaman "Kelola Bagan" — kelola grup, daftar tim (+ penempatan ke
+     * grup), klasemen otomatis per grup, dan daftar pertandingan (fase
+     * grup maupun babak gugur) yang seluruhnya diinput manual oleh admin.
+     * Tidak ada jumlah tim baku (8/16/32/64) — jumlah tim & grup mengikuti
+     * berapa yang benar-benar mendaftar & mekanisme dari federasi.
      */
     public function show(FeaturedEvent $event)
     {
         abort_unless($event->has_bracket, 404);
 
-        $teams = $event->teams()->get();
-        $bracketRounds = $event->bracketRounds();
+        $groups = $event->groups()->withCount('teams')->get();
+        $groupsWithStandings = $event->groupsWithStandings();
+        $knockoutStages = $event->knockoutMatchesByStage();
+        $allTeams = $event->teams;
 
-        return view('events.bracket', compact('event', 'teams', 'bracketRounds'));
+        return view('events.bracket', compact(
+            'event', 'groups', 'groupsWithStandings', 'knockoutStages', 'allTeams'
+        ));
     }
+
+    // ==================== TIM ====================
 
     public function storeTeam(Request $request, FeaturedEvent $event)
     {
         abort_unless($event->has_bracket, 404);
         Gate::authorize('manage_events');
 
-        $currentCount = $event->teams()->count();
-
-        if ($currentCount >= $event->team_count) {
-            return back()->with('error', 'Jumlah tim sudah mencapai batas (' . $event->team_count . ' tim). Hapus salah satu tim dulu jika ingin menggantinya.');
-        }
-
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:1024'],
+            'event_group_id' => ['nullable', 'integer', 'exists:event_groups,id'],
         ]);
 
         $data = [
             'featured_event_id' => $event->id,
             'name' => $validated['name'],
-            // Nomor urut sekadar penanda tim di daftar — TIDAK menentukan
-            // pasangan pertandingan (pairing babak pertama diisi manual
-            // oleh admin sesuai hasil undian/keputusan federasi).
-            'seed' => $currentCount + 1,
+            'event_group_id' => $validated['event_group_id'] ?? null,
+            'seed' => $event->teams()->count() + 1,
         ];
 
         if ($request->hasFile('logo')) {
@@ -68,71 +69,126 @@ class EventBracketController extends Controller
         Gate::authorize('manage_events');
         abort_unless($team->featured_event_id === $event->id, 404);
 
-        if ($event->matches()->exists()) {
-            return back()->with('error', 'Bagan sudah digenerate — hapus/reset bagan dulu sebelum mengubah daftar tim.');
-        }
-
         if ($team->logo_path && Storage::disk('public')->exists($team->logo_path)) {
             Storage::disk('public')->delete($team->logo_path);
         }
 
         $team->delete();
 
-        // Rapikan ulang nomor seed supaya tetap berurutan tanpa celah.
-        $event->teams()->orderBy('seed')->get()->values()->each(function ($t, $i) {
-            $t->update(['seed' => $i + 1]);
-        });
-
         return back()->with('success', 'Tim "' . $team->name . '" berhasil dihapus.');
     }
 
     /**
-     * Membuat seluruh struktur pertandingan (babak pertama sampai final)
-     * dalam keadaan KOSONG — tanpa pasangan tim otomatis. Pemasangan
-     * (siapa lawan siapa) untuk babak pertama diisi manual oleh admin lewat
-     * halaman Kelola Bagan, karena biasanya sudah ditentukan langsung oleh
-     * federasi/panitia penyelenggara turnamen, bukan diundi oleh sistem.
+     * Pindahkan satu tim ke grup tertentu (atau lepas dari grup lewat
+     * opsi "Belum ada grup") — dipanggil dari dropdown per baris tim.
      */
-    public function generate(FeaturedEvent $event)
+    public function assignTeamGroup(Request $request, FeaturedEvent $event, EventTeam $team)
     {
         Gate::authorize('manage_events');
-        abort_unless($event->has_bracket, 404);
+        abort_unless($team->featured_event_id === $event->id, 404);
 
-        $teamCount = $event->teams()->count();
+        $validated = $request->validate([
+            'event_group_id' => ['nullable', 'integer', 'exists:event_groups,id'],
+        ]);
 
-        if ($teamCount !== $event->team_count) {
-            return back()->with('error', 'Jumlah tim (' . $teamCount . ') belum sesuai target (' . $event->team_count . ' tim). Lengkapi dulu daftar tim sebelum membuat bagan.');
-        }
+        $team->update(['event_group_id' => $validated['event_group_id'] ?? null]);
 
-        if ($event->matches()->exists()) {
-            return back()->with('error', 'Bagan untuk event ini sudah pernah dibuat. Gunakan "Reset Bagan" dulu jika ingin membuat ulang dari awal.');
-        }
-
-        $totalRounds = $event->totalRounds();
-
-        DB::transaction(function () use ($event, $teamCount, $totalRounds) {
-            for ($round = 1; $round <= $totalRounds; $round++) {
-                $matchesInRound = $teamCount / (2 ** $round);
-                for ($i = 1; $i <= $matchesInRound; $i++) {
-                    EventMatch::create([
-                        'featured_event_id' => $event->id,
-                        'round' => $round,
-                        'round_order' => $i,
-                    ]);
-                }
-            }
-        });
-
-        return redirect()->route('events.bracket', $event)->with('success', 'Bagan berhasil dibuat. Silakan atur pasangan pertandingan babak pertama sesuai hasil undian/keputusan federasi.');
+        return back()->with('success', 'Grup untuk tim "' . $team->name . '" berhasil diperbarui.');
     }
 
-    public function reset(FeaturedEvent $event)
+    // ==================== GRUP ====================
+
+    public function storeGroup(Request $request, FeaturedEvent $event)
     {
+        abort_unless($event->has_bracket, 404);
         Gate::authorize('manage_events');
 
-        $event->matches()->delete();
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+        ]);
 
-        return back()->with('success', 'Bagan berhasil direset. Susunan tim tetap tersimpan, silakan buat ulang.');
+        $event->groups()->create([
+            'name' => $validated['name'],
+            'order' => $event->groups()->count() + 1,
+        ]);
+
+        return back()->with('success', 'Grup "' . $validated['name'] . '" berhasil dibuat.');
+    }
+
+    public function destroyGroup(FeaturedEvent $event, EventGroup $group)
+    {
+        Gate::authorize('manage_events');
+        abort_unless($group->featured_event_id === $event->id, 404);
+
+        // Tim di grup ini otomatis kembali ke status "belum ada grup"
+        // (FK nullOnDelete), pertandingan grup ini ikut terhapus.
+        $group->delete();
+
+        return back()->with('success', 'Grup "' . $group->name . '" berhasil dihapus.');
+    }
+
+    // ==================== PERTANDINGAN ====================
+
+    /**
+     * Tambah satu pertandingan secara manual — untuk fase grup maupun
+     * babak gugur. Admin memilih sendiri lawan tandingnya (sesuai hasil
+     * undian resmi dari federasi), sistem tidak menebak pasangannya.
+     */
+    public function storeMatch(Request $request, FeaturedEvent $event)
+    {
+        abort_unless($event->has_bracket, 404);
+        Gate::authorize('manage_events');
+
+        $validated = $request->validate([
+            'stage' => ['required', 'in:' . implode(',', array_keys(EventMatch::STAGES))],
+            'event_group_id' => ['required_if:stage,group', 'nullable', 'integer', 'exists:event_groups,id'],
+            'team1_id' => ['required', 'integer', 'different:team2_id', 'exists:event_teams,id'],
+            'team2_id' => ['required', 'integer', 'exists:event_teams,id'],
+            'scheduled_at' => ['nullable', 'date'],
+            'venue' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $teamIds = $event->teams()->pluck('id');
+        if (! $teamIds->contains((int) $validated['team1_id']) || ! $teamIds->contains((int) $validated['team2_id'])) {
+            return back()->with('error', 'Tim yang dipilih tidak terdaftar di event ini.');
+        }
+
+        $groupId = $validated['stage'] === 'group' ? $validated['event_group_id'] : null;
+
+        if ($groupId) {
+            $groupTeamIds = EventTeam::where('event_group_id', $groupId)->pluck('id');
+            if (! $groupTeamIds->contains((int) $validated['team1_id']) || ! $groupTeamIds->contains((int) $validated['team2_id'])) {
+                return back()->with('error', 'Kedua tim harus berada di grup yang sama untuk pertandingan fase grup.');
+            }
+        }
+
+        $nextOrder = EventMatch::where('featured_event_id', $event->id)
+            ->where('stage', $validated['stage'])
+            ->when($groupId, fn ($q) => $q->where('event_group_id', $groupId))
+            ->max('round_order') + 1;
+
+        EventMatch::create([
+            'featured_event_id' => $event->id,
+            'stage' => $validated['stage'],
+            'event_group_id' => $groupId,
+            'round_order' => $nextOrder,
+            'team1_id' => $validated['team1_id'],
+            'team2_id' => $validated['team2_id'],
+            'scheduled_at' => $validated['scheduled_at'] ?? null,
+            'venue' => $validated['venue'] ?? null,
+            'status' => 'scheduled',
+        ]);
+
+        return back()->with('success', 'Pertandingan berhasil ditambahkan.');
+    }
+
+    public function destroyMatch(FeaturedEvent $event, EventMatch $match)
+    {
+        Gate::authorize('manage_events');
+        abort_unless($match->featured_event_id === $event->id, 404);
+
+        $match->delete();
+
+        return back()->with('success', 'Pertandingan berhasil dihapus.');
     }
 }
-

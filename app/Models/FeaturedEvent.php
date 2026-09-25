@@ -22,7 +22,6 @@ class FeaturedEvent extends Model
         'registration_url',
         'cta_label',
         'has_bracket',
-        'team_count',
         'status',
         'show_on_homepage',
         'show_announcement_bar',
@@ -42,18 +41,19 @@ class FeaturedEvent extends Model
         'archived' => 'Arsip',
     ];
 
-    // Ukuran bagan yang didukung — harus pangkat 2 supaya sistem gugur
-    // tunggal tidak perlu bye/kosong di tengah bagan.
-    public const TEAM_COUNTS = [8, 16, 32, 64];
-
     public function teams(): HasMany
     {
-        return $this->hasMany(EventTeam::class)->orderBy('seed');
+        return $this->hasMany(EventTeam::class)->orderBy('name');
+    }
+
+    public function groups(): HasMany
+    {
+        return $this->hasMany(EventGroup::class)->orderBy('order')->orderBy('name');
     }
 
     public function matches(): HasMany
     {
-        return $this->hasMany(EventMatch::class)->orderBy('round')->orderBy('round_order');
+        return $this->hasMany(EventMatch::class)->orderBy('round_order');
     }
 
     public function updates(): HasMany
@@ -100,61 +100,37 @@ class FeaturedEvent extends Model
     }
 
     /**
-     * Total babak di bagan gugur tunggal berdasarkan jumlah tim
-     * (log2 dari team_count). 32 tim -> 5 babak (32→16→8→4→2→1 juara).
+     * Semua pertandingan event ini, dikelompokkan per fase (lihat
+     * EventMatch::STAGES) mengikuti urutan alur turnamen — fase grup
+     * (dipecah lagi per grup lewat groupsWithStandings()) dan babak-babak
+     * gugur setelahnya. Fase yang tidak dipakai (tidak ada pertandingan
+     * di dalamnya) otomatis tidak muncul.
      */
-    public function totalRounds(): int
+    public function knockoutMatchesByStage()
     {
-        if (! $this->has_bracket || ! $this->team_count) {
-            return 0;
-        }
+        $matches = $this->matches()->whereNot('stage', 'group')->with(['team1', 'team2', 'winner'])->get();
 
-        return (int) log($this->team_count, 2);
-    }
-
-    /**
-     * Label babak yang enak dibaca manusia, dihitung dari posisi babak
-     * relatif terhadap total babak — supaya benar untuk 8, 16, 32, atau 64
-     * tim sekaligus, tanpa perlu tabel enum nama babak yang kaku.
-     */
-    public static function roundLabel(int $round, int $totalRounds): string
-    {
-        $fromFinal = $totalRounds - $round;
-
-        return match (true) {
-            $fromFinal === 0 => 'Final',
-            $fromFinal === 1 => 'Semifinal',
-            $fromFinal === 2 => 'Perempat Final',
-            default => 'Babak ' . (2 ** ($fromFinal + 1)) . ' Besar',
-        };
-    }
-
-    /**
-     * Data bagan siap-tampil, dikelompokkan per babak & sudah membawa
-     * label babaknya masing-masing. Dipakai bersama oleh halaman kelola
-     * bagan (admin) dan microsite publik supaya tampilannya selalu
-     * konsisten.
-     */
-    public function bracketRounds()
-    {
-        $totalRounds = $this->totalRounds();
-
-        if ($totalRounds === 0) {
-            return collect();
-        }
-
-        return $this->matches()
-            ->with(['team1', 'team2', 'winner'])
-            ->get()
-            ->groupBy('round')
-            ->map(function ($matches, $round) use ($totalRounds) {
-                return [
-                    'round' => $round,
-                    'label' => static::roundLabel((int) $round, $totalRounds),
-                    'matches' => $matches->sortBy('round_order')->values(),
-                ];
-            })
-            ->sortKeys()
+        return collect(EventMatch::STAGES)
+            ->except('group')
+            ->map(fn ($label, $stage) => [
+                'stage' => $stage,
+                'label' => $label,
+                'matches' => $matches->where('stage', $stage)->values(),
+            ])
+            ->filter(fn ($data) => $data['matches']->isNotEmpty())
             ->values();
+    }
+
+    /**
+     * Semua grup beserta daftar tim & klasemennya masing-masing — siap
+     * pakai baik untuk halaman admin (Kelola Bagan) maupun publik
+     * (microsite event).
+     */
+    public function groupsWithStandings()
+    {
+        return $this->groups()->with('teams')->get()->map(fn ($group) => [
+            'group' => $group,
+            'standings' => $group->standings(),
+        ]);
     }
 }

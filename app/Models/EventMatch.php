@@ -9,7 +9,8 @@ class EventMatch extends Model
 {
     protected $fillable = [
         'featured_event_id',
-        'round',
+        'stage',
+        'event_group_id',
         'round_order',
         'team1_id',
         'team2_id',
@@ -24,11 +25,35 @@ class EventMatch extends Model
 
     protected $casts = [
         'scheduled_at' => 'datetime',
+        'team1_score' => 'integer',
+        'team2_score' => 'integer',
+    ];
+
+    /**
+     * Fase pertandingan, diurutkan sesuai alur turnamen nyata: fase grup
+     * dulu (dengan klasemen), baru babak gugur. Jumlah tim yang lolos ke
+     * tiap babak gugur ditentukan federasi/panitia (bisa langsung ke 8
+     * besar tanpa 16 besar, dsb.) — jadi admin bebas memilih fase mana
+     * saja yang dipakai, tidak wajib berurutan penuh.
+     */
+    public const STAGES = [
+        'group' => 'Fase Grup',
+        'ro32' => '32 Besar',
+        'ro16' => '16 Besar',
+        'qf' => 'Perempat Final',
+        'sf' => 'Semifinal',
+        'third_place' => 'Perebutan Juara 3',
+        'final' => 'Final',
     ];
 
     public function featuredEvent(): BelongsTo
     {
         return $this->belongsTo(FeaturedEvent::class);
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(EventGroup::class, 'event_group_id');
     }
 
     public function team1(): BelongsTo
@@ -46,37 +71,8 @@ class EventMatch extends Model
         return $this->belongsTo(EventTeam::class, 'winner_id');
     }
 
-    /**
-     * Begitu sebuah pertandingan ditandai selesai dengan pemenang, otomatis
-     * dorong tim tersebut ke slot yang sesuai di pertandingan babak
-     * berikutnya — supaya admin tidak perlu mengisi manual satu per satu
-     * naik ke atas bagan.
-     *
-     * Aturan slot: dua pertandingan berurutan di babak sekarang (order
-     * ganjil & genap sesudahnya) selalu bermuara ke SATU pertandingan yang
-     * sama di babak berikutnya. Order ganjil mengisi slot tim1, order
-     * genap mengisi slot tim2.
-     */
-    public function propagateWinner(): void
+    public function getStageLabelAttribute(): string
     {
-        if (! $this->winner_id) {
-            return;
-        }
-
-        $totalRounds = $this->featuredEvent->totalRounds();
-
-        // Sudah final — tidak ada babak berikutnya untuk didorong.
-        if ($this->round >= $totalRounds) {
-            return;
-        }
-
-        $nextRound = $this->round + 1;
-        $nextOrder = intdiv($this->round_order - 1, 2) + 1;
-        $slot = $this->round_order % 2 === 1 ? 'team1_id' : 'team2_id';
-
-        static::where('featured_event_id', $this->featured_event_id)
-            ->where('round', $nextRound)
-            ->where('round_order', $nextOrder)
-            ->update([$slot => $this->winner_id]);
+        return self::STAGES[$this->stage] ?? $this->stage;
     }
 }

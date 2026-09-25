@@ -68,10 +68,11 @@ class PublicController extends Controller
     {
         abort_unless(in_array($event->status, ['active', 'archived']), 404);
 
-        $bracketRounds = $event->has_bracket ? $event->bracketRounds() : collect();
+        $groupsWithStandings = $event->has_bracket ? $event->groupsWithStandings() : collect();
+        $knockoutStages = $event->has_bracket ? $event->knockoutMatchesByStage() : collect();
         $updates = $event->updates()->published()->get();
 
-        return view('public.events.show', compact('event', 'bracketRounds', 'updates'));
+        return view('public.events.show', compact('event', 'groupsWithStandings', 'knockoutStages', 'updates'));
     }
 
     // Profil > Tentang Kami
