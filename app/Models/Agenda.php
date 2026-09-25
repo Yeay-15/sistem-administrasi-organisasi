@@ -46,6 +46,17 @@ class Agenda extends Model
     }
 
     /**
+     * Kepanitiaan yang menjadikan agenda ini bagian dari rangkaiannya
+     * (rapat persiapan atau hari-H). Satu agenda bisa dipakai lebih dari
+     * satu kepanitiaan hanya dalam kasus yang jarang (mis. technical
+     * meeting gabungan), sehingga relasinya many-to-many.
+     */
+    public function committees()
+    {
+        return $this->belongsToMany(Committee::class, 'committee_agenda')->withTimestamps();
+    }
+
+    /**
      * Menghasilkan data event kalender lengkap dengan warna (dipakai bersama oleh
      * kalender admin, cetak PDF kalender, dan kalender Portal Publik) supaya
      * skema warna per-divisi & gradient kolaborasi selalu konsisten di semua tempat.

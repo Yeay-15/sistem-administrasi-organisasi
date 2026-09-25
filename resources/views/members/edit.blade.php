@@ -83,8 +83,9 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Divisi</label>
-                        <select name="division_id" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        <div class="relative">
+                            <select name="division_id" required
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
                             <option value="">-- Pilih Divisi --</option>
                             @foreach ($divisions as $division)
                                 <option value="{{ $division->id }}" {{ old('division_id', $member->division_id) == $division->id ? 'selected' : '' }}>
@@ -92,14 +93,20 @@
                                 </option>
                             @endforeach
                         </select>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </div>
                         @error('division_id')
                             <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Jabatan</label>
-                        <select name="position" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        <div class="relative">
+                            <select name="position" required
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
                             <option value="">-- Pilih Jabatan --</option>
                             @foreach (['Ketua Umum', 'Sekretaris Umum', 'Bendahara Umum', 'Ketua Divisi', 'Sekretaris Divisi', 'Anggota Divisi'] as $jabatan)
                                 <option value="{{ $jabatan }}" {{ old('position', $member->position) == $jabatan ? 'selected' : '' }}>
@@ -107,6 +114,11 @@
                                 </option>
                             @endforeach
                         </select>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </div>
                         @error('position')
                             <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                         @enderror
@@ -143,11 +155,17 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Status</label>
-                        <select name="status" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        <div class="relative">
+                            <select name="status" required
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
                             <option value="Aktif" {{ old('status', $member->status) == 'Aktif' ? 'selected' : '' }}>Aktif</option>
                             <option value="Non-Aktif" {{ old('status', $member->status) == 'Non-Aktif' ? 'selected' : '' }}>Non-Aktif</option>
                         </select>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </div>
                         @error('status')
                             <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                         @enderror

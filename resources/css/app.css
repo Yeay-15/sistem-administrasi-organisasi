@@ -150,3 +150,10 @@ body,
 .dark .katiber-prose strong {
     color: white;
 }
+
+/* Alpine.js x-cloak: sembunyikan elemen sampai Alpine selesai inisialisasi,
+   supaya dropdown/kotak yang mestinya tersembunyi tidak sempat "kedip"
+   muncul sekilas saat halaman baru dimuat. */
+[x-cloak] {
+    display: none !important;
+}

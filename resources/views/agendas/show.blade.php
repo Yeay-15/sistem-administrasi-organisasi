@@ -80,13 +80,19 @@
                                     <span class="text-xs text-slate-500 dark:text-slate-400">{{ $member->position }}</span>
                                 </td>
                                 <td class="px-5 py-3.5">
-                                    <select name="attendances[{{ $member->id }}][status]" required
-                                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <div class="relative">
+                                        <select name="attendances[{{ $member->id }}][status]" required
+                                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
                                         <option value="H" {{ $currentStatus == 'H' ? 'selected' : '' }}>Hadir (H)</option>
                                         <option value="I" {{ $currentStatus == 'I' ? 'selected' : '' }}>Izin (I)</option>
                                         <option value="S" {{ $currentStatus == 'S' ? 'selected' : '' }}>Sakit (S)</option>
                                         <option value="A" {{ $currentStatus == 'A' ? 'selected' : '' }}>Alpha (A)</option>
                                     </select>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                            class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </div>
                                 </td>
                                 <td class="px-5 py-3.5">
                                     <input type="text" name="attendances[{{ $member->id }}][notes]" value="{{ $currentNotes }}" placeholder="Catatan..."

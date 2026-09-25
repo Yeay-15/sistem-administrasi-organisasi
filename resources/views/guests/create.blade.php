@@ -13,14 +13,20 @@
             <div class="mb-4">
                 <label class="block text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1">Acara / Agenda yang
                     Dihadiri <span class="text-red-500">*</span></label>
-                <select name="agenda_id" required
-                    class="w-full px-4 py-2 border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-slate-900 dark:text-white">
+                <div class="relative">
+                    <select name="agenda_id" required
+                    class="w-full px-4 py-2 border dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-slate-900 dark:text-white appearance-none pr-10">
                     <option value="">-- Pilih Agenda --</option>
                     @foreach ($agendas as $agenda)
                         <option value="{{ $agenda->id }}">{{ \Carbon\Carbon::parse($agenda->date)->format('d/m/Y') }} -
                             {{ $agenda->name }}</option>
                     @endforeach
                 </select>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                        class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </div>
                 @error('agenda_id')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror

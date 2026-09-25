@@ -17,6 +17,7 @@ class Member extends Model
         'division_id',
         'position',
         'status',
+        'membership_type',
         'photo_path',
         'join_date',
         'exit_date',
@@ -26,6 +27,29 @@ class Member extends Model
     public function division()
     {
         return $this->belongsTo(Division::class);
+    }
+
+    public function isPengurus(): bool
+    {
+        return $this->membership_type === 'Pengurus';
+    }
+
+    /**
+     * Baris pivot (dengan peran & bidang) histori kepanitiaan orang ini.
+     */
+    public function committeeMemberships()
+    {
+        return $this->hasMany(CommitteeMember::class);
+    }
+
+    /**
+     * Daftar Kepanitiaan unik yang pernah diikuti (lintas peran).
+     */
+    public function committees()
+    {
+        return $this->belongsToMany(Committee::class, 'committee_members')
+            ->withPivot(['id', 'position_category', 'panitia_bidang_id', 'notes'])
+            ->withTimestamps();
     }
 
     /**

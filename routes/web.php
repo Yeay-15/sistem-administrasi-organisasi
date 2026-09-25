@@ -24,6 +24,9 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\LeaderController;
 use App\Http\Controllers\AspirationController;
+use App\Http\Controllers\NonPengurusController;
+use App\Http\Controllers\CommitteeController;
+use App\Http\Controllers\PanitiaBidangController;
 
 // ============ SITEMAP.XML & ROBOTS.TXT (SEO) ============
 // Di luar grup "track.visit" — ini feed untuk mesin pencari, bukan halaman
@@ -95,8 +98,61 @@ Route::middleware('auth')->group(function () {
     Route::resource('members', MemberController::class)->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_members');
     Route::resource('members', MemberController::class)->only(['destroy'])->middleware('can:delete_members');
 
-    Route::resource('agendas', AgendaController::class)->only(['index', 'show'])->middleware('can:view_agendas');
-    Route::resource('agendas', AgendaController::class)->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_agendas');
+    // Statistik individu (histori kepanitiaan + kehadiran) — dipakai bersama
+    // oleh menu Pengurus maupun Anggota Non-Pengurus, jadi izinnya cukup
+    // salah satu dari kedua hak "Lihat" (dicek lagi di dalam controller).
+    Route::get('/anggota/{member}/statistik', [MemberController::class, 'statistik'])
+        ->name('members.statistik');
+    Route::patch('/anggota/{member}/ubah-status-keanggotaan', [MemberController::class, 'toggleMembershipType'])
+        ->name('members.toggle-membership')->middleware('can:manage_members');
+    Route::get('/anggota/{member}/jadikan-pengurus', [MemberController::class, 'promoteForm'])
+        ->name('members.promote-form')->middleware('can:manage_members');
+
+    // Anggota Non-Pengurus: orang yang ikut kegiatan/kepanitiaan tapi bukan
+    // bagian struktur Pengurus. Menu & controller sengaja terpisah dari
+    // "Pengurus" walau sama-sama tabel members (lihat NonPengurusController).
+    Route::resource('non-pengurus', NonPengurusController::class)->only(['index'])->middleware('can:view_non_pengurus');
+    Route::resource('non-pengurus', NonPengurusController::class)->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_non_pengurus');
+    Route::resource('non-pengurus', NonPengurusController::class)->only(['destroy'])->middleware('can:delete_non_pengurus');
+
+    // Kepanitiaan: histori panitia per event, bisa berisi Pengurus maupun
+    // Non-Pengurus, dan bisa dikaitkan ke beberapa agenda (rapat + hari-H).
+    // Urutan di bawah ini sengaja: rute statis (/kepanitiaan/create) HARUS
+    // didaftarkan sebelum rute berwildcard (/kepanitiaan/{kepanitiaan}) dari
+    // 'show' — kalau tidak, Laravel akan mencocokkan "create" sebagai ID
+    // kepanitiaan lebih dulu (karena didaftarkan lebih awal) dan berakhir 404.
+    Route::resource('kepanitiaan', CommitteeController::class)->only(['index'])->middleware('can:view_committees');
+    Route::resource('kepanitiaan', CommitteeController::class)->only(['create', 'store'])->middleware('can:manage_committees');
+    Route::resource('kepanitiaan', CommitteeController::class)->only(['show'])->middleware('can:view_committees');
+    Route::resource('kepanitiaan', CommitteeController::class)->only(['edit', 'update'])->middleware('can:manage_committees');
+    Route::resource('kepanitiaan', CommitteeController::class)->only(['destroy'])->middleware('can:delete_committees');
+    Route::post('/kepanitiaan/{kepanitiaan}/anggota', [CommitteeController::class, 'addMember'])
+        ->name('kepanitiaan.anggota.store')->middleware('can:manage_committees');
+    Route::delete('/kepanitiaan/{kepanitiaan}/anggota/{committeeMember}', [CommitteeController::class, 'removeMember'])
+        ->name('kepanitiaan.anggota.destroy')->middleware('can:manage_committees');
+    Route::post('/kepanitiaan/{kepanitiaan}/agenda', [CommitteeController::class, 'attachAgenda'])
+        ->name('kepanitiaan.agenda.store')->middleware('can:manage_committees');
+    Route::delete('/kepanitiaan/{kepanitiaan}/agenda/{agenda}', [CommitteeController::class, 'detachAgenda'])
+        ->name('kepanitiaan.agenda.destroy')->middleware('can:manage_committees');
+    Route::post('/kepanitiaan-anggota-baru', [CommitteeController::class, 'quickCreateMember'])
+        ->name('kepanitiaan.anggota.quick-create')->middleware('can:manage_committees');
+
+    // Master bidang panitia (Sie Acara, Sie Konsumsi, dst) — dikelola dari
+    // dalam halaman Kepanitiaan, dipakai berulang lintas kepanitiaan.
+    Route::resource('bidang-panitia', PanitiaBidangController::class)->only(['index'])->middleware('can:view_committees');
+    Route::resource('bidang-panitia', PanitiaBidangController::class)->only(['store', 'update'])->middleware('can:manage_committees');
+    Route::resource('bidang-panitia', PanitiaBidangController::class)->only(['destroy'])->middleware('can:delete_committees');
+
+    // Sama seperti kasus 'kepanitiaan' sebelumnya: rute statis (/agendas/create)
+    // harus didaftarkan sebelum rute wildcard (/agendas/{agenda}) dari 'show',
+    // kalau tidak Laravel mencocokkan "create" sebagai ID agenda lebih dulu
+    // (karena show didaftarkan lebih awal) dan berakhir error/404. Ini bug
+    // bawaan dari kode aslinya (bukan bagian yang saya tambahkan), tapi
+    // sekalian saya perbaiki karena sama-sama di routes/web.php.
+    Route::resource('agendas', AgendaController::class)->only(['index'])->middleware('can:view_agendas');
+    Route::resource('agendas', AgendaController::class)->only(['create', 'store'])->middleware('can:manage_agendas');
+    Route::resource('agendas', AgendaController::class)->only(['show'])->middleware('can:view_agendas');
+    Route::resource('agendas', AgendaController::class)->only(['edit', 'update'])->middleware('can:manage_agendas');
     Route::resource('agendas', AgendaController::class)->only(['destroy'])->middleware('can:delete_agendas');
     Route::patch('/agendas/{agenda}/toggle-public', [AgendaController::class, 'togglePublic'])
         ->name('agendas.toggle-public')->middleware('can:manage_agendas');

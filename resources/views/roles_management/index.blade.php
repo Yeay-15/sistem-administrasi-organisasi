@@ -237,8 +237,9 @@
                             @csrf
                             <div>
                                 <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Pengurus</label>
-                                <select name="member_id" required
-                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                <div class="relative">
+                                    <select name="member_id" required
+                                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
                                     <option value="">Pilih pengurus...</option>
                                     @foreach ($membersWithoutAccount as $member)
                                         <option value="{{ $member->id }}" {{ old('member_id') == $member->id ? 'selected' : '' }}>
@@ -246,6 +247,11 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                        class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </div>
                                 @error('member_id')
                                     <p class="mt-1 text-xs text-red-500 dark:text-red-400">{{ $message }}</p>
                                 @enderror
@@ -262,13 +268,19 @@
                             <div class="flex gap-2">
                                 <div class="flex-1">
                                     <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Peran</label>
-                                    <select name="role_id" required
-                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <div class="relative">
+                                        <select name="role_id" required
+                                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
                                         <option value="">Pilih peran...</option>
                                         @foreach ($assignableRoles as $role)
                                             <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>{{ $role->name }}</option>
                                         @endforeach
                                     </select>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                            class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </div>
                                     @error('role_id')
                                         <p class="mt-1 text-xs text-red-500 dark:text-red-400">{{ $message }}</p>
                                     @enderror
@@ -323,9 +335,10 @@
                                     @endif
                                 </td>
                                 <td class="px-5 py-4">
-                                    <select @if($user->id === auth()->id()) disabled title="Tidak dapat mengubah data akun sendiri di sini"
+                                    <div class="relative">
+                                        <select @if($user->id === auth()->id()) disabled title="Tidak dapat mengubah data akun sendiri di sini"
                                         @else @change="updateUserField({{ $user->id }}, 'member_id', $event.target.value)" @endif
-                                        class="w-full min-w-[180px] rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                        class="w-full min-w-[180px] rounded-lg border-slate-200 bg-slate-50 text-sm text-slate-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 appearance-none pr-10">
                                         <option value="">— Belum dipetakan —</option>
                                         @foreach ($members as $member)
                                             <option value="{{ $member->id }}" @selected($user->member_id === $member->id)>
@@ -333,16 +346,27 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                            class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </div>
                                 </td>
                                 <td class="px-5 py-4">
-                                    <select @if($user->id === auth()->id()) disabled title="Tidak dapat mengubah peran akun sendiri di sini"
+                                    <div class="relative">
+                                        <select @if($user->id === auth()->id()) disabled title="Tidak dapat mengubah peran akun sendiri di sini"
                                         @else @change="updateUserField({{ $user->id }}, 'role_id', $event.target.value)" @endif
-                                        class="w-full min-w-[160px] rounded-lg border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                        class="w-full min-w-[160px] rounded-lg border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 appearance-none pr-10">
                                         <option value="">— Belum ada peran —</option>
                                         @foreach ($roles as $role)
                                             <option value="{{ $role->id }}" @selected($user->role_id === $role->id)>{{ $role->name }}</option>
                                         @endforeach
                                     </select>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                            class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </div>
                                 </td>
                                 @if (auth()->user()->isSuperAdmin())
                                     <td class="px-5 py-4 text-center">

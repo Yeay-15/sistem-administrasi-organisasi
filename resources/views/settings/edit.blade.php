@@ -214,12 +214,18 @@
 
                 <div class="mt-5">
                     <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Mode Aspirasi</label>
-                    <select name="aspiration_mode"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                    <div class="relative">
+                        <select name="aspiration_mode"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
                         @foreach (\App\Models\HomeSetting::ASPIRATION_MODES as $value => $label)
                             <option value="{{ $value }}" {{ old('aspiration_mode', $setting->aspiration_mode) === $value ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                            class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </div>
                     <div class="mt-3 space-y-1.5 text-xs text-slate-400 dark:text-slate-500">
                         <p><span class="font-semibold text-slate-500 dark:text-slate-400">Publik:</span> formulir terbuka untuk siapa saja, termasuk pengiriman anonim.</p>
                         <p><span class="font-semibold text-slate-500 dark:text-slate-400">Hanya Pengurus:</span> pengunjung wajib login sebagai pengurus untuk mengirim aspirasi internal.</p>

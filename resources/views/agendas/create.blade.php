@@ -83,8 +83,9 @@
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Jenis
                             Agenda</label>
-                        <select name="type" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        <div class="relative">
+                            <select name="type" required
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
                             <option value="">-- Pilih Jenis --</option>
                             <option value="Rapat Internal" {{ old('type') == 'Rapat Internal' ? 'selected' : '' }}>Rapat
                                 Internal</option>
@@ -94,6 +95,11 @@
                                 Muskom</option>
                             <option value="Lainnya" {{ old('type') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                         </select>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </div>
                         @error('type')
                             <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                         @enderror
@@ -101,14 +107,20 @@
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Status
                             Agenda</label>
-                        <select name="status" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        <div class="relative">
+                            <select name="status" required
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
                             <option value="Terjadwal" {{ old('status') == 'Terjadwal' ? 'selected' : '' }}>Terjadwal
                             </option>
                             <option value="Selesai" {{ old('status') == 'Selesai' ? 'selected' : '' }}>Selesai</option>
                             <option value="Dibatalkan" {{ old('status') == 'Dibatalkan' ? 'selected' : '' }}>Dibatalkan
                             </option>
                         </select>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </div>
                         @error('status')
                             <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                         @enderror
@@ -118,14 +130,20 @@
                 <div class="mt-5">
                     <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Penanggung Jawab
                         (PIC)</label>
-                    <select x-model="pic" @change="updatePrefix()" required
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                    <div class="relative">
+                        <select x-model="pic" @change="updatePrefix()" required
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
                         <option value="">-- Pilih Penanggung Jawab / Divisi --</option>
                         @foreach ($divisions as $div)
                             <option value="{{ $div->name }}">{{ $div->name }}</option>
                         @endforeach
                         <option value="Kolaborasi / Lintas Divisi">Kolaborasi / Lintas Divisi</option>
                     </select>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                            class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </div>
                     @error('person_in_charge')
                         <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                     @enderror
