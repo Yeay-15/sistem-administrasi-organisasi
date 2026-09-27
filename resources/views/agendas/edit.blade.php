@@ -26,6 +26,8 @@
                     pic: '',
                     code: '{{ old('agenda_code', $agenda->agenda_code) }}',
                     collabDivisions: [],
+                    attendanceScope: '{{ old('attendance_scope', $agenda->attendance_scope ?? 'all') }}',
+                    attendanceDivisions: {{ json_encode(old('division_ids', $agenda->divisions->pluck('id')->map(fn ($id) => (string) $id)->all())) }},
                     init() {
                         // Cek apakah data lama adalah kolaborasi (mengandung ' x ')
                         if (this.initialPic.includes(' x ')) {
@@ -94,26 +96,13 @@
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Jenis
                             Agenda</label>
-                        <div class="relative">
-                            <select name="type" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
-                            <option value="Rapat Internal"
-                                {{ old('type', $agenda->type) == 'Rapat Internal' ? 'selected' : '' }}>Rapat Internal
-                            </option>
-                            <option value="Kegiatan / Event"
-                                {{ old('type', $agenda->type) == 'Kegiatan / Event' ? 'selected' : '' }}>Kegiatan / Event
-                            </option>
-                            <option value="Pleno / Muskom"
-                                {{ old('type', $agenda->type) == 'Pleno / Muskom' ? 'selected' : '' }}>Pleno / Muskom
-                            </option>
-                            <option value="Lainnya" {{ old('type', $agenda->type) == 'Lainnya' ? 'selected' : '' }}>Lainnya
-                            </option>
-                        </select>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                            </svg>
-                        </div>
+                        <x-dropdown-select name="type" placeholder="-- Pilih Jenis --" :required="true"
+                            :selected="old('type', $agenda->type)" :options="[
+                                'Rapat Internal' => 'Rapat Internal',
+                                'Kegiatan / Event' => 'Kegiatan / Event',
+                                'Pleno / Muskom' => 'Pleno / Muskom',
+                                'Lainnya' => 'Lainnya',
+                            ]" />
                         @error('type')
                             <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                         @enderror
@@ -121,44 +110,32 @@
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Status
                             Agenda</label>
-                        <div class="relative">
-                            <select name="status" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
-                            <option value="Terjadwal"
-                                {{ old('status', $agenda->status) == 'Terjadwal' ? 'selected' : '' }}>Terjadwal</option>
-                            <option value="Selesai" {{ old('status', $agenda->status) == 'Selesai' ? 'selected' : '' }}>
-                                Selesai</option>
-                            <option value="Dibatalkan"
-                                {{ old('status', $agenda->status) == 'Dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
-                        </select>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                            </svg>
-                        </div>
+                        <x-dropdown-select name="status" placeholder="-- Pilih Status --" :required="true"
+                            :selected="old('status', $agenda->status)" :options="[
+                                'Terjadwal' => 'Terjadwal',
+                                'Selesai' => 'Selesai',
+                                'Dibatalkan' => 'Dibatalkan',
+                            ]" />
                         @error('status')
                             <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
 
+                @php
+                    // Samakan dengan logika init() di x-data atas: kalau nilai lama
+                    // mengandung ' x ' berarti itu hasil Kolaborasi / Lintas Divisi,
+                    // jadi dropdown-nya harus menampilkan opsi "Kolaborasi..." itu,
+                    // bukan string gabungan mentahnya.
+                    $picRaw = old('person_in_charge', $agenda->person_in_charge);
+                    $picSelected = str_contains($picRaw, ' x ') ? 'Kolaborasi / Lintas Divisi' : $picRaw;
+                @endphp
                 <div class="mt-5">
                     <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Penanggung Jawab
                         (PIC)</label>
-                    <div class="relative">
-                        <select x-model="pic" @change="updatePrefix()" required
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
-                        <option value="">-- Pilih Penanggung Jawab / Divisi --</option>
-                        @foreach ($divisions as $div)
-                            <option value="{{ $div->name }}">{{ $div->name }}</option>
-                        @endforeach
-                        <option value="Kolaborasi / Lintas Divisi">Kolaborasi / Lintas Divisi</option>
-                    </select>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                            class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                        </svg>
-                    </div>
+                    <x-dropdown-select placeholder="-- Pilih Penanggung Jawab / Divisi --" :required="true"
+                        :selected="$picSelected" on-select="pic = value; updatePrefix()"
+                        :options="$divisions->pluck('name', 'name')->put('Kolaborasi / Lintas Divisi', 'Kolaborasi / Lintas Divisi')" />
                     @error('person_in_charge')
                         <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                     @enderror
@@ -182,6 +159,63 @@
                     <p class="mt-3 text-xs text-slate-500 dark:text-slate-400 italic">Hasil PIC otomatis: <span
                             class="font-semibold text-blue-600 dark:text-blue-400"
                             x-text="finalPic || '(Belum ada divisi yang dicentang)'"></span></p>
+                </div>
+
+                <div class="mt-5">
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Cakupan
+                        Absensi</label>
+                    <p class="mb-2.5 text-xs text-slate-500 dark:text-slate-400">Menentukan siapa saja yang muncul di
+                        daftar absensi & terhitung di statistik kehadirannya untuk agenda ini.</p>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <label
+                            class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
+                            :class="attendanceScope === 'all' ? 'border-blue-500 bg-blue-50/60 dark:border-blue-500 dark:bg-blue-500/10' : 'border-slate-200 dark:border-slate-700'">
+                            <input type="radio" name="attendance_scope" value="all" x-model="attendanceScope"
+                                class="mt-0.5 h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800">
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-800 dark:text-white">Seluruh
+                                    Pengurus</span>
+                                <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Semua pengurus
+                                    aktif diabsen & masuk statistik kehadiran mereka.</span>
+                            </span>
+                        </label>
+                        <label
+                            class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
+                            :class="attendanceScope === 'division' ? 'border-blue-500 bg-blue-50/60 dark:border-blue-500 dark:bg-blue-500/10' : 'border-slate-200 dark:border-slate-700'">
+                            <input type="radio" name="attendance_scope" value="division" x-model="attendanceScope"
+                                class="mt-0.5 h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800">
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-800 dark:text-white">Divisi
+                                    Tertentu</span>
+                                <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Hanya anggota
+                                    divisi terpilih yang diabsen. Divisi lain tidak ikut dinilai kehadirannya di
+                                    agenda ini.</span>
+                            </span>
+                        </label>
+                    </div>
+                    @error('attendance_scope')
+                        <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+
+                    <div x-show="attendanceScope === 'division'" x-cloak
+                        class="mt-3 rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-500/5">
+                        <p class="mb-2.5 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                            Pilih Divisi yang Diabsen:</p>
+                        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                            @foreach ($divisions as $div)
+                                <label
+                                    class="flex items-center gap-2.5 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+                                    <input type="checkbox" name="division_ids[]" value="{{ $div->id }}"
+                                        x-model="attendanceDivisions"
+                                        class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800">
+                                    <span class="truncate">{{ $div->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                        @error('division_ids')
+                            <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="mt-5">

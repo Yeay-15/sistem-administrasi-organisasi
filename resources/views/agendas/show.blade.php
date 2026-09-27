@@ -43,9 +43,16 @@
 
     <!-- Form Input Absensi Masal -->
     <div class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div class="flex items-center justify-between border-b border-slate-100 bg-slate-50/70 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/40">
-            <h3 class="text-base font-bold text-slate-800 dark:text-white">Form Absensi Pengurus</h3>
-            <span class="text-sm text-slate-500 dark:text-slate-400">Total: {{ $members->count() }} Pengurus Aktif</span>
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/70 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/40">
+            <div class="flex items-center gap-2.5">
+                <h3 class="text-base font-bold text-slate-800 dark:text-white">Form Absensi Pengurus</h3>
+                @if ($agenda->isForAllMembers())
+                    <span class="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">Seluruh Pengurus</span>
+                @else
+                    <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-400" title="{{ $agenda->divisions->pluck('name')->join(', ') }}">Khusus: {{ $agenda->divisions->pluck('name')->join(', ') }}</span>
+                @endif
+            </div>
+            <span class="text-sm text-slate-500 dark:text-slate-400">Total: {{ $members->count() }} Pengurus{{ $agenda->isForAllMembers() ? ' Aktif' : '' }}</span>
         </div>
 
         <form action="{{ route('attendances.store', $agenda->id) }}" method="POST">
@@ -80,19 +87,13 @@
                                     <span class="text-xs text-slate-500 dark:text-slate-400">{{ $member->position }}</span>
                                 </td>
                                 <td class="px-5 py-3.5">
-                                    <div class="relative">
-                                        <select name="attendances[{{ $member->id }}][status]" required
-                                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
-                                        <option value="H" {{ $currentStatus == 'H' ? 'selected' : '' }}>Hadir (H)</option>
-                                        <option value="I" {{ $currentStatus == 'I' ? 'selected' : '' }}>Izin (I)</option>
-                                        <option value="S" {{ $currentStatus == 'S' ? 'selected' : '' }}>Sakit (S)</option>
-                                        <option value="A" {{ $currentStatus == 'A' ? 'selected' : '' }}>Alpha (A)</option>
-                                    </select>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                            class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                        </svg>
-                                    </div>
+                                    <x-dropdown-select name="attendances[{{ $member->id }}][status]" :required="true"
+                                        :selected="$currentStatus" :options="[
+                                            'H' => 'Hadir (H)',
+                                            'I' => 'Izin (I)',
+                                            'S' => 'Sakit (S)',
+                                            'A' => 'Alpha (A)',
+                                        ]" />
                                 </td>
                                 <td class="px-5 py-3.5">
                                     <input type="text" name="attendances[{{ $member->id }}][notes]" value="{{ $currentNotes }}" placeholder="Catatan..."

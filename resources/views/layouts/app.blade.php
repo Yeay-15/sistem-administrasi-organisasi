@@ -17,6 +17,28 @@
         })();
     </script>
 
+    <script>
+        // Komponen dropdown kustom (x-dropdown-select) — didaftarkan sinkron
+        // di sini (bukan lewat resources/js/app.js) supaya PASTI terdaftar
+        // sebelum event 'alpine:init' ditembak oleh script Alpine di bawah,
+        // apa pun urutan loading antara script defer & module Vite.
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('katiberSelect', (options, initialValue) => ({
+                open: false,
+                options: options || [],
+                value: initialValue ?? '',
+                get selectedLabel() {
+                    const match = this.options.find((opt) => String(opt.value) === String(this.value));
+                    return match ? match.label : '';
+                },
+                choose(value) {
+                    this.value = value;
+                    this.open = false;
+                },
+            }));
+        });
+    </script>
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])

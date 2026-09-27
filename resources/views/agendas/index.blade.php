@@ -212,7 +212,15 @@
                                     @endunless
                                 </td>
                                 <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">
-                                    {{ $agenda->person_in_charge }}</td>
+                                    {{ $agenda->person_in_charge }}
+                                    @unless ($agenda->isForAllMembers())
+                                        <span
+                                            class="mt-1 block w-fit rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                                            title="{{ $agenda->divisions->pluck('name')->join(', ') }}">
+                                            Khusus Divisi
+                                        </span>
+                                    @endunless
+                                </td>
                                 <td class="px-5 py-4 text-center">
                                     @if ($agenda->status == 'Selesai')
                                         <span

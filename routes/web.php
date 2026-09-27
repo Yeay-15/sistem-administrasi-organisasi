@@ -185,6 +185,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('posts', PostController::class)->only(['index'])->middleware('can:view_news');
     Route::resource('posts', PostController::class)->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_news');
     Route::resource('posts', PostController::class)->only(['destroy'])->middleware('can:delete_news');
+    // Endpoint upload gambar inline dari editor Quill (lihat PostController::uploadContentImage).
+    // Gambar disimpan ke storage & yang masuk ke kolom `content` cuma URL-nya,
+    // BUKAN base64 mentah seperti perilaku default Quill.
+    Route::post('posts/upload-content-image', [PostController::class, 'uploadContentImage'])
+        ->name('posts.upload-content-image')
+        ->middleware('can:manage_news');
 
     Route::resource('galleries', GalleryController::class)->only(['index'])->middleware('can:view_gallery');
     Route::resource('galleries', GalleryController::class)->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_gallery');

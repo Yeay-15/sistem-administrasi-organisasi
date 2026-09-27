@@ -17,6 +17,7 @@ class Agenda extends Model
         'notes',
         'status',
         'is_public',
+        'attendance_scope',
     ];
 
     protected $casts = [
@@ -27,6 +28,59 @@ class Agenda extends Model
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * Divisi yang menjadi cakupan absensi agenda ini. Hanya relevan ketika
+     * attendance_scope = 'division' — lihat scopeRelevantForMember() &
+     * helper isForAllMembers()/isForDivision() di bawah.
+     */
+    public function divisions()
+    {
+        return $this->belongsToMany(Division::class, 'agenda_division')->withTimestamps();
+    }
+
+    public function isForAllMembers(): bool
+    {
+        return $this->attendance_scope !== 'division';
+    }
+
+    /**
+     * True jika agenda ini relevan untuk anggota dari $divisionId — dipakai
+     * saat menyaring daftar absensi (AgendaController::show) maupun
+     * penyebut (denominator) statistik kehadiran per pengurus
+     * (MemberController::statistik), supaya pengurus divisi lain tidak
+     * ikut dinilai dari agenda yang memang bukan untuk mereka.
+     */
+    public function isRelevantForDivision(?int $divisionId): bool
+    {
+        if ($this->isForAllMembers()) {
+            return true;
+        }
+
+        if (! $divisionId) {
+            return false;
+        }
+
+        return $this->divisions->contains('id', $divisionId);
+    }
+
+    /**
+     * Scope query: agenda yang relevan untuk seorang pengurus, dilihat dari
+     * divisinya — agenda scope 'all', ATAU agenda scope 'division' yang
+     * memang mencantumkan divisi pengurus tersebut.
+     */
+    public function scopeRelevantForDivision($query, ?int $divisionId)
+    {
+        return $query->where(function ($q) use ($divisionId) {
+            $q->where('attendance_scope', '!=', 'division');
+
+            if ($divisionId) {
+                $q->orWhereHas('divisions', function ($q2) use ($divisionId) {
+                    $q2->where('divisions.id', $divisionId);
+                });
+            }
+        });
     }
 
     /**

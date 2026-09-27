@@ -24,4 +24,13 @@ class Division extends Model
     {
         return $this->belongsToMany(Permission::class, 'division_permission');
     }
+
+    /**
+     * Agenda yang cakupan absensinya dikhususkan untuk divisi ini
+     * (agendas.attendance_scope = 'division'). Lihat App\Models\Agenda::divisions().
+     */
+    public function agendas()
+    {
+        return $this->belongsToMany(Agenda::class, 'agenda_division')->withTimestamps();
+    }
 }

@@ -184,8 +184,17 @@ class MemberController extends Controller
         $anggotaBidang = $committeeMemberships->reject->isTerasPanitia();
 
         // --- Statistik Kehadiran Agenda Organisasi (H/I/S/A) ---
-        $totalAgenda = Agenda::count();
+        // Penyebut (total agenda) HANYA menghitung agenda yang memang
+        // relevan untuk pengurus ini: agenda scope 'all', ditambah agenda
+        // scope 'division' yang mencantumkan divisinya sendiri. Ini
+        // mencegah pengurus divisi lain "dihukum" persentase kehadirannya
+        // gara-gara agenda internal divisi lain yang tidak pernah mereka
+        // diundang untuk hadir.
+        $relevantAgendaIds = Agenda::relevantForDivision($member->division_id)->pluck('id');
+        $totalAgenda = $relevantAgendaIds->count();
+
         $attendanceByStatus = Attendance::where('member_id', $member->id)
+            ->whereIn('agenda_id', $relevantAgendaIds)
             ->selectRaw('status, COUNT(*) as jumlah')
             ->groupBy('status')
             ->pluck('jumlah', 'status');
@@ -199,11 +208,13 @@ class MemberController extends Controller
         $attendanceByType = Attendance::where('attendances.member_id', $member->id)
             ->join('agendas', 'agendas.id', '=', 'attendances.agenda_id')
             ->where('attendances.status', 'H')
+            ->whereIn('attendances.agenda_id', $relevantAgendaIds)
             ->selectRaw('agendas.type as type, COUNT(*) as jumlah')
             ->groupBy('agendas.type')
             ->pluck('jumlah', 'type');
 
-        $totalAgendaByType = Agenda::selectRaw('type, COUNT(*) as jumlah')
+        $totalAgendaByType = Agenda::whereIn('id', $relevantAgendaIds)
+            ->selectRaw('type, COUNT(*) as jumlah')
             ->groupBy('type')
             ->pluck('jumlah', 'type');
 

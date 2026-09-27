@@ -110,29 +110,15 @@
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Jenis
                             Pembinaan</label>
-                        <div class="relative">
-                            <select name="type" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
-                            <option value="Teguran Lisan"
-                                {{ old('type', $guidance->type) == 'Teguran Lisan' ? 'selected' : '' }}>Teguran Lisan
-                            </option>
-                            <option value="Teguran Tertulis"
-                                {{ old('type', $guidance->type) == 'Teguran Tertulis' ? 'selected' : '' }}>Teguran Tertulis
-                            </option>
-                            <option value="SP 1" {{ old('type', $guidance->type) == 'SP 1' ? 'selected' : '' }}>Surat
-                                Peringatan 1</option>
-                            <option value="SP 2" {{ old('type', $guidance->type) == 'SP 2' ? 'selected' : '' }}>Surat
-                                Peringatan 2</option>
-                            <option value="SP 3" {{ old('type', $guidance->type) == 'SP 3' ? 'selected' : '' }}>Surat
-                                Peringatan 3</option>
-                            <option value="Lainnya" {{ old('type', $guidance->type) == 'Lainnya' ? 'selected' : '' }}>
-                                Lainnya</option>
-                        </select>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                            </svg>
-                        </div>
+                        <x-dropdown-select name="type" placeholder="-- Pilih Jenis --" :required="true"
+                            :selected="old('type', $guidance->type)" :options="[
+                                'Teguran Lisan' => 'Teguran Lisan',
+                                'Teguran Tertulis' => 'Teguran Tertulis',
+                                'SP 1' => 'Surat Peringatan 1',
+                                'SP 2' => 'Surat Peringatan 2',
+                                'SP 3' => 'Surat Peringatan 3',
+                                'Lainnya' => 'Lainnya',
+                            ]" />
                         @error('type')
                             <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                         @enderror
@@ -149,21 +135,9 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Status</label>
-                        <div class="relative">
-                            <select name="status" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
-                            <option value="Berlaku" {{ old('status', $guidance->status) == 'Berlaku' ? 'selected' : '' }}>
-                                Berlaku</option>
-                            <option value="Selesai" {{ old('status', $guidance->status) == 'Selesai' ? 'selected' : '' }}>
-                                Selesai</option>
-                            <option value="Dicabut" {{ old('status', $guidance->status) == 'Dicabut' ? 'selected' : '' }}>
-                                Dicabut</option>
-                        </select>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                            </svg>
-                        </div>
+                        <x-dropdown-select name="status" placeholder="-- Pilih Status --" :required="true"
+                            :selected="old('status', $guidance->status)"
+                            :options="['Berlaku' => 'Berlaku', 'Selesai' => 'Selesai', 'Dicabut' => 'Dicabut']" />
                         @error('status')
                             <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                         @enderror

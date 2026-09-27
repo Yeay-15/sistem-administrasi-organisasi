@@ -37,17 +37,8 @@
 
                 <div class="mt-5">
                     <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Kategori</label>
-                    <div class="relative">
-                        <select name="category"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white appearance-none pr-10">
-                        <option value="Artikel & Berita" {{ old('category') === 'Artikel & Berita' ? 'selected' : '' }}>Artikel & Berita</option>
-                        <option value="Laporan Kegiatan" {{ old('category') === 'Laporan Kegiatan' ? 'selected' : '' }}>Laporan Kegiatan</option>
-                    </select>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                            class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                        </svg>
-                    </div>
+                    <x-dropdown-select name="category" :selected="old('category', 'Artikel & Berita')"
+                        :options="['Artikel & Berita' => 'Artikel & Berita', 'Laporan Kegiatan' => 'Laporan Kegiatan']" />
                     <p class="mt-1 text-xs text-slate-400">Menentukan tampil di menu Media mana pada Portal Publik.</p>
                     @error('category')
                         <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
@@ -118,6 +109,51 @@
 
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <script>
+        // Handler upload gambar Quill (dipakai lewat modules.toolbar.handlers.image
+        // di init() bawah). `this` di sini otomatis merujuk ke instance toolbar
+        // module milik Quill, jadi this.quill tetap mengarah ke editor yang aktif.
+        function quillImageUploadHandler() {
+            const quillInstance = this.quill;
+            const input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.click();
+
+            input.onchange = async () => {
+                const file = input.files[0];
+                if (!file) return;
+
+                const range = quillInstance.getSelection(true);
+                const placeholder = 'Mengunggah gambar...';
+                quillInstance.insertText(range.index, placeholder, { italic: true });
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                try {
+                    const response = await fetch('{{ route('posts.upload-content-image') }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            Accept: 'application/json',
+                        },
+                        body: formData,
+                    });
+
+                    quillInstance.deleteText(range.index, placeholder.length);
+
+                    if (!response.ok) throw new Error('Upload gagal');
+                    const data = await response.json();
+
+                    quillInstance.insertEmbed(range.index, 'image', data.url, 'user');
+                    quillInstance.setSelection(range.index + 1);
+                } catch (error) {
+                    quillInstance.deleteText(range.index, placeholder.length);
+                    alert('Gagal mengunggah gambar. Coba lagi.');
+                }
+            };
+        }
+
         function postForm() {
             return {
                 coverPreview: null,
@@ -127,15 +163,25 @@
                         theme: 'snow',
                         placeholder: 'Tulis isi berita di sini...',
                         modules: {
-                            toolbar: [
-                                [{ header: [2, 3, false] }],
-                                ['bold', 'italic', 'underline'],
-                                [{ align: [] }],
-                                [{ list: 'ordered' }, { list: 'bullet' }],
-                                ['blockquote'],
-                                ['link', 'image'],
-                                ['clean'],  
-                            ],
+                            toolbar: {
+                                container: [
+                                    [{ header: [2, 3, false] }],
+                                    ['bold', 'italic', 'underline'],
+                                    [{ align: [] }],
+                                    [{ list: 'ordered' }, { list: 'bullet' }],
+                                    ['blockquote'],
+                                    ['link', 'image'],
+                                    ['clean'],
+                                ],
+                                handlers: {
+                                    // Handler upload gambar kustom — menggantikan perilaku bawaan
+                                    // Quill yang meng-encode gambar jadi base64 dan menaruhnya
+                                    // langsung di HTML. Di sini file dikirim ke server (lihat
+                                    // PostController::uploadContentImage), disimpan ke storage,
+                                    // dan yang disisipkan ke editor cuma URL hasil uploadnya.
+                                    image: quillImageUploadHandler,
+                                },
+                            },
                         },
                     });
                 },

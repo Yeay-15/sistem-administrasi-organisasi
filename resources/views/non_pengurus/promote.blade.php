@@ -26,36 +26,21 @@
                 <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Divisi</label>
-                        <div class="relative">
-                            <select name="division_id" required
-                                class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 pr-10 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                <option value="">Pilih Divisi</option>
-                                @foreach ($divisions as $division)
-                                    <option value="{{ $division->id }}" {{ old('division_id') == $division->id ? 'selected' : '' }}>{{ $division->name }}</option>
-                                @endforeach
-                            </select>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                            </svg>
-                        </div>
+                        <x-dropdown-select name="division_id" placeholder="Pilih Divisi" :required="true"
+                            :selected="old('division_id')" :options="$divisions->pluck('name', 'id')" />
                         @error('division_id')<p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Jabatan</label>
-                        <div class="relative">
-                            <select name="position" required
-                                class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 pr-10 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                <option value="">Pilih Jabatan</option>
-                                @foreach (['Ketua Umum', 'Sekretaris Umum', 'Bendahara Umum', 'Ketua Divisi', 'Sekretaris Divisi', 'Anggota Divisi'] as $pos)
-                                    <option value="{{ $pos }}" {{ old('position') == $pos ? 'selected' : '' }}>{{ $pos }}</option>
-                                @endforeach
-                            </select>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                            </svg>
-                        </div>
+                        <x-dropdown-select name="position" placeholder="Pilih Jabatan" :required="true"
+                            :selected="old('position')" :options="[
+                                'Ketua Umum' => 'Ketua Umum',
+                                'Sekretaris Umum' => 'Sekretaris Umum',
+                                'Bendahara Umum' => 'Bendahara Umum',
+                                'Ketua Divisi' => 'Ketua Divisi',
+                                'Sekretaris Divisi' => 'Sekretaris Divisi',
+                                'Anggota Divisi' => 'Anggota Divisi',
+                            ]" />
                         @error('position')<p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>@enderror
                     </div>
                     <div>

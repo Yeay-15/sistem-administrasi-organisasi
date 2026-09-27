@@ -13,7 +13,7 @@ class AgendaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Agenda::query();
+        $query = Agenda::with('divisions');
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%')
@@ -36,7 +36,7 @@ class AgendaController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'agenda_code' => ['required', 'string', 'max:50', 'unique:agendas,agenda_code'],
             'name' => ['required', 'string', 'max:255'],
             'date' => ['required', 'date'],
@@ -44,21 +44,40 @@ class AgendaController extends Controller
             'person_in_charge' => ['required', 'string', 'max:255'],
             'status' => ['required', 'string'],
             'notes' => ['nullable', 'string'],
+            'attendance_scope' => ['required', 'in:all,division'],
+            'division_ids' => ['required_if:attendance_scope,division', 'array'],
+            'division_ids.*' => ['exists:divisions,id'],
         ]);
 
-        Agenda::create(array_merge($request->all(), [
+        $agenda = Agenda::create(array_merge($validated, [
             // Checkbox HTML tidak mengirim apa pun saat tidak dicentang,
             // jadi statusnya dihitung eksplisit di sini alih-alih ikut
             // $request->all() begitu saja.
             'is_public' => $request->boolean('is_public', true),
         ]));
 
+        $agenda->divisions()->sync(
+            $validated['attendance_scope'] === 'division' ? ($validated['division_ids'] ?? []) : []
+        );
+
         return redirect()->route('agendas.index')->with('success', 'Agenda berhasil ditambahkan.');
     }
 
     public function show(Agenda $agenda)
     {
-        $members = Member::with('division')->where('status', 'Aktif')->get();
+        $agenda->load('divisions');
+
+        // Kalau cakupannya 'division', daftar absensi hanya berisi anggota
+        // dari divisi yang dicantumkan — bukan seluruh pengurus aktif —
+        // supaya pengurus divisi lain yang memang tidak diundang tidak ikut
+        // "kena absen alpha" di statistik kehadirannya.
+        $members = Member::with('division')->where('status', 'Aktif');
+
+        if (! $agenda->isForAllMembers()) {
+            $members->whereIn('division_id', $agenda->divisions->pluck('id'));
+        }
+
+        $members = $members->get();
         $existingAttendances = $agenda->attendances->keyBy('member_id');
 
         return view('agendas.show', compact('agenda', 'members', 'existingAttendances'));
@@ -67,12 +86,13 @@ class AgendaController extends Controller
     public function edit(Agenda $agenda)
     {
         $divisions = Division::all();
+        $agenda->load('divisions');
         return view('agendas.edit', compact('agenda', 'divisions'));
     }
 
     public function update(Request $request, Agenda $agenda)
     {
-        $request->validate([
+        $validated = $request->validate([
             'agenda_code' => ['required', 'string', 'max:50', 'unique:agendas,agenda_code,' . $agenda->id],
             'name' => ['required', 'string', 'max:255'],
             'date' => ['required', 'date'],
@@ -80,11 +100,18 @@ class AgendaController extends Controller
             'person_in_charge' => ['required', 'string', 'max:255'],
             'status' => ['required', 'string'],
             'notes' => ['nullable', 'string'],
+            'attendance_scope' => ['required', 'in:all,division'],
+            'division_ids' => ['required_if:attendance_scope,division', 'array'],
+            'division_ids.*' => ['exists:divisions,id'],
         ]);
 
-        $agenda->update(array_merge($request->all(), [
+        $agenda->update(array_merge($validated, [
             'is_public' => $request->boolean('is_public', true),
         ]));
+
+        $agenda->divisions()->sync(
+            $validated['attendance_scope'] === 'division' ? ($validated['division_ids'] ?? []) : []
+        );
 
         return redirect()->route('agendas.index')->with('success', 'Agenda berhasil diperbarui.');
     }

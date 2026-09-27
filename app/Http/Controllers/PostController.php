@@ -140,6 +140,32 @@ class PostController extends Controller
         return $request->file('cover')->storeAs('posts', $filename, 'public');
     }
 
+    /**
+     * Menangani upload gambar yang disisipkan LANGSUNG di dalam body editor
+     * Quill (bukan cover). Sebelumnya Quill meng-encode gambar ini sebagai
+     * base64 dan menyimpannya utuh di kolom `content` (longText) — bikin
+     * baris database membengkak & tidak ada kompresi sama sekali.
+     *
+     * Sekarang file-nya disimpan ke storage/app/public/posts/content dan
+     * yang dikembalikan ke Quill (lalu disisipkan ke HTML `content`) HANYA
+     * URL publiknya, persis seperti pola cover_path yang sudah ada.
+     */
+    public function uploadContentImage(Request $request)
+    {
+        $request->validate([
+            // Batas 4MB per gambar cukup longgar untuk foto kegiatan tapi tetap
+            // mencegah upload berukuran ekstrem lewat editor.
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:4096'],
+        ]);
+
+        $filename = Str::uuid() . '.' . $request->file('image')->getClientOriginalExtension();
+        $path = $request->file('image')->storeAs('posts/content', $filename, 'public');
+
+        return response()->json([
+            'url' => Storage::disk('public')->url($path),
+        ]);
+    }
+
     private function deleteCover(Post $post): void
     {
         if ($post->cover_path && Storage::disk('public')->exists($post->cover_path)) {

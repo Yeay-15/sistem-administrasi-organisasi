@@ -199,39 +199,18 @@
 
                             <div>
                                 <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Peran</label>
-                                <div class="relative">
-                                    <select x-model="positionCategory" required
-                                        class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 pr-10 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                        <option value="">Pilih peran...</option>
-                                        @foreach (\App\Models\Committee::positionCategories() as $pos)
-                                            <option value="{{ $pos }}">{{ $pos }}</option>
-                                        @endforeach
-                                        <option value="__custom__">+ Lainnya (ketik sendiri)</option>
-                                    </select>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                        class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                    </svg>
-                                </div>
+                                <x-dropdown-select placeholder="Pilih peran..." :required="true"
+                                    on-select="positionCategory = value"
+                                    :options="collect(\App\Models\Committee::positionCategories())->combine(\App\Models\Committee::positionCategories())->put('__custom__', '+ Lainnya (ketik sendiri)')" />
                                 <input type="text" x-show="positionCategory === '__custom__'" x-cloak x-model="customPosition"
                                     :required="positionCategory === '__custom__'" placeholder="Ketik peran, mis. Penanggung Jawab Lapangan"
                                     class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                             </div>
                             <div x-show="positionCategory === 'Ketua Bidang' || positionCategory === 'Anggota Bidang'" x-cloak>
                                 <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Bidang Panitia</label>
-                                <div class="relative">
-                                    <select name="panitia_bidang_id" :required="positionCategory === 'Ketua Bidang' || positionCategory === 'Anggota Bidang'"
-                                        class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 pr-10 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                        <option value="">Pilih bidang...</option>
-                                        @foreach ($bidangList as $bidang)
-                                            <option value="{{ $bidang->id }}">{{ $bidang->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                        class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                    </svg>
-                                </div>
+                                <x-dropdown-select name="panitia_bidang_id" placeholder="Pilih bidang..."
+                                    dynamic-required="positionCategory === 'Ketua Bidang' || positionCategory === 'Anggota Bidang'"
+                                    :options="$bidangList->pluck('name', 'id')" />
                                 @if ($bidangList->isEmpty())
                                     <p class="mt-1 text-xs text-amber-600 dark:text-amber-400">Belum ada bidang panitia. <a href="{{ route('bidang-panitia.index') }}" class="underline">Tambahkan dulu di sini.</a></p>
                                 @endif
@@ -290,18 +269,11 @@
                         @csrf
                         <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Kaitkan Agenda</label>
                         <div class="flex gap-2">
-                            <div class="relative flex-1">
-                                <select name="agenda_id" required
-                                    class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 pr-10 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                                    <option value="">Pilih agenda...</option>
-                                    @foreach ($availableAgendas as $agenda)
-                                        <option value="{{ $agenda->id }}">{{ $agenda->name }} ({{ \Carbon\Carbon::parse($agenda->date)->format('d/m/Y') }})</option>
-                                    @endforeach
-                                </select>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                    class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                </svg>
+                            <div class="flex-1">
+                                <x-dropdown-select name="agenda_id" placeholder="Pilih agenda..." :required="true"
+                                    :options="$availableAgendas->mapWithKeys(fn ($agenda) => [
+                                        $agenda->id => $agenda->name . ' (' . \Carbon\Carbon::parse($agenda->date)->format('d/m/Y') . ')',
+                                    ])" />
                             </div>
                             <button type="submit" class="shrink-0 rounded-lg bg-slate-800 px-3.5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900">+</button>
                         </div>
