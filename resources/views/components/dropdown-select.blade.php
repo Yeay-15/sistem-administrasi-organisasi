@@ -7,6 +7,7 @@
     'onSelect' => null,
     'dynamicRequired' => null, // ekspresi Alpine mentah, mis. "positionCategory === 'Ketua Bidang'"
     'disabled' => false,
+    'id' => null, // dipasang di tombol (bukan <select> tersembunyi) supaya <label for="..."> tetap nyambung
 ])
 
 @php
@@ -18,6 +19,12 @@
     foreach ($options as $key => $label) {
         $normalizedOptions[] = ['value' => (string) $key, 'label' => (string) $label];
     }
+    // Default id ikut name (kebiasaan lama di form-form KATIBER: id="division_id"
+    // berpasangan dengan <label for="division_id">). Boleh dioverride manual.
+    // Dikecualikan untuk name gaya array (mis. attendances[12][status]) di baris
+    // tabel berulang — karakter [] di id itu valid tapi tidak lazim, dan tidak
+    // ada <label for> yang butuh id di kasus itu.
+    $triggerId = $id ?? ($name && ! str_contains($name, '[') ? $name : null);
 @endphp
 
 {{--
@@ -31,10 +38,18 @@
     - Untuk dropdown yang murni kontrol tampilan & terhubung ke state
       Alpine form lain (mis. memicu logika tambahan saat berubah),
       jangan isi `name`, lalu pakai `on-select="namaVar = value; fungsiLain()"`.
+
+    PENTING soal panel opsi: di-teleport ke <body> (bukan absolute biasa di
+    dalam wrapper ini) karena banyak dropdown dipakai di dalam kartu/tabel
+    yang punya class `overflow-hidden` atau `overflow-x-auto` (untuk
+    lengkungan sudut / scroll horizontal tabel) — panel absolute biasa akan
+    ikut kepotong oleh overflow itu dan jadi kelihatan "tidak berfungsi"
+    padahal statenya sudah terbuka. Teleport ke body + posisi dihitung
+    manual (lihat toggle()/reposition() di Alpine.data('katiberSelect'))
+    menghindari masalah itu sepenuhnya.
 --}}
 <div
     x-data="katiberSelect(@js($normalizedOptions), @js((string) $selected))"
-    @click.outside="open = false"
     @keydown.escape="open = false"
     {{ $attributes->merge(['class' => 'relative']) }}
 >
@@ -48,7 +63,8 @@
         </select>
     @endif
 
-    <button type="button" @if ($disabled) title="{{ is_string($disabled) ? $disabled : '' }}" @else @click="open = !open" @endif
+    <button type="button" x-ref="trigger" @if ($triggerId) id="{{ $triggerId }}" @endif
+        @if ($disabled) title="{{ is_string($disabled) ? $disabled : '' }}" @else @click.stop="toggle()" @endif
         @if ($disabled) disabled @endif
         class="flex w-full items-center justify-between gap-2 rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-left text-sm text-slate-800 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
         <span class="truncate" :class="!value && 'text-slate-400 dark:text-slate-500'"
@@ -59,23 +75,26 @@
         </svg>
     </button>
 
-    <div x-show="open" x-cloak x-transition.opacity.duration.100ms
-        class="absolute z-30 mt-1.5 max-h-60 w-full overflow-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
-        <template x-if="options.length === 0">
-            <p class="px-3 py-2 text-sm text-slate-400 dark:text-slate-500">Tidak ada pilihan.</p>
-        </template>
-        <template x-for="opt in options" :key="opt.value">
-            <button type="button" @click="choose(opt.value); {{ $onSelect }}"
-                class="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition"
-                :class="opt.value === value
-                    ? 'bg-blue-50 font-medium text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
-                    : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700'">
-                <span class="truncate" x-text="opt.label"></span>
-                <svg x-show="opt.value === value" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke-width="2.5" stroke="currentColor" class="h-4 w-4 shrink-0">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-            </button>
-        </template>
-    </div>
+    <template x-teleport="body">
+        <div x-show="open" x-cloak x-transition.opacity.duration.100ms @click.outside="open = false"
+            @scroll.window="open = false" @resize.window="open = false" :style="panelStyle"
+            class="fixed z-[9999] max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg dark:border-slate-700 dark:bg-slate-800">
+            <template x-if="options.length === 0">
+                <p class="px-3 py-2 text-sm text-slate-400 dark:text-slate-500">Tidak ada pilihan.</p>
+            </template>
+            <template x-for="opt in options" :key="opt.value">
+                <button type="button" @click="choose(opt.value); {{ $onSelect }}"
+                    class="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition"
+                    :class="opt.value === value
+                        ? 'bg-blue-50 font-medium text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+                        : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700'">
+                    <span class="truncate" x-text="opt.label"></span>
+                    <svg x-show="opt.value === value" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="2.5" stroke="currentColor" class="h-4 w-4 shrink-0">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                </button>
+            </template>
+        </div>
+    </template>
 </div>

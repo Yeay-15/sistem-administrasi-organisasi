@@ -12,6 +12,7 @@ use App\Models\Member;
 use App\Models\OrganizationLeader;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PublicController extends Controller
 {
@@ -50,9 +51,13 @@ class PublicController extends Controller
         // Estafet Kepemimpinan — dikelola dari dashboard admin (menu
         // "Estafet Kepemimpinan"), diurutkan sesuai kolom "order" lalu
         // tahun mulai menjabat.
-        $leaders = OrganizationLeader::orderBy('order')->orderBy('period_start')->get();
+        // Bisa disembunyikan lewat toggle di halaman admin Estafet Kepemimpinan.
+        $showLeaders = HomeSetting::current()->show_leaders_public;
+        $leaders = $showLeaders
+            ? OrganizationLeader::orderBy('order')->orderBy('period_start')->get()
+            : collect();
 
-        return view('public.about', compact('leaders'));
+        return view('public.about', compact('leaders', 'showLeaders'));
     }
 
     // Profil > Visi & Misi
@@ -202,7 +207,7 @@ class PublicController extends Controller
         $settings = HomeSetting::current();
 
         abort_if($settings->aspiration_mode === 'nonaktif', 403, 'Formulir aspirasi sedang dinonaktifkan.');
-        abort_if($settings->aspiration_mode === 'pengurus_only' && !auth()->check(), 403, 'Silakan login sebagai pengurus untuk mengirim aspirasi internal.');
+        abort_if($settings->aspiration_mode === 'pengurus_only' && !Auth::check(), 403, 'Formulir aspirasi tidak tersedia.');
 
         $validated = $request->validate([
             'is_anonymous' => ['nullable', 'boolean'],

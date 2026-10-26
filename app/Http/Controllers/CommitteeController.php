@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Agenda;
 use App\Models\AuditLog;
 use App\Models\Committee;
+use App\Models\CommitteeField;
 use App\Models\CommitteeMember;
 use App\Models\Member;
-use App\Models\PanitiaBidang;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -50,25 +50,25 @@ class CommitteeController extends Controller
 
         AuditLog::record('Tambah Kepanitiaan', "Membuat kepanitiaan baru \"{$committee->name}\".");
 
-        return redirect()->route('kepanitiaan.show', $committee)->with('success', 'Kepanitiaan berhasil dibuat. Sekarang tambahkan anggota panitianya.');
+        return redirect()->route('committees.show', $committee)->with('success', 'Kepanitiaan berhasil dibuat. Sekarang tambahkan anggota panitianya.');
     }
 
-    public function show(Committee $kepanitiaan)
+    public function show(Committee $committee)
     {
-        $kepanitiaan->load([
-            'committeeMembers' => fn ($q) => $q->with(['member', 'bidang'])->orderBy('position_category'),
+        $committee->load([
+            'committeeMembers' => fn ($q) => $q->with(['member', 'committeeField'])->orderBy('position_category'),
             'agendas',
         ]);
 
-        $terasPanitia = $kepanitiaan->committeeMembers->filter->isTerasPanitia();
-        $anggotaBidang = $kepanitiaan->committeeMembers->reject->isTerasPanitia()->groupBy(fn ($cm) => $cm->bidang->name ?? 'Tanpa Bidang');
+        $committeeLeadership = $committee->committeeMembers->filter->isCommitteeLeadership();
+        $fieldMembers = $committee->committeeMembers->reject->isCommitteeLeadership()->groupBy(fn ($cm) => $cm->committeeField->name ?? 'Tanpa Bidang');
 
-        $bidangList = PanitiaBidang::orderBy('name')->get();
+        $fields = CommitteeField::orderBy('name')->get();
 
         // Untuk dropdown "pilih orang yang sudah ada" — semua members (Pengurus
         // & Non-Pengurus) yang BELUM terdaftar sebagai anggota di kepanitiaan ini,
         // supaya tidak bisa ditambahkan dobel lewat form yang sama.
-        $existingMemberIds = $kepanitiaan->committeeMembers->pluck('member_id')->unique();
+        $existingMemberIds = $committee->committeeMembers->pluck('member_id')->unique();
         $availableMembers = Member::whereNotIn('id', $existingMemberIds)
             ->orderBy('membership_type')
             ->orderBy('name')
@@ -76,25 +76,25 @@ class CommitteeController extends Controller
 
         // Untuk mengaitkan agenda (rapat persiapan + hari-H) — agenda yang
         // belum ditautkan ke kepanitiaan ini, terbaru dulu.
-        $linkedAgendaIds = $kepanitiaan->agendas->pluck('id');
+        $linkedAgendaIds = $committee->agendas->pluck('id');
         $availableAgendas = Agenda::whereNotIn('id', $linkedAgendaIds)->orderByDesc('date')->limit(100)->get();
 
         return view('committees.show', compact(
-            'kepanitiaan',
-            'terasPanitia',
-            'anggotaBidang',
-            'bidangList',
+            'committee',
+            'committeeLeadership',
+            'fieldMembers',
+            'fields',
             'availableMembers',
             'availableAgendas'
         ));
     }
 
-    public function edit(Committee $kepanitiaan)
+    public function edit(Committee $committee)
     {
-        return view('committees.edit', ['committee' => $kepanitiaan]);
+        return view('committees.edit', compact('committee'));
     }
 
-    public function update(Request $request, Committee $kepanitiaan)
+    public function update(Request $request, Committee $committee)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -105,20 +105,20 @@ class CommitteeController extends Controller
             'status' => ['required', 'string', 'in:Persiapan,Berjalan,Selesai'],
         ]);
 
-        $kepanitiaan->update($validated);
+        $committee->update($validated);
 
-        AuditLog::record('Ubah Kepanitiaan', "Memperbarui data kepanitiaan \"{$kepanitiaan->name}\".");
+        AuditLog::record('Ubah Kepanitiaan', "Memperbarui data kepanitiaan \"{$committee->name}\".");
 
-        return redirect()->route('kepanitiaan.show', $kepanitiaan)->with('success', 'Kepanitiaan berhasil diperbarui.');
+        return redirect()->route('committees.show', $committee)->with('success', 'Kepanitiaan berhasil diperbarui.');
     }
 
-    public function destroy(Committee $kepanitiaan)
+    public function destroy(Committee $committee)
     {
-        AuditLog::record('Hapus Kepanitiaan', "Menghapus kepanitiaan \"{$kepanitiaan->name}\".");
+        AuditLog::record('Hapus Kepanitiaan', "Menghapus kepanitiaan \"{$committee->name}\".");
 
-        $kepanitiaan->delete();
+        $committee->delete();
 
-        return redirect()->route('kepanitiaan.index')->with('success', 'Kepanitiaan berhasil dihapus.');
+        return redirect()->route('committees.index')->with('success', 'Kepanitiaan berhasil dihapus.');
     }
 
     /**
@@ -127,7 +127,7 @@ class CommitteeController extends Controller
      * (Pengurus atau Non-Pengurus) — untuk mendaftarkan orang yang
      * benar-benar baru, form memakai quickCreateMember() lebih dulu.
      */
-    public function addMember(Request $request, Committee $kepanitiaan)
+    public function addMember(Request $request, Committee $committee)
     {
         $validated = $request->validate([
             'member_id' => ['required', 'exists:members,id'],
@@ -135,45 +135,45 @@ class CommitteeController extends Controller
             // ATAU diketik bebas lewat opsi "Lainnya" di form (lihat
             // Committee::positionCategories() untuk daftar siap pakainya).
             'position_category' => ['required', 'string', 'max:100'],
-            'panitia_bidang_id' => ['nullable', 'exists:panitia_bidang,id'],
+            'committee_field_id' => ['nullable', 'exists:committee_fields,id'],
             'notes' => ['nullable', 'string'],
         ]);
 
-        $isBidangRole = in_array($validated['position_category'], ['Ketua Bidang', 'Anggota Bidang'], true);
+        $isFieldRole = in_array($validated['position_category'], ['Ketua Bidang', 'Anggota Bidang'], true);
 
-        if ($isBidangRole && empty($validated['panitia_bidang_id'])) {
+        if ($isFieldRole && empty($validated['committee_field_id'])) {
             throw ValidationException::withMessages([
-                'panitia_bidang_id' => 'Pilih bidang panitia untuk peran ini.',
+                'committee_field_id' => 'Pilih bidang panitia untuk peran ini.',
             ]);
         }
 
-        if (! $isBidangRole) {
-            $validated['panitia_bidang_id'] = null;
+        if (! $isFieldRole) {
+            $validated['committee_field_id'] = null;
         }
 
-        $validated['committee_id'] = $kepanitiaan->id;
+        $validated['committee_id'] = $committee->id;
 
         CommitteeMember::create($validated);
 
         $member = Member::find($validated['member_id']);
         AuditLog::record(
             'Tambah Anggota Kepanitiaan',
-            "Menambahkan \"{$member->name}\" sebagai {$validated['position_category']} di kepanitiaan \"{$kepanitiaan->name}\"."
+            "Menambahkan \"{$member->name}\" sebagai {$validated['position_category']} di kepanitiaan \"{$committee->name}\"."
         );
 
-        return redirect()->route('kepanitiaan.show', $kepanitiaan)->with('success', 'Anggota panitia berhasil ditambahkan.');
+        return redirect()->route('committees.show', $committee)->with('success', 'Anggota panitia berhasil ditambahkan.');
     }
 
-    public function removeMember(Committee $kepanitiaan, CommitteeMember $committeeMember)
+    public function removeMember(Committee $committee, CommitteeMember $committeeMember)
     {
-        abort_unless($committeeMember->committee_id === $kepanitiaan->id, 404);
+        abort_unless($committeeMember->committee_id === $committee->id, 404);
 
         $name = $committeeMember->member->name ?? '(orang telah dihapus)';
         $committeeMember->delete();
 
-        AuditLog::record('Hapus Anggota Kepanitiaan', "Mengeluarkan \"{$name}\" dari kepanitiaan \"{$kepanitiaan->name}\".");
+        AuditLog::record('Hapus Anggota Kepanitiaan', "Mengeluarkan \"{$name}\" dari kepanitiaan \"{$committee->name}\".");
 
-        return redirect()->route('kepanitiaan.show', $kepanitiaan)->with('success', 'Anggota panitia berhasil dikeluarkan.');
+        return redirect()->route('committees.show', $committee)->with('success', 'Anggota panitia berhasil dikeluarkan.');
     }
 
     /**
@@ -204,21 +204,21 @@ class CommitteeController extends Controller
         ]);
     }
 
-    public function attachAgenda(Request $request, Committee $kepanitiaan)
+    public function attachAgenda(Request $request, Committee $committee)
     {
         $validated = $request->validate([
             'agenda_id' => ['required', 'exists:agendas,id'],
         ]);
 
-        $kepanitiaan->agendas()->syncWithoutDetaching([$validated['agenda_id']]);
+        $committee->agendas()->syncWithoutDetaching([$validated['agenda_id']]);
 
-        return redirect()->route('kepanitiaan.show', $kepanitiaan)->with('success', 'Agenda berhasil dikaitkan ke kepanitiaan ini.');
+        return redirect()->route('committees.show', $committee)->with('success', 'Agenda berhasil dikaitkan ke kepanitiaan ini.');
     }
 
-    public function detachAgenda(Committee $kepanitiaan, Agenda $agenda)
+    public function detachAgenda(Committee $committee, Agenda $agenda)
     {
-        $kepanitiaan->agendas()->detach($agenda->id);
+        $committee->agendas()->detach($agenda->id);
 
-        return redirect()->route('kepanitiaan.show', $kepanitiaan)->with('success', 'Agenda berhasil dilepas dari kepanitiaan ini.');
+        return redirect()->route('committees.show', $committee)->with('success', 'Agenda berhasil dilepas dari kepanitiaan ini.');
     }
 }

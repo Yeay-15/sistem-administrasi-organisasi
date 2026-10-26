@@ -9,6 +9,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -19,18 +20,33 @@ class RoleManagementController extends Controller
     public function index()
     {
         $roles = Role::with('permissions')->orderBy('id')->get();
-        $permissionMatrix = $this->buildPermissionMatrix(Permission::orderBy('group')->orderBy('label')->get());
+        $roleFeatures = $this->featuresFrom(Permission::orderBy('group')->orderBy('label')->get());
+        $roleFeaturesUi = $roleFeatures
+            ->map(fn (array $f) => Arr::only($f, ['key', 'label', 'group', 'tiers']))
+            ->values();
+        $roleAccess = $roles
+            ->reject(fn (Role $role) => $role->isSuperAdmin())
+            ->mapWithKeys(fn (Role $role) => [$role->id => $this->roleLevels($role, $roleFeatures)]);
+        $editableRoles = $roles->reject(fn (Role $role) => $role->isSuperAdmin())->values();
 
-        // Hak akses per-Divisi hanya menampilkan permission grup "Konten"
-        // (mis. Berita, Galeri) — permission lain (mis. Kelola Agenda) memang
-        // secara desain hanya diatur lewat peran (Role), bukan divisi.
-        // Menambah permission baru ke grup ini otomatis muncul di sini tanpa
-        // perlu ubah kode apa pun. Dipakai struktur baris yang sama (3 toggle:
-        // Lihat/Kelola/Hapus) seperti matrix peran di atas.
-        $divisionPermissionMatrix = $this->buildPermissionMatrix(
-            Permission::where('group', 'Konten')->orderBy('label')->get()
-        )->get('Konten', collect());
+        // Hak akses per-Divisi hanya menampilkan permission grup "Konten" dan
+        // "Inventaris" (permission lain, mis. Kelola Agenda, memang hanya diatur
+        // lewat peran). Setiap fitur = satu baris: satu level akses + siapa di
+        // divisi yang boleh (Kadiv / Sekdiv / Anggota). Permission baru di grup
+        // ini otomatis muncul tanpa ubah kode.
+        $divisionFeatures = $this->featuresFrom(
+            Permission::whereIn('group', ['Konten', 'Inventaris'])->orderBy('label')->get()
+        );
         $divisions = Division::with('permissions')->orderBy('name')->get();
+
+        $divisionFeaturesUi = $divisionFeatures
+            ->map(fn (array $f) => Arr::only($f, ['key', 'label', 'group', 'tiers']))
+            ->values();
+        $divisionsUi = $divisions->map(fn (Division $d) => ['id' => $d->id, 'name' => $d->name])->values();
+
+        $divisionAccess = $divisions->mapWithKeys(
+            fn (Division $division) => [$division->id => $this->accessFor($division, $divisionFeatures)]
+        );
 
         $users = User::with(['role', 'member.division'])->orderBy('name')->get();
         $members = Member::where('status', 'Aktif')->orderBy('name')->get();
@@ -50,9 +66,14 @@ class RoleManagementController extends Controller
 
         return view('roles_management.index', compact(
             'roles',
-            'permissionMatrix',
+            'roleFeaturesUi',
+            'roleAccess',
+            'editableRoles',
             'divisions',
-            'divisionPermissionMatrix',
+            'divisionFeatures',
+            'divisionFeaturesUi',
+            'divisionsUi',
+            'divisionAccess',
             'users',
             'members',
             'membersWithoutAccount',
@@ -80,6 +101,7 @@ class RoleManagementController extends Controller
 
             if (! isset($rows[$key])) {
                 $rows[$key] = [
+                    'key' => $base,
                     'group' => $permission->group,
                     'label' => preg_replace('/^(Lihat|Kelola|Hapus)\s+/', '', $permission->label),
                     'view' => null,
@@ -101,9 +123,31 @@ class RoleManagementController extends Controller
     }
 
     /**
-     * Menyalakan/mematikan satu permission untuk satu role (dari tombol toggle).
+     * Level akses satu peran untuk semua fitur: tingkat tertinggi yang aktif.
      */
-    public function togglePermission(Request $request, Role $role, Permission $permission)
+    private function roleLevels(Role $role, $features): array
+    {
+        $ownedIds = $role->permissions->pluck('id');
+        $levels = [];
+
+        foreach ($features as $feature) {
+            $level = 'none';
+            foreach ($feature['tiers'] as $tier) {
+                if ($ownedIds->contains($feature['permissions'][$tier]->id)) {
+                    $level = $tier;
+                }
+            }
+            $levels[$feature['key']] = $level;
+        }
+
+        return $levels;
+    }
+
+    /**
+     * Mengatur level akses satu peran pada satu fitur (none / view / manage / delete).
+     * Level bertingkat: memilih level tinggi otomatis menyalakan level di bawahnya.
+     */
+    public function updateRoleAccess(Request $request, Role $role, string $feature)
     {
         if ($role->isSuperAdmin()) {
             return response()->json([
@@ -111,60 +155,243 @@ class RoleManagementController extends Controller
             ], 422);
         }
 
-        $isActive = $role->permissions()->where('permission_id', $permission->id)->exists();
+        $row = $this->featuresFrom(Permission::orderBy('group')->orderBy('label')->get())
+            ->firstWhere('key', $feature);
+        abort_if(! $row, 404);
 
-        // Cegah admin yang sedang login menonaktifkan akses \"Manajemen Peran & Akses\"
-        // untuk perannya sendiri, supaya tidak langsung terkunci dari halaman ini.
-        if ($isActive && $permission->slug === 'manage_roles' && $role->id === Auth::user()->role_id) {
+        $validated = $request->validate([
+            'level' => ['required', Rule::in(array_merge(['none'], $row['tiers']))],
+        ]);
+        $level = $validated['level'];
+
+        // Cegah admin mematikan akses "Manajemen Peran & Akses" untuk perannya
+        // sendiri, supaya tidak langsung terkunci dari halaman ini.
+        if ($feature === 'roles' && $level === 'none' && $role->id === Auth::user()->role_id) {
             return response()->json([
                 'message' => 'Anda tidak dapat menonaktifkan akses ini untuk peran Anda sendiri.',
             ], 422);
         }
 
-        if ($isActive) {
-            $role->permissions()->detach($permission->id);
-        } else {
-            $role->permissions()->attach($permission->id);
+        $cutoff = $level === 'none' ? -1 : array_search($level, $row['tiers'], true);
+
+        $attach = [];
+        $detach = [];
+        foreach ($row['tiers'] as $index => $tier) {
+            $permissionId = $row['permissions'][$tier]->id;
+            if ($index <= $cutoff) {
+                $attach[] = $permissionId;
+            } else {
+                $detach[] = $permissionId;
+            }
+        }
+
+        if ($detach) {
+            $role->permissions()->detach($detach);
+        }
+        if ($attach) {
+            $role->permissions()->syncWithoutDetaching($attach);
         }
 
         AuditLog::record(
             'Ubah Hak Akses',
-            sprintf(
-                '%s hak akses "%s" untuk peran "%s".',
-                $isActive ? 'Menonaktifkan' : 'Mengaktifkan',
-                $permission->label,
-                $role->name
-            )
+            sprintf('Akses peran "%s" untuk "%s": %s.', $role->name, $row['label'], $level === 'none' ? 'Tidak ada' : $level)
         );
 
-        return response()->json(['active' => ! $isActive]);
+        return response()->json(['level' => $level]);
     }
 
     /**
-     * Menyalakan/mematikan satu permission untuk satu Divisi (hak akses
-     * ekstra per-divisi, terlepas dari peran anggotanya).
+     * Tingkatan akses berurutan: lihat < kelola < hapus. Memilih satu tingkat
+     * otomatis menyalakan tingkat di bawahnya, jadi kombinasi tak masuk akal
+     * (mis. Hapus nyala tapi Lihat mati) tidak mungkin terjadi.
      */
-    public function toggleDivisionPermission(Request $request, Division $division, Permission $permission)
-    {
-        $isActive = $division->permissions()->where('permission_id', $permission->id)->exists();
+    private const TIERS = ['view', 'manage', 'delete'];
 
-        if ($isActive) {
-            $division->permissions()->detach($permission->id);
-        } else {
-            $division->permissions()->attach($permission->id);
+    /**
+     * Daftar fitur yang bisa diatur per divisi. Tiap fitur membawa tingkat yang
+     * benar-benar tersedia (mis. Pengaturan Beranda hanya punya 'manage',
+     * Aspirasi Mahasiswa hanya 'view' & 'delete').
+     *
+     * @return \Illuminate\Support\Collection<int, array{key:string,label:string,group:string,tiers:array<int,string>,permissions:array<string,Permission>}>
+     */
+    private function divisionFeatures()
+    {
+        return $this->featuresFrom(
+            Permission::whereIn('group', ['Konten', 'Inventaris'])->orderBy('label')->get()
+        );
+    }
+
+    /**
+     * Ubah daftar permission menjadi daftar fitur bertingkat (lihat/kelola/hapus).
+     */
+    private function featuresFrom($permissions)
+    {
+        return $this->buildPermissionMatrix($permissions)
+            ->flatten(1)
+            ->map(function (array $row) {
+                $tiers = array_values(array_filter(self::TIERS, fn ($tier) => $row[$tier] !== null));
+
+                return [
+                    'key' => $row['key'],
+                    'label' => $row['label'],
+                    'group' => $row['group'],
+                    'tiers' => $tiers,
+                    'permissions' => collect($tiers)->mapWithKeys(fn ($tier) => [$tier => $row[$tier]])->all(),
+                ];
+            })
+            ->filter(fn (array $feature) => $feature['tiers'] !== [])
+            ->values();
+    }
+
+    /**
+     * Keadaan akses satu divisi untuk semua fitur: level tertinggi yang aktif
+     * + centang Kadiv/Sekdiv/Anggota (diambil dari tingkat tertinggi itu).
+     */
+    private function accessFor(Division $division, $features): array
+    {
+        $result = [];
+
+        foreach ($features as $feature) {
+            $level = 'none';
+            $scopes = ['kadiv' => false, 'sekdiv' => false, 'anggota' => false];
+
+            foreach ($feature['tiers'] as $tier) {
+                $attached = $division->permissions->firstWhere('id', $feature['permissions'][$tier]->id);
+
+                if ($attached) {
+                    $level = $tier;
+                    $scopes = [
+                        'kadiv' => (bool) $attached->pivot->scope_kadiv,
+                        'sekdiv' => (bool) $attached->pivot->scope_sekdiv,
+                        'anggota' => (bool) $attached->pivot->scope_anggota,
+                    ];
+                }
+            }
+
+            $result[$feature['key']] = ['level' => $level] + $scopes;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Mengatur akses satu divisi pada satu fitur sekaligus: level (none / view /
+     * manage / delete) + siapa di divisi yang boleh (Kadiv, Sekdiv, Anggota).
+     */
+    public function updateDivisionAccess(Request $request, Division $division, string $feature)
+    {
+        $row = $this->divisionFeatures()->firstWhere('key', $feature);
+        abort_if(! $row, 404);
+
+        $validated = $request->validate([
+            'level' => ['required', Rule::in(array_merge(['none'], $row['tiers']))],
+            'kadiv' => ['required', 'boolean'],
+            'sekdiv' => ['required', 'boolean'],
+            'anggota' => ['required', 'boolean'],
+        ]);
+
+        $level = $validated['level'];
+        $scopes = [
+            'scope_kadiv' => $request->boolean('kadiv'),
+            'scope_sekdiv' => $request->boolean('sekdiv'),
+            'scope_anggota' => $request->boolean('anggota'),
+        ];
+
+        if ($level !== 'none' && ! in_array(true, $scopes, true)) {
+            return response()->json([
+                'message' => 'Pilih minimal satu: Kadiv, Sekdiv, atau Anggota.',
+            ], 422);
+        }
+
+        $cutoff = $level === 'none' ? -1 : array_search($level, $row['tiers'], true);
+
+        $attach = [];
+        $detach = [];
+        foreach ($row['tiers'] as $index => $tier) {
+            $permissionId = $row['permissions'][$tier]->id;
+
+            if ($index <= $cutoff) {
+                $attach[$permissionId] = $scopes;
+            } else {
+                $detach[] = $permissionId;
+            }
+        }
+
+        if ($detach) {
+            $division->permissions()->detach($detach);
+        }
+        if ($attach) {
+            $division->permissions()->syncWithoutDetaching($attach);
         }
 
         AuditLog::record(
             'Ubah Hak Akses Divisi',
             sprintf(
-                '%s hak akses "%s" untuk Divisi "%s".',
-                $isActive ? 'Menonaktifkan' : 'Mengaktifkan',
-                $permission->label,
-                $division->name
+                'Akses Divisi "%s" untuk "%s": %s%s.',
+                $division->name,
+                $row['label'],
+                $level === 'none' ? 'Tidak ada' : $level,
+                $level === 'none' ? '' : ' (' . implode(', ', array_keys(array_filter([
+                    'Kadiv' => $scopes['scope_kadiv'],
+                    'Sekdiv' => $scopes['scope_sekdiv'],
+                    'Anggota' => $scopes['scope_anggota'],
+                ]))) . ')'
             )
         );
 
-        return response()->json(['active' => ! $isActive]);
+        return response()->json([
+            'level' => $level,
+            'kadiv' => $scopes['scope_kadiv'],
+            'sekdiv' => $scopes['scope_sekdiv'],
+            'anggota' => $scopes['scope_anggota'],
+        ]);
+    }
+
+    /**
+     * Menyalin seluruh pengaturan akses (fitur Konten & Inventaris) dari
+     * divisi lain — menimpa pengaturan divisi tujuan.
+     */
+    public function copyDivisionAccess(Request $request, Division $division)
+    {
+        $validated = $request->validate([
+            'from_division_id' => ['required', 'exists:divisions,id'],
+        ]);
+
+        if ((int) $validated['from_division_id'] === $division->id) {
+            return response()->json(['message' => 'Pilih divisi sumber yang berbeda.'], 422);
+        }
+
+        $source = Division::with('permissions')->findOrFail($validated['from_division_id']);
+        $features = $this->divisionFeatures();
+
+        $featurePermissionIds = $features
+            ->flatMap(fn (array $feature) => collect($feature['permissions'])->pluck('id'))
+            ->all();
+
+        $attach = [];
+        foreach ($source->permissions as $permission) {
+            if (in_array($permission->id, $featurePermissionIds, true)) {
+                $attach[$permission->id] = [
+                    'scope_kadiv' => (bool) $permission->pivot->scope_kadiv,
+                    'scope_sekdiv' => (bool) $permission->pivot->scope_sekdiv,
+                    'scope_anggota' => (bool) $permission->pivot->scope_anggota,
+                ];
+            }
+        }
+
+        $division->permissions()->detach($featurePermissionIds);
+        if ($attach) {
+            $division->permissions()->attach($attach);
+        }
+
+        AuditLog::record(
+            'Salin Hak Akses Divisi',
+            sprintf('Menyalin hak akses Divisi "%s" ke Divisi "%s".', $source->name, $division->name)
+        );
+
+        return response()->json([
+            'access' => $this->accessFor($division->load('permissions'), $features),
+        ]);
     }
 
     /**

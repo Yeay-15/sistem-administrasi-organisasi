@@ -65,7 +65,7 @@ class IncomingLetterController extends Controller
             'subject' => ['required', 'string', 'max:255'],
             'addressed_to' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'file_path' => ['nullable', 'file', 'mimes:pdf', 'max:5120'], // Hanya PDF, Max 5MB
+            'file_path' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'], // PDF/JPG/JPEG/PNG, Max 5MB
         ]);
 
         $data = $request->all();
@@ -78,7 +78,7 @@ class IncomingLetterController extends Controller
             $sender = Str::slug($request->sender, '-');
             $subject = Str::slug(Str::limit($request->subject, 30, ''), '-'); // Batasi perihal max 30 karakter
 
-            $filename = "{$date}_{$no}_{$sender}_{$subject}.pdf";
+            $filename = "{$date}_{$no}_{$sender}_{$subject}.{$request->file('file_path')->extension()}";
 
             // 2. Simpan menggunakan storeAs
             $path = $request->file('file_path')->storeAs('incoming_letters', $filename, 'public');
@@ -104,7 +104,7 @@ class IncomingLetterController extends Controller
             'subject' => ['required', 'string', 'max:255'],
             'addressed_to' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'file_path' => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
+            'file_path' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
 
         $data = $request->all();
@@ -119,7 +119,7 @@ class IncomingLetterController extends Controller
             $sender = Str::slug($request->sender, '-');
             $subject = Str::slug(Str::limit($request->subject, 30, ''), '-'); // Batasi perihal max 30 karakter
 
-            $filename = "{$date}_{$no}_{$sender}_{$subject}.pdf";
+            $filename = "{$date}_{$no}_{$sender}_{$subject}.{$request->file('file_path')->extension()}";
 
             // 2. Simpan menggunakan storeAs
             $path = $request->file('file_path')->storeAs('incoming_letters', $filename, 'public');

@@ -65,7 +65,10 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    // Diubah dari default Laravel 'UTC' ke 'Asia/Jakarta' (WIB) — sebelumnya
+    // ini yang bikin semua jam (Cadangan Data, Audit Log, dll) tampil
+    // selisih 7 jam dari waktu lokal Aceh/Jakarta sebenarnya.
+    'timezone' => 'Asia/Jakarta',
 
     /*
     |--------------------------------------------------------------------------

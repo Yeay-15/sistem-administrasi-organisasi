@@ -1,43 +1,43 @@
 @extends('layouts.app')
 
-@section('title', $kepanitiaan->name . ' - Kepanitiaan - KATIBER')
+@section('title', $committee->name . ' - Kepanitiaan - KATIBER')
 
 @section('content')
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
             <div class="mb-2 flex items-center gap-2">
-                <a href="{{ route('kepanitiaan.index') }}" class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
+                <a href="{{ route('committees.index') }}" class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                     </svg>
                 </a>
                 <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold
-                    {{ $kepanitiaan->status === 'Selesai' ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' : ($kepanitiaan->status === 'Berjalan' ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400' : 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400') }}">
-                    {{ $kepanitiaan->status }}
+                    {{ $committee->status === 'Selesai' ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' : ($committee->status === 'Berjalan' ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400' : 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400') }}">
+                    {{ $committee->status }}
                 </span>
             </div>
-            <h1 class="text-2xl font-bold text-slate-800 dark:text-white">{{ $kepanitiaan->name }}</h1>
+            <h1 class="text-2xl font-bold text-slate-800 dark:text-white">{{ $committee->name }}</h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {{ $kepanitiaan->type ?? 'Tanpa jenis' }} ·
-                @if ($kepanitiaan->start_date)
-                    {{ $kepanitiaan->start_date->translatedFormat('d M Y') }}{{ $kepanitiaan->end_date ? ' - ' . $kepanitiaan->end_date->translatedFormat('d M Y') : '' }}
+                {{ $committee->type ?? 'Tanpa jenis' }} ·
+                @if ($committee->start_date)
+                    {{ $committee->start_date->translatedFormat('d M Y') }}{{ $committee->end_date ? ' - ' . $committee->end_date->translatedFormat('d M Y') : '' }}
                 @else
                     Tanggal belum ditentukan
                 @endif
             </p>
-            @if ($kepanitiaan->description)
-                <p class="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">{{ $kepanitiaan->description }}</p>
+            @if ($committee->description)
+                <p class="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">{{ $committee->description }}</p>
             @endif
         </div>
         <div class="flex items-center gap-2">
             @can('manage_committees')
-                <a href="{{ route('kepanitiaan.edit', $kepanitiaan->id) }}"
+                <a href="{{ route('committees.edit', $committee->id) }}"
                     class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                     Edit
                 </a>
             @endcan
             @can('delete_committees')
-                <form action="{{ route('kepanitiaan.destroy', $kepanitiaan->id) }}" method="POST" onsubmit="return confirm('Hapus kepanitiaan ini beserta seluruh datanya?');">
+                <form action="{{ route('committees.destroy', $committee->id) }}" method="POST" onsubmit="return confirm('Hapus kepanitiaan ini beserta seluruh datanya?');">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10">Hapus</button>
@@ -59,8 +59,8 @@
                     <h2 class="text-sm font-bold text-slate-800 dark:text-white">Teras Panitia</h2>
                 </div>
                 <div class="divide-y divide-slate-100 dark:divide-slate-800">
-                    @forelse ($terasPanitia as $cm)
-                        @include('committees._anggota-row', ['cm' => $cm])
+                    @forelse ($committeeLeadership as $cm)
+                        @include('committees._member-row', ['cm' => $cm])
                     @empty
                         <p class="px-5 py-6 text-sm text-slate-400 dark:text-slate-500">Belum ada Ketua/Sekretaris/Bendahara Panitia.</p>
                     @endforelse
@@ -72,12 +72,12 @@
                 <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
                     <h2 class="text-sm font-bold text-slate-800 dark:text-white">Anggota per Bidang</h2>
                 </div>
-                @forelse ($anggotaBidang as $bidangName => $rows)
+                @forelse ($fieldMembers as $bidangName => $rows)
                     <div class="border-b border-slate-100 px-5 py-3 dark:border-slate-800">
                         <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $bidangName }}</p>
                         <div class="divide-y divide-slate-50 dark:divide-slate-800/60">
                             @foreach ($rows as $cm)
-                                @include('committees._anggota-row', ['cm' => $cm])
+                                @include('committees._member-row', ['cm' => $cm])
                             @endforeach
                         </div>
                     </div>
@@ -129,7 +129,7 @@
                                 if (!this.quickName.trim()) { alert('Isi nama orangnya dulu.'); return; }
                                 this.submitting = true;
                                 try {
-                                    const res = await fetch('{{ route('kepanitiaan.anggota.quick-create') }}', {
+                                    const res = await fetch('{{ route('committees.members.quick-create') }}', {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
                                         body: JSON.stringify({ name: this.quickName, university: this.quickUniversity })
@@ -146,7 +146,7 @@
                         }
                     }">
                     <h3 class="mb-4 text-sm font-bold text-slate-800 dark:text-white">Tambah Anggota Panitia</h3>
-                    <form action="{{ route('kepanitiaan.anggota.store', $kepanitiaan->id) }}" method="POST" @submit="handleSubmit($event)">
+                    <form action="{{ route('committees.members.store', $committee->id) }}" method="POST" @submit="handleSubmit($event)">
                         @csrf
                         <input type="hidden" name="member_id" :value="memberId">
                         <input type="hidden" name="position_category" :value="finalPositionCategory()">
@@ -208,11 +208,11 @@
                             </div>
                             <div x-show="positionCategory === 'Ketua Bidang' || positionCategory === 'Anggota Bidang'" x-cloak>
                                 <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Bidang Panitia</label>
-                                <x-dropdown-select name="panitia_bidang_id" placeholder="Pilih bidang..."
+                                <x-dropdown-select name="committee_field_id" placeholder="Pilih bidang..."
                                     dynamic-required="positionCategory === 'Ketua Bidang' || positionCategory === 'Anggota Bidang'"
-                                    :options="$bidangList->pluck('name', 'id')" />
-                                @if ($bidangList->isEmpty())
-                                    <p class="mt-1 text-xs text-amber-600 dark:text-amber-400">Belum ada bidang panitia. <a href="{{ route('bidang-panitia.index') }}" class="underline">Tambahkan dulu di sini.</a></p>
+                                    :options="$fields->pluck('name', 'id')" />
+                                @if ($fields->isEmpty())
+                                    <p class="mt-1 text-xs text-amber-600 dark:text-amber-400">Belum ada bidang panitia. <a href="{{ route('committee-fields.index') }}" class="underline">Tambahkan dulu di sini.</a></p>
                                 @endif
                             </div>
                             <div class="md:col-span-2">
@@ -242,14 +242,14 @@
                     <p class="mt-0.5 text-xs text-slate-400">Rapat persiapan & hari-H yang dipakai untuk menghitung statistik kehadiran panitia.</p>
                 </div>
                 <div class="divide-y divide-slate-100 dark:divide-slate-800">
-                    @forelse ($kepanitiaan->agendas as $agenda)
+                    @forelse ($committee->agendas as $agenda)
                         <div class="flex items-center justify-between px-5 py-3">
                             <div>
                                 <p class="text-sm font-semibold text-slate-800 dark:text-white">{{ $agenda->name }}</p>
                                 <p class="text-xs text-slate-400">{{ \Carbon\Carbon::parse($agenda->date)->translatedFormat('d M Y') }} · {{ $agenda->type }}</p>
                             </div>
                             @can('manage_committees')
-                                <form action="{{ route('kepanitiaan.agenda.destroy', [$kepanitiaan->id, $agenda->id]) }}" method="POST" onsubmit="return confirm('Lepas agenda ini dari kepanitiaan?');">
+                                <form action="{{ route('committees.agenda.destroy', [$committee->id, $agenda->id]) }}" method="POST" onsubmit="return confirm('Lepas agenda ini dari kepanitiaan?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="rounded-lg p-1.5 text-red-500 transition hover:bg-red-50 dark:hover:bg-red-500/10">
@@ -265,7 +265,7 @@
                     @endforelse
                 </div>
                 @can('manage_committees')
-                    <form action="{{ route('kepanitiaan.agenda.store', $kepanitiaan->id) }}" method="POST" class="border-t border-slate-100 p-4 dark:border-slate-800">
+                    <form action="{{ route('committees.agenda.store', $committee->id) }}" method="POST" class="border-t border-slate-100 p-4 dark:border-slate-800">
                         @csrf
                         <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Kaitkan Agenda</label>
                         <div class="flex gap-2">

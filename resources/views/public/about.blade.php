@@ -98,6 +98,7 @@
         </div>
 
         {{-- ============ ESTAFET KEPEMIMPINAN (TIMELINE) ============ --}}
+        @if ($showLeaders)
         <div class="reveal mt-14">
             <div class="mb-8 text-center">
                 <span class="text-xs font-bold uppercase tracking-wider text-navy-700 dark:text-navy-400">Sejak
@@ -177,6 +178,7 @@
                 @endif
             </div>
         </div>
+        @endif
 
         {{-- ============ NAVIGASI CEPAT ============ --}}
         <div class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3">

@@ -33,7 +33,12 @@ class BackupController extends Controller
             ->map(fn ($path) => [
                 'name' => basename($path),
                 'size' => $disk->size($path),
-                'modified_at' => Carbon::createFromTimestamp($disk->lastModified($path)),
+                // Carbon::createFromTimestamp() TANPA parameter timezone selalu
+                // dianggap UTC, beda dengan Carbon::now() yang otomatis ikut
+                // timezone aplikasi (config('app.timezone')) — makanya jam yang
+                // tampil di tabel selisih 7 jam dari jam sebenarnya (WIB).
+                // Timezone-nya harus disebutkan eksplisit di sini.
+                'modified_at' => Carbon::createFromTimestamp($disk->lastModified($path), config('app.timezone')),
             ])
             ->sortByDesc('modified_at')
             ->values();

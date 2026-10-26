@@ -194,7 +194,7 @@
                         @forelse ($agendas as $agenda)
                             <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
                                 <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">
-                                    {{ \Carbon\Carbon::parse($agenda->date)->format('d M Y') }}</td>
+                                    {{ \Carbon\Carbon::parse($agenda->date)->translatedFormat('d M Y') }}</td>
                                 <td class="px-5 py-4 text-sm text-slate-500 dark:text-slate-400">{{ $agenda->agenda_code }}
                                 </td>
                                 <td class="px-5 py-4 text-sm font-semibold text-slate-800 dark:text-white">

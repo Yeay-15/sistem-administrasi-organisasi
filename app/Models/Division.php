@@ -22,7 +22,9 @@ class Division extends Model
      */
     public function permissions()
     {
-        return $this->belongsToMany(Permission::class, 'division_permission');
+        return $this->belongsToMany(Permission::class, 'division_permission')
+            ->withPivot(['scope_kadiv', 'scope_sekdiv', 'scope_anggota'])
+            ->withTimestamps();
     }
 
     /**

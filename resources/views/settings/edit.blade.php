@@ -219,7 +219,7 @@
                         :options="\App\Models\HomeSetting::ASPIRATION_MODES" />
                     <div class="mt-3 space-y-1.5 text-xs text-slate-400 dark:text-slate-500">
                         <p><span class="font-semibold text-slate-500 dark:text-slate-400">Publik:</span> formulir terbuka untuk siapa saja, termasuk pengiriman anonim.</p>
-                        <p><span class="font-semibold text-slate-500 dark:text-slate-400">Hanya Pengurus:</span> pengunjung wajib login sebagai pengurus untuk mengirim aspirasi internal.</p>
+                        <p><span class="font-semibold text-slate-500 dark:text-slate-400">Hanya Pengurus:</span> formulir hanya tampil setelah login sebagai pengurus. Pengunjung biasa hanya melihat kanal kontak (tanpa tombol login).</p>
                         <p><span class="font-semibold text-slate-500 dark:text-slate-400">Nonaktif:</span> formulir disembunyikan sepenuhnya, hanya menampilkan info kontak & media sosial.</p>
                     </div>
                     @error('aspiration_mode')

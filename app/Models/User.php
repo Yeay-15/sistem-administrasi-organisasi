@@ -129,8 +129,16 @@ class User extends Authenticatable
     private function divisionPermissionSlugs(): Collection
     {
         if ($this->cachedDivisionPermissionSlugs === null) {
-            $this->cachedDivisionPermissionSlugs = $this->member?->division
-                ? $this->member->division->permissions->pluck('slug')
+            $member = $this->member;
+
+            // Hak akses divisi hanya berlaku jika posisi orang ini (Kadiv /
+            // Sekdiv / Anggota) dicentang pada baris hak akses tersebut.
+            $column = $member ? 'scope_' . $member->divisionScope() : null;
+
+            $this->cachedDivisionPermissionSlugs = $member?->division
+                ? $member->division->permissions
+                    ->filter(fn ($permission) => (bool) $permission->pivot->{$column})
+                    ->pluck('slug')
                 : collect();
         }
 

@@ -22,7 +22,7 @@ class MemberController extends Controller
         // 1. Inisialisasi Query Builder dengan relasi.
         // Menu "Pengurus" hanya menampilkan membership_type = Pengurus —
         // anggota Non-Pengurus punya menu & controller terpisah (lihat
-        // NonPengurusController) walau sama-sama menyimpan datanya di
+        // NonOfficerController) walau sama-sama menyimpan datanya di
         // tabel members.
         $query = Member::with('division')->where('membership_type', 'Pengurus');
 
@@ -163,12 +163,12 @@ class MemberController extends Controller
      * members. Menampilkan histori kepanitiaan (dikelompokkan Teras
      * Panitia vs Bidang) dan statistik kehadiran agenda organisasi.
      */
-    public function statistik(Member $member)
+    public function statistics(Member $member)
     {
         abort_unless(
             Auth::user()->isSuperAdmin()
                 || Auth::user()->hasPermission('view_members')
-                || Auth::user()->hasPermission('view_non_pengurus'),
+                || Auth::user()->hasPermission('view_non_officers'),
             403
         );
 
@@ -176,12 +176,12 @@ class MemberController extends Controller
 
         // --- Histori Kepanitiaan ---
         $committeeMemberships = $member->committeeMemberships()
-            ->with(['committee', 'bidang'])
+            ->with(['committee', 'committeeField'])
             ->get()
             ->sortByDesc(fn ($cm) => $cm->committee->start_date ?? $cm->created_at);
 
-        $terasPanitia = $committeeMemberships->filter->isTerasPanitia();
-        $anggotaBidang = $committeeMemberships->reject->isTerasPanitia();
+        $committeeLeadership = $committeeMemberships->filter->isCommitteeLeadership();
+        $fieldMembers = $committeeMemberships->reject->isCommitteeLeadership();
 
         // --- Statistik Kehadiran Agenda Organisasi (H/I/S/A) ---
         // Penyebut (total agenda) HANYA menghitung agenda yang memang
@@ -199,8 +199,8 @@ class MemberController extends Controller
             ->groupBy('status')
             ->pluck('jumlah', 'status');
 
-        $totalHadir = (int) ($attendanceByStatus['H'] ?? 0);
-        $persentaseKehadiran = $totalAgenda > 0 ? round(($totalHadir / $totalAgenda) * 100, 1) : 0;
+        $totalPresent = (int) ($attendanceByStatus['H'] ?? 0);
+        $attendancePercentage = $totalAgenda > 0 ? round(($totalPresent / $totalAgenda) * 100, 1) : 0;
 
         // Breakdown per jenis agenda (mis. Rapat vs Kegiatan) — memakai
         // kolom `type` yang sudah ada di tabel agendas supaya insight-nya
@@ -221,7 +221,7 @@ class MemberController extends Controller
         // --- Kehadiran khusus rapat-rapat tiap kepanitiaan yang diikuti ---
         $committeeAttendance = $committeeMemberships->map(function ($cm) use ($member) {
             $agendaIds = $cm->committee->agendas()->pluck('agendas.id');
-            $hadir = Attendance::where('member_id', $member->id)
+            $present = Attendance::where('member_id', $member->id)
                 ->whereIn('agenda_id', $agendaIds)
                 ->where('status', 'H')
                 ->count();
@@ -229,17 +229,17 @@ class MemberController extends Controller
             return [
                 'committee' => $cm->committee,
                 'total_agenda' => $agendaIds->count(),
-                'hadir' => $hadir,
+                'present' => $present,
             ];
         })->unique(fn ($row) => $row['committee']->id)->values();
 
-        return view('members.statistik', compact(
+        return view('members.statistics', compact(
             'member',
-            'terasPanitia',
-            'anggotaBidang',
+            'committeeLeadership',
+            'fieldMembers',
             'totalAgenda',
-            'totalHadir',
-            'persentaseKehadiran',
+            'totalPresent',
+            'attendancePercentage',
             'attendanceByStatus',
             'attendanceByType',
             'totalAgendaByType',
@@ -258,7 +258,7 @@ class MemberController extends Controller
 
         $divisions = Division::all();
 
-        return view('non_pengurus.promote', compact('member', 'divisions'));
+        return view('non_officers.promote', compact('member', 'divisions'));
     }
 
     /**

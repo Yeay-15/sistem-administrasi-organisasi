@@ -74,7 +74,7 @@ class OutgoingLetterController extends Controller
             'destination' => ['required', 'string', 'max:255'],
             'signatory' => ['required', 'string', 'max:255'],
             'status' => ['required', 'in:Draft,Terkirim,Dibatalkan'],
-            'file_path' => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
+            'file_path' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
 
         $data = $request->all();
@@ -86,7 +86,7 @@ class OutgoingLetterController extends Controller
             $dest = Str::slug($request->destination, '-');
             $subject = Str::slug(Str::limit($request->subject, 30, ''), '-');
 
-            $filename = "{$date}_{$no}_{$dest}_{$subject}.pdf";
+            $filename = "{$date}_{$no}_{$dest}_{$subject}.{$request->file('file_path')->extension()}";
 
             // 2. Simpan menggunakan storeAs
             $path = $request->file('file_path')->storeAs('outgoing_letters', $filename, 'public');
@@ -115,7 +115,7 @@ class OutgoingLetterController extends Controller
             'destination' => ['required', 'string', 'max:255'],
             'signatory' => ['required', 'string', 'max:255'],
             'status' => ['required', 'in:Draft,Terkirim,Dibatalkan'],
-            'file_path' => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
+            'file_path' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
 
         $data = $request->all();
@@ -130,7 +130,7 @@ class OutgoingLetterController extends Controller
             $dest = Str::slug($request->destination, '-');
             $subject = Str::slug(Str::limit($request->subject, 30, ''), '-');
 
-            $filename = "{$date}_{$no}_{$dest}_{$subject}.pdf";
+            $filename = "{$date}_{$no}_{$dest}_{$subject}.{$request->file('file_path')->extension()}";
 
             // 2. Simpan menggunakan storeAs
             $path = $request->file('file_path')->storeAs('outgoing_letters', $filename, 'public');

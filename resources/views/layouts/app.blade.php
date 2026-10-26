@@ -27,9 +27,28 @@
                 open: false,
                 options: options || [],
                 value: initialValue ?? '',
+                // Posisi panel dihitung manual (bukan CSS absolute biasa) karena
+                // panelnya di-teleport ke <body> — lihat komentar di
+                // components/dropdown-select.blade.php kenapa ini perlu.
+                panelPosition: { top: 0, left: 0, width: 0 },
                 get selectedLabel() {
                     const match = this.options.find((opt) => String(opt.value) === String(this.value));
                     return match ? match.label : '';
+                },
+                toggle() {
+                    if (this.open) {
+                        this.open = false;
+                        return;
+                    }
+                    this.reposition();
+                    this.open = true;
+                },
+                reposition() {
+                    const rect = this.$refs.trigger.getBoundingClientRect();
+                    this.panelPosition = { top: rect.bottom + 6, left: rect.left, width: rect.width };
+                },
+                get panelStyle() {
+                    return `top:${this.panelPosition.top}px; left:${this.panelPosition.left}px; width:${this.panelPosition.width}px;`;
                 },
                 choose(value) {
                     this.value = value;
@@ -131,18 +150,18 @@
                         'icon' => 'users',
                     ])
                 @endcan
-                @can('view_non_pengurus')
+                @can('view_non_officers')
                     @include('layouts.partials.nav-item', [
-                        'route' => 'non-pengurus.index',
-                        'pattern' => 'non-pengurus.*',
+                        'route' => 'non-officers.index',
+                        'pattern' => 'non-officers.*',
                         'label' => 'Anggota Non-Pengurus',
                         'icon' => 'identification',
                     ])
                 @endcan
                 @can('view_committees')
                     @include('layouts.partials.nav-item', [
-                        'route' => 'kepanitiaan.index',
-                        'pattern' => 'kepanitiaan.*',
+                        'route' => 'committees.index',
+                        'pattern' => 'committees.*',
                         'label' => 'Kepanitiaan',
                         'icon' => 'briefcase',
                     ])
@@ -254,6 +273,18 @@
                         'pattern' => 'outgoing-letters.*',
                         'label' => 'Surat Keluar',
                         'icon' => 'send',
+                    ])
+                @endcan
+
+                @can('view_inventory_items')
+                    <p
+                        class="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-600">
+                        Inventaris</p>
+                    @include('layouts.partials.nav-item', [
+                        'route' => 'inventory-items.index',
+                        'pattern' => 'inventory-items.*',
+                        'label' => 'Data Inventaris',
+                        'icon' => 'cube',
                     ])
                 @endcan
 

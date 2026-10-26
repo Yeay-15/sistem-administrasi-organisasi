@@ -106,7 +106,7 @@
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                     @forelse ($filteredLetters as $letter)
                         <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
-                            <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{{ \Carbon\Carbon::parse($letter->date)->format('d M Y') }}</td>
+                            <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{{ \Carbon\Carbon::parse($letter->date)->translatedFormat('d M Y') }}</td>
                             <td class="px-5 py-4">
                                 <span class="block text-sm font-semibold text-slate-800 dark:text-white">{{ $letter->reference_number }}</span>
                                 <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">Tipe: {{ $letter->type }}</span>
@@ -137,7 +137,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4 w-4">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.481L15 17.25m-1.519-3.75L12 15m1.481-1.5L15 15m-1.519-1.5L12 12m5.25 6a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18V6a2.25 2.25 0 012.25-2.25h4.5a1.125 1.125 0 011.125 1.125v1.5a3.375 3.375 0 003.375 3.375h1.5a1.125 1.125 0 011.125 1.125v9z" />
                                         </svg>
-                                        Lihat PDF
+                                        Lihat Berkas
                                     </a>
                                 @else
                                     <span class="text-sm italic text-slate-400 dark:text-slate-500">-</span>

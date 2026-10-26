@@ -35,7 +35,7 @@
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                     @forelse ($guidances as $guidance)
                         <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
-                            <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{{ \Carbon\Carbon::parse($guidance->date)->format('d M Y') }}</td>
+                            <td class="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">{{ \Carbon\Carbon::parse($guidance->date)->translatedFormat('d M Y') }}</td>
                             <td class="px-5 py-4">
                                 <span class="block text-sm font-semibold text-slate-800 dark:text-white">{{ $guidance->member->name }}</span>
                                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ $guidance->member->division->name ?? '-' }}</span>

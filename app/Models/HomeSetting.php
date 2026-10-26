@@ -18,6 +18,11 @@ class HomeSetting extends Model
         'whatsapp_number',
         'contact_email',
         'aspiration_mode',
+        'show_leaders_public',
+    ];
+
+    protected $casts = [
+        'show_leaders_public' => 'boolean',
     ];
 
     public const ASPIRATION_MODES = [
@@ -53,6 +58,33 @@ class HomeSetting extends Model
         }
 
         return 'https://wa.me/' . preg_replace('/\D/', '', $this->whatsapp_number);
+    }
+
+    /**
+     * Tautan email resmi.
+     * Untuk alamat Gmail, arahkan langsung ke jendela tulis Gmail di browser
+     * (memakai akun Google yang sedang aktif), bukan mailto: yang memicu
+     * pemilihan profil Chrome / aplikasi email bawaan lalu gagal membuka Gmail.
+     * Alamat non-Gmail tetap memakai mailto:.
+     */
+    public function getEmailLinkAttribute(): ?string
+    {
+        $email = trim((string) $this->contact_email);
+
+        if ($email === '') {
+            return null;
+        }
+
+        if ($this->email_link_is_web) {
+            return 'https://mail.google.com/mail/?view=cm&fs=1&to=' . rawurlencode($email);
+        }
+
+        return 'mailto:' . $email;
+    }
+
+    public function getEmailLinkIsWebAttribute(): bool
+    {
+        return (bool) preg_match('/@(gmail|googlemail)\.com$/i', trim((string) $this->contact_email));
     }
 
     public function getChairmanPhotoUrlAttribute(): ?string

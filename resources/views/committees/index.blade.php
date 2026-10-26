@@ -10,13 +10,13 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
             @can('view_committees')
-                <a href="{{ route('bidang-panitia.index') }}"
+                <a href="{{ route('committee-fields.index') }}"
                     class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                     Kelola Bidang Panitia
                 </a>
             @endcan
             @can('manage_committees')
-                <a href="{{ route('kepanitiaan.create') }}"
+                <a href="{{ route('committees.create') }}"
                     class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-blue-600/20">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -28,7 +28,7 @@
     </div>
 
     <div class="mb-4 theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <form method="GET" action="{{ route('kepanitiaan.index') }}" class="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <form method="GET" action="{{ route('committees.index') }}" class="flex flex-col gap-4 sm:flex-row sm:items-end">
             <div class="flex-1">
                 <label class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Cari Nama Kepanitiaan</label>
                 <div class="relative">
@@ -53,7 +53,7 @@
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @forelse ($committees as $committee)
-            <a href="{{ route('kepanitiaan.show', $committee->id) }}"
+            <a href="{{ route('committees.show', $committee->id) }}"
                 class="theme-transition group flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
                 <div>
                     <div class="mb-2 flex items-center justify-between">

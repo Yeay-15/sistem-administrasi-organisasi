@@ -28,7 +28,7 @@ class Committee extends Model
     /**
      * Baris pivot (dengan peran & bidang) anggota kepanitiaan ini.
      * Dipakai (bukan belongsToMany biasa) karena kita perlu akses ke
-     * position_category & panitia_bidang_id per baris, bukan cuma daftar Member.
+     * position_category & committee_field_id per baris, bukan cuma daftar Member.
      */
     public function committeeMembers(): HasMany
     {
@@ -41,7 +41,7 @@ class Committee extends Model
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(Member::class, 'committee_members')
-            ->withPivot(['id', 'position_category', 'panitia_bidang_id', 'notes'])
+            ->withPivot(['id', 'position_category', 'committee_field_id', 'notes'])
             ->withTimestamps();
     }
 

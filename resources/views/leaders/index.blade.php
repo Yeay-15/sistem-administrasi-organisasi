@@ -19,6 +19,31 @@
         @endcan
     </div>
 
+    {{-- Toggle tampil/sembunyi di halaman publik --}}
+    <div class="theme-transition mb-5 flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div>
+            <p class="text-sm font-semibold text-slate-800 dark:text-white">Tampilkan di halaman publik</p>
+            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                {{ $showPublic ? 'Timeline Estafet Kepemimpinan saat ini tampil di halaman Tentang Kami.' : 'Timeline Estafet Kepemimpinan saat ini disembunyikan dari pengunjung. Data tetap tersimpan.' }}
+            </p>
+        </div>
+        @can('manage_leaders')
+            <form method="POST" action="{{ route('leaders.visibility') }}" class="shrink-0">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="show_public" value="0">
+                <label class="relative inline-flex cursor-pointer items-center">
+                    <input type="checkbox" name="show_public" value="1" class="peer sr-only" @checked($showPublic)
+                        onchange="this.form.submit()">
+                    <span class="h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500 dark:bg-slate-700"></span>
+                    <span class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition peer-checked:translate-x-5"></span>
+                </label>
+            </form>
+        @else
+            <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $showPublic ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' }}">{{ $showPublic ? 'Tampil' : 'Disembunyikan' }}</span>
+        @endcan
+    </div>
+
     @if ($leaders->isEmpty())
         <div class="theme-transition rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
             <p class="text-sm text-slate-400 dark:text-slate-500">Belum ada data Ketua Umum. Tambahkan data pertama untuk ditampilkan di halaman Tentang Kami.</p>

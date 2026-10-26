@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
+use App\Models\HomeSetting;
 use App\Models\OrganizationLeader;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -13,7 +15,32 @@ class LeaderController extends Controller
     {
         $leaders = OrganizationLeader::orderBy('order')->orderBy('period_start')->paginate(12);
 
-        return view('leaders.index', compact('leaders'));
+        $showPublic = HomeSetting::current()->show_leaders_public;
+
+        return view('leaders.index', compact('leaders', 'showPublic'));
+    }
+
+    /**
+     * Menyalakan/mematikan tampilnya timeline "Estafet Kepemimpinan" di
+     * halaman publik (Tentang Kami). Data ketua umum tidak dihapus — hanya
+     * disembunyikan dari pengunjung.
+     */
+    public function updateVisibility(Request $request)
+    {
+        $show = $request->boolean('show_public');
+
+        HomeSetting::current()->update(['show_leaders_public' => $show]);
+
+        AuditLog::record(
+            'Ubah Tampilan Estafet',
+            $show
+                ? 'Menampilkan Estafet Kepemimpinan di halaman publik.'
+                : 'Menyembunyikan Estafet Kepemimpinan dari halaman publik.'
+        );
+
+        return redirect()->route('leaders.index')->with('success', $show
+            ? 'Estafet Kepemimpinan sekarang tampil di halaman publik.'
+            : 'Estafet Kepemimpinan disembunyikan dari halaman publik.');
     }
 
     public function create()

@@ -19,7 +19,7 @@
          Tiap halaman bisa menimpa og_title/og_image lewat @section, kalau
          tidak diisi maka jatuh ke nilai bawaan di bawah ini. --}}
     @php
-        $ogImageFallback = $homeSettings->hero_image_url ?? $homeSettings->logo_url ?? null;
+        $ogImageFallback = $homeSettings->hero_image_url ?? ($homeSettings->logo_url ?? null);
     @endphp
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="KATIBER">
@@ -195,14 +195,15 @@
             <div class="flex items-center gap-1.5">
                 <button @click="toggleDark()"
                     class="rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-                    :aria-label="dark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'" title="Ganti mode gelap/terang">
+                    :aria-label="dark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap'"
+                    title="Ganti mode gelap/terang">
                     <svg x-show="!dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke-width="1.75" stroke="currentColor" class="h-5 w-5">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
                     </svg>
-                    <svg x-show="dark" x-cloak xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="1.75" stroke="currentColor" class="h-5 w-5">
+                    <svg x-show="dark" x-cloak xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-5 w-5">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
                     </svg>
@@ -392,7 +393,8 @@
                             </a>
                         @endif
                         @if ($homeSettings->contact_email ?? null)
-                            <a href="mailto:{{ $homeSettings->contact_email }}"
+                            <a href="{{ $homeSettings->email_link }}"
+                                @if ($homeSettings->email_link_is_web) target="_blank" rel="noopener" @endif
                                 class="flex items-start gap-2.5 transition hover:text-navy-700 dark:hover:text-navy-400">
                                 {{-- Logo Email Solid (Kecil) --}}
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -442,7 +444,9 @@
                             </a>
                         @endif
                         @if ($homeSettings->contact_email ?? null)
-                            <a href="mailto:{{ $homeSettings->contact_email }}" aria-label="Email KATIBER"
+                            <a href="{{ $homeSettings->email_link }}"
+                                @if ($homeSettings->email_link_is_web) target="_blank" rel="noopener" @endif
+                                aria-label="Email KATIBER"
                                 class="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:-translate-y-0.5 hover:border-navy-200 hover:bg-navy-50 hover:text-navy-700 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800">
                                 {{-- Logo Email Solid --}}
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"

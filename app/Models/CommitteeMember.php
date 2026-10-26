@@ -11,7 +11,7 @@ class CommitteeMember extends Model
         'committee_id',
         'member_id',
         'position_category',
-        'panitia_bidang_id',
+        'committee_field_id',
         'notes',
     ];
 
@@ -25,16 +25,16 @@ class CommitteeMember extends Model
         return $this->belongsTo(Member::class);
     }
 
-    public function bidang(): BelongsTo
+    public function committeeField(): BelongsTo
     {
-        return $this->belongsTo(PanitiaBidang::class, 'panitia_bidang_id');
+        return $this->belongsTo(CommitteeField::class);
     }
 
     /**
      * True jika peran ini termasuk "teras panitia" (Ketua/Sekretaris/Bendahara),
      * bukan peran berbasis bidang (Ketua Bidang/Anggota Bidang).
      */
-    public function isTerasPanitia(): bool
+    public function isCommitteeLeadership(): bool
     {
         return in_array($this->position_category, [
             'Ketua Panitia',

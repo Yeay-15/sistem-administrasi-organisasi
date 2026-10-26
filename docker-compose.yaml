@@ -1,7 +1,6 @@
 services:
   app:
-    # Nama image sudah diperbarui ke fpm-nginx
-    image: serversideup/php:8.3-fpm-nginx
+    image: katiber-app:custom
     container_name: katiber_app
     restart: unless-stopped
     ports:

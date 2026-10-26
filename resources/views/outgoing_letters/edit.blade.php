@@ -90,16 +90,11 @@
                     </div>
                 </div>
 
-                <div class="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 dark:border-slate-600 dark:bg-slate-800/60">
+                <div class="mt-5">
                     <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Ganti Arsip Surat (Opsional)</label>
-                    @if ($outgoingLetter->file_path)
-                        <div class="mb-2 text-sm text-slate-600 dark:text-slate-400">
-                            File saat ini: <a href="{{ asset('storage/' . $outgoingLetter->file_path) }}" target="_blank" class="font-medium text-indigo-600 underline dark:text-indigo-400">Lihat PDF</a>
-                        </div>
-                    @endif
-                    <input type="file" name="file_path" accept=".pdf"
-                        class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-500/10 dark:file:text-blue-400">
-                    <p class="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Kosongkan jika tidak ingin mengganti file lama. Format: PDF. Max: 5MB.</p>
+                    <x-file-dropzone name="file_path" hint="Kosongkan jika tidak ingin mengganti file lama. PDF, JPG, JPEG, atau PNG. Maksimal 5MB."
+                        :current-url="$outgoingLetter->file_path ? asset('storage/' . $outgoingLetter->file_path) : null"
+                        :current-name="$outgoingLetter->file_path ? basename($outgoingLetter->file_path) : null" />
                     @error('file_path')
                         <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                     @enderror

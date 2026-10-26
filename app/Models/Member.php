@@ -29,6 +29,21 @@ class Member extends Model
         return $this->belongsTo(Division::class);
     }
 
+    /**
+     * Posisi orang ini di dalam divisinya untuk keperluan hak akses divisi:
+     * 'kadiv' (Ketua Divisi), 'sekdiv' (Sekretaris Divisi), selain itu 'anggota'
+     * (termasuk jabatan BPH seperti Ketua/Sekretaris/Bendahara Umum — hak akses
+     * mereka diatur lewat Peran, bukan lewat hak akses divisi).
+     */
+    public function divisionScope(): string
+    {
+        return match ($this->position) {
+            'Ketua Divisi' => 'kadiv',
+            'Sekretaris Divisi' => 'sekdiv',
+            default => 'anggota',
+        };
+    }
+
     public function isPengurus(): bool
     {
         return $this->membership_type === 'Pengurus';
@@ -48,7 +63,7 @@ class Member extends Model
     public function committees()
     {
         return $this->belongsToMany(Committee::class, 'committee_members')
-            ->withPivot(['id', 'position_category', 'panitia_bidang_id', 'notes'])
+            ->withPivot(['id', 'position_category', 'committee_field_id', 'notes'])
             ->withTimestamps();
     }
 

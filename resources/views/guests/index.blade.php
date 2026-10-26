@@ -36,7 +36,7 @@
                         <td class="px-5 py-4">
                             <span class="block font-medium text-slate-800 dark:text-white">{{ $guest->agenda->name }}</span>
                             <span
-                                class="text-xs text-slate-500 dark:text-slate-400">{{ \Carbon\Carbon::parse($guest->agenda->date)->format('d M Y') }}</span>
+                                class="text-xs text-slate-500 dark:text-slate-400">{{ \Carbon\Carbon::parse($guest->agenda->date)->translatedFormat('d M Y') }}</span>
                         </td>
                         <td class="px-5 py-4 font-semibold text-slate-800 dark:text-white">{{ $guest->name }}</td>
                         <td class="px-5 py-4 text-slate-600 dark:text-slate-300">

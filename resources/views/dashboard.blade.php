@@ -211,7 +211,7 @@
                                     <li
                                         class="theme-transition rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm dark:border-slate-800 dark:bg-slate-800/60">
                                         <span
-                                            class="block text-xs text-slate-400 dark:text-slate-500">{{ \Carbon\Carbon::parse($in->received_date)->format('d M Y') }}</span>
+                                            class="block text-xs text-slate-400 dark:text-slate-500">{{ \Carbon\Carbon::parse($in->received_date)->translatedFormat('d M Y') }}</span>
                                         <span
                                             class="font-semibold text-slate-800 dark:text-slate-100">{{ $in->sender }}</span>
                                         <span class="block truncate text-slate-500 dark:text-slate-400"
@@ -238,7 +238,7 @@
                                     <li
                                         class="theme-transition rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm dark:border-slate-800 dark:bg-slate-800/60">
                                         <span class="block text-xs text-slate-400 dark:text-slate-500">
-                                            {{ \Carbon\Carbon::parse($out->date)->format('d M Y') }} •
+                                            {{ \Carbon\Carbon::parse($out->date)->translatedFormat('d M Y') }} •
                                             <span
                                                 class="font-bold {{ $out->status == 'Terkirim' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400' }}">{{ $out->status }}</span>
                                         </span>

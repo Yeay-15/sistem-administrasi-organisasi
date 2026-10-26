@@ -7,6 +7,7 @@ use App\Models\Aspiration;
 use App\Models\HomeSetting;
 use App\Models\User;
 use App\Support\DatabaseDumpBinaryResolver;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -29,6 +30,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Semua tanggal yang diterjemahkan (translatedFormat, diffForHumans,
+        // nama bulan/hari) tampil dalam Bahasa Indonesia: "25 Okt 2026",
+        // "Minggu, 25 Oktober 2026", "2 menit yang lalu". Sengaja ditulis
+        // eksplisit 'id' (bukan config('app.locale')) supaya tidak bergantung
+        // pada isi APP_LOCALE di .env server.
+        Carbon::setLocale('id');
+
         // Menyuntikkan path binary mysqldump/pg_dump untuk spatie/laravel-backup
         // (lihat DatabaseDumpBinaryResolver). Dipanggil di SETIAP request
         // (bukan cuma CLI) karena tombol "Buat Cadangan Sekarang" di

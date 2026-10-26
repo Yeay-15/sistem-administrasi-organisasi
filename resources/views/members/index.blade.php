@@ -53,14 +53,16 @@
             <div class="flex-1">
                 <label for="division_id" class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Filter
                     Divisi</label>
-                <x-dropdown-select name="division_id" placeholder="Semua Divisi" :selected="request('division_id')" :options="$divisions->pluck('name', 'id')" />
+                <x-dropdown-select name="division_id" placeholder="Semua Divisi" :selected="request('division_id')"
+                    :options="$divisions->pluck('name', 'id')" />
             </div>
 
             {{-- Filter Angkatan --}}
             <div class="w-full sm:w-48">
                 <label for="batch"
                     class="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Angkatan</label>
-                <x-dropdown-select name="batch" placeholder="Semua Angkatan" :selected="request('batch')" :options="$batches->combine($batches)" />
+                <x-dropdown-select name="batch" placeholder="Semua Angkatan" :selected="request('batch')"
+                    :options="$batches->combine($batches)" />
             </div>
 
             {{-- Tombol Aksi --}}
@@ -157,26 +159,21 @@
                             </td>
                             <td class="px-5 py-4">
                                 <div class="flex items-center justify-center gap-1.5">
-                                    <a href="{{ route('members.statistik', $member->id) }}" title="Lihat Statistik"
+                                    <a href="{{ route('members.statistics', $member->id) }}" title="Lihat Statistik"
                                         class="rounded-lg p-2 text-blue-600 transition hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/10">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M3 3v18h18M8.25 16.5v-4.5m4.5 4.5V9m4.5 7.5v-9" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M8.25 16.5v-4.5m4.5 4.5V9m4.5 7.5v-9" />
                                         </svg>
                                     </a>
                                     @can('manage_members')
                                         <form action="{{ route('members.toggle-membership', $member->id) }}" method="POST"
-                                            onsubmit="return confirm('Pindahkan {{ $member->name }} ke Anggota Non-Pengurus?');"
-                                            class="inline">
+                                            onsubmit="return confirm('Pindahkan {{ $member->name }} ke Anggota Non-Pengurus?');" class="inline">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" title="Jadikan Non-Pengurus"
                                                 class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                    stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="h-4.5 w-4.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
                                                 </svg>
                                             </button>
                                         </form>

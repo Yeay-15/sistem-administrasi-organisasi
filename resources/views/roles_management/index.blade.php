@@ -3,7 +3,7 @@
 @section('title', 'Manajemen Peran & Akses - KATIBER')
 
 @section('content')
-    <div x-data="rolesManagement()" class="space-y-8">
+    <div x-data="rolesManagement()" @notice="showNotice($event.detail.message, $event.detail.type)" class="space-y-8">
 
         <div>
             <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Manajemen Peran & Akses</h1>
@@ -37,23 +37,25 @@
             </div>
         @endif
 
-        {{-- ============ BAGIAN 1: MATRIX HAK AKSES PER PERAN ============ --}}
-        <div class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        {{-- ============ BAGIAN 1: HAK AKSES PER PERAN ============ --}}
+        <div x-data="roleAccess()"
+            class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="border-b border-slate-100 px-5 pt-4 dark:border-slate-800">
-                <h2 class="text-base font-semibold text-slate-800 dark:text-white">Matrix Hak Akses per Peran</h2>
+                <h2 class="text-base font-semibold text-slate-800 dark:text-white">Hak Akses per Peran</h2>
                 <p class="mb-1 mt-0.5 text-xs text-slate-400 dark:text-slate-500">
-                    Setiap modul punya tiga toggle: <span class="font-medium text-slate-500 dark:text-slate-400">Lihat</span> (buka & baca halaman),
-                    <span class="font-medium text-slate-500 dark:text-slate-400">Kelola</span> (tambah/ubah — TIDAK termasuk hapus), dan
-                    <span class="font-medium text-red-500 dark:text-red-400">Hapus</span> (toggle terpisah &amp; eksklusif, sengaja tidak otomatis ikut nyala dengan Kelola).
-                    Kelola maupun Hapus otomatis mencakup Lihat.
+                    Pilih peran, lalu tentukan level akses tiap modul:
+                    <span class="font-medium text-slate-500 dark:text-slate-400">Lihat</span> (buka &amp; baca),
+                    <span class="font-medium text-slate-500 dark:text-slate-400">Kelola</span> (tambah/ubah), atau
+                    <span class="font-medium text-red-500 dark:text-red-400">Penuh</span> (termasuk hapus). Level yang lebih tinggi otomatis mencakup yang di bawahnya.
                 </p>
-                <p class="mb-4 text-xs text-slate-400 dark:text-slate-500">Perubahan tersimpan otomatis.</p>
+                <p class="mb-4 text-xs text-slate-400 dark:text-slate-500">
+                    Super Admin selalu punya akses penuh ke semua modul, jadi tidak ditampilkan di sini. Perubahan tersimpan otomatis.
+                </p>
 
-                {{-- Tabs --}}
                 <div class="flex gap-1 overflow-x-auto">
-                    @foreach ($roles as $role)
-                        <button type="button" @click="activeRole = {{ $role->id }}"
-                            :class="activeRole === {{ $role->id }}
+                    @foreach ($editableRoles as $role)
+                        <button type="button" @click="roleId = {{ $role->id }}"
+                            :class="roleId === {{ $role->id }}
                                 ? 'border-blue-600 text-blue-700 dark:border-blue-400 dark:text-blue-400'
                                 : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
                             class="shrink-0 whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-semibold transition">
@@ -63,142 +65,110 @@
                 </div>
             </div>
 
-            <div class="p-5">
-                @foreach ($roles as $role)
-                    <div x-show="activeRole === {{ $role->id }}" x-cloak>
-                        @if ($role->isSuperAdmin())
-                            <div class="mb-4 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3 text-sm text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="mt-0.5 h-5 w-5 shrink-0">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span>Super Admin selalu memiliki akses penuh ke seluruh modul dan tidak dapat dibatasi.</span>
-                            </div>
-                        @endif
-
-                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            @foreach ($permissionMatrix as $group => $rows)
-                                <div>
-                                    <p class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-600">
-                                        {{ $group ?: 'Lainnya' }}
-                                    </p>
-                                    <div class="space-y-1">
-                                        @foreach ($rows as $row)
-                                            <div class="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/60">
-                                                <span class="truncate text-sm text-slate-600 dark:text-slate-300">{{ $row['label'] }}</span>
-
-                                                <div class="flex shrink-0 items-center gap-3">
-                                                    @foreach ([['perm' => $row['view'], 'label' => 'Lihat'], ['perm' => $row['manage'], 'label' => 'Kelola'], ['perm' => $row['delete'], 'label' => 'Hapus']] as $col)
-                                                        @if ($col['perm'])
-                                                            @php
-                                                                $permission = $col['perm'];
-                                                                $isActive = $role->isSuperAdmin() || $role->permissions->contains('id', $permission->id);
-                                                            @endphp
-                                                            <div class="flex flex-col items-center gap-1"
-                                                                x-data="{ active: {{ $isActive ? 'true' : 'false' }}, loading: false }">
-                                                                <span class="text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ $col['label'] }}</span>
-
-                                                                @if ($role->isSuperAdmin())
-                                                                    <span class="inline-flex h-5 w-9 shrink-0 items-center rounded-full bg-blue-600 px-0.5">
-                                                                        <span class="h-4 w-4 translate-x-4 rounded-full bg-white shadow"></span>
-                                                                    </span>
-                                                                @else
-                                                                    <button type="button" title="Toggle akses {{ $col['label'] }}"
-                                                                        @click="loading = true; togglePermission({{ $role->id }}, {{ $permission->id }}, $data, () => loading = false)"
-                                                                        :disabled="loading"
-                                                                        :class="active ? '{{ $col['label'] === 'Hapus' ? 'bg-red-600' : 'bg-blue-600' }}' : 'bg-slate-200 dark:bg-slate-700'"
-                                                                        class="inline-flex h-5 w-9 shrink-0 items-center rounded-full px-0.5 transition disabled:opacity-50">
-                                                                        <span :class="active ? 'translate-x-4' : 'translate-x-0'"
-                                                                            class="h-4 w-4 rounded-full bg-white shadow transition-transform"></span>
-                                                                    </button>
-                                                                @endif
-                                                            </div>
-                                                        @endif
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
+            <div class="grid grid-cols-1 gap-x-8 gap-y-6 p-5 lg:grid-cols-2">
+                <template x-for="group in groups" :key="group.name">
+                    <div>
+                        <p class="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-600" x-text="group.name"></p>
+                        <div class="space-y-1">
+                            <template x-for="feature in group.features" :key="feature.key">
+                                <div class="flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                                    <span class="truncate text-sm text-slate-600 dark:text-slate-300" x-text="feature.label"></span>
+                                    <select :value="level(feature)" @change="setLevel(feature, $event.target.value)" :disabled="busy"
+                                        :class="level(feature) === 'delete' ? 'text-red-600 dark:text-red-400' : ''"
+                                        class="w-40 shrink-0 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-800 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                        <option value="none">Tidak ada</option>
+                                        <template x-for="tier in feature.tiers" :key="tier">
+                                            <option :value="tier" :selected="level(feature) === tier" x-text="tierLabel(feature, tier)"></option>
+                                        </template>
+                                    </select>
                                 </div>
-                            @endforeach
+                            </template>
                         </div>
                     </div>
-                @endforeach
+                </template>
             </div>
         </div>
 
         {{-- ============ BAGIAN 2: HAK AKSES EKSTRA PER DIVISI ============ --}}
-        @if ($divisionPermissionMatrix->isNotEmpty())
-            <div class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        @if ($divisionFeatures->isNotEmpty() && $divisions->isNotEmpty())
+            <div x-data="divisionAccess()"
+                class="theme-transition overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-                    <h2 class="text-base font-semibold text-slate-800 dark:text-white">Hak Akses Ekstra per Divisi</h2>
+                    <h2 class="text-base font-semibold text-slate-800 dark:text-white">Hak Akses per Divisi</h2>
                     <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
-                        Berikan hak akses tambahan langsung ke sebuah Divisi, terlepas dari peran (Role) anggotanya — mis. Divisi Infokom boleh mengelola Berita &amp; Galeri tanpa perlu peran khusus. Nyalakan toggle di bawah untuk divisi lain kapan pun tanpa perlu mengubah kode.
+                        Pilih divisi, lalu tentukan untuk tiap fitur: <span class="font-medium text-slate-500 dark:text-slate-400">seberapa jauh</span> aksesnya
+                        dan <span class="font-medium text-slate-500 dark:text-slate-400">siapa di divisi itu</span> yang boleh (Kadiv, Sekdiv, dan/atau Anggota). Perubahan tersimpan otomatis.
                     </p>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="border-b border-slate-100 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/40">
-                                <th rowspan="2" class="whitespace-nowrap px-5 py-3.5 align-bottom text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Divisi</th>
-                                @foreach ($divisionPermissionMatrix as $row)
-                                    <th colspan="{{ collect([$row['view'], $row['manage'], $row['delete']])->filter()->count() }}"
-                                        class="whitespace-nowrap border-l border-slate-100 px-5 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                                        {{ $row['label'] }}
-                                    </th>
-                                @endforeach
-                            </tr>
-                            <tr class="border-b border-slate-100 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/40">
-                                @foreach ($divisionPermissionMatrix as $row)
-                                    @foreach ([['perm' => $row['view'], 'label' => 'Lihat'], ['perm' => $row['manage'], 'label' => 'Kelola'], ['perm' => $row['delete'], 'label' => 'Hapus']] as $col)
-                                        @if ($col['perm'])
-                                            <th class="whitespace-nowrap border-l border-slate-100 px-3 py-2 text-center text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:border-slate-800 dark:text-slate-500">
-                                                {{ $col['label'] }}
-                                            </th>
-                                        @endif
-                                    @endforeach
-                                @endforeach
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            @forelse ($divisions as $division)
-                                <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
-                                    <td class="px-5 py-3.5 text-sm font-semibold text-slate-800 dark:text-white">
-                                        {{ $division->name }}
-                                        <span class="ml-1 text-xs font-normal text-slate-400 dark:text-slate-500">({{ $division->abbreviation }})</span>
-                                    </td>
-                                    @foreach ($divisionPermissionMatrix as $row)
-                                        @foreach ([['perm' => $row['view'], 'label' => 'Lihat'], ['perm' => $row['manage'], 'label' => 'Kelola'], ['perm' => $row['delete'], 'label' => 'Hapus']] as $col)
-                                            @if ($col['perm'])
-                                                @php
-                                                    $permission = $col['perm'];
-                                                    $isActive = $division->permissions->contains('id', $permission->id);
-                                                @endphp
-                                                <td class="border-l border-slate-100 px-3 py-3.5 text-center dark:border-slate-800">
-                                                    <div class="inline-flex" x-data="{ active: {{ $isActive ? 'true' : 'false' }}, loading: false }">
-                                                        <button type="button" title="Toggle {{ $col['label'] }} {{ $row['label'] }} untuk {{ $division->name }}"
-                                                            @click="loading = true; toggleDivisionPermission({{ $division->id }}, {{ $permission->id }}, $data, () => loading = false)"
-                                                            :disabled="loading"
-                                                            :class="active ? '{{ $col['label'] === 'Hapus' ? 'bg-red-600' : 'bg-blue-600' }}' : 'bg-slate-200 dark:bg-slate-700'"
-                                                            class="inline-flex h-5 w-9 shrink-0 items-center rounded-full px-0.5 transition disabled:opacity-50">
-                                                            <span :class="active ? 'translate-x-4' : 'translate-x-0'"
-                                                                class="h-4 w-4 rounded-full bg-white shadow transition-transform"></span>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            @endif
-                                        @endforeach
-                                    @endforeach
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="10" class="px-5 py-12 text-center text-sm text-slate-400 dark:text-slate-500">
-                                        Belum ada data divisi.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+                    <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                        <span class="font-medium">Divisi</span>
+                        <select x-model.number="divisionId"
+                            class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            @foreach ($divisions as $division)
+                                <option value="{{ $division->id }}">{{ $division->name }} ({{ $division->abbreviation }})</option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                        <select x-model.number="copyFrom"
+                            class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            <option value="">Salin dari divisi…</option>
+                            <template x-for="d in otherDivisions" :key="d.id">
+                                <option :value="d.id" x-text="d.name"></option>
+                            </template>
+                        </select>
+                        <button type="button" @click="copyAccess()" :disabled="!copyFrom || busy"
+                            class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                            Salin
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hidden border-b border-slate-100 bg-slate-50/70 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:border-slate-800 dark:bg-slate-800/40 dark:text-slate-500 sm:grid sm:grid-cols-12 sm:gap-4">
+                    <div class="col-span-4">Fitur</div>
+                    <div class="col-span-3">Level akses</div>
+                    <div class="col-span-5">Siapa yang boleh</div>
+                </div>
+
+                <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <template x-for="feature in features" :key="feature.key">
+                        <div class="grid grid-cols-1 items-center gap-3 px-5 py-3.5 sm:grid-cols-12 sm:gap-4">
+                            <div class="sm:col-span-4">
+                                <div class="text-sm font-semibold text-slate-800 dark:text-white" x-text="feature.label"></div>
+                                <div class="text-xs text-slate-400 dark:text-slate-500" x-text="feature.group"></div>
+                            </div>
+
+                            <div class="sm:col-span-3">
+                                <select :value="current(feature).level"
+                                    @change="setLevel(feature, $event.target.value)"
+                                    :disabled="busy"
+                                    :class="current(feature).level === 'delete' ? 'text-red-600 dark:text-red-400' : ''"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                                    <option value="none">Tidak ada</option>
+                                    <template x-for="tier in feature.tiers" :key="tier">
+                                        <option :value="tier" :selected="current(feature).level === tier" x-text="tierLabel(feature, tier)"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-x-5 gap-y-2 sm:col-span-5"
+                                :class="current(feature).level === 'none' ? 'opacity-40' : ''">
+                                <template x-for="who in [['kadiv', 'Kadiv'], ['sekdiv', 'Sekdiv'], ['anggota', 'Anggota']]" :key="who[0]">
+                                    <label class="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                                        <input type="checkbox"
+                                            :checked="current(feature)[who[0]]"
+                                            :disabled="current(feature).level === 'none' || busy"
+                                            @change="setScope(feature, who[0], $event.target.checked)"
+                                            class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800">
+                                        <span x-text="who[1]"></span>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </div>
         @endif
@@ -366,7 +336,6 @@
     <script>
         function rolesManagement() {
             return {
-                activeRole: {{ $roles->first()->id ?? 'null' }},
                 notice: '',
                 noticeType: 'success',
 
@@ -379,44 +348,8 @@
                     }
                 },
 
-                togglePermission(roleId, permissionId, itemData, done) {
-                    fetch(`{{ url('roles-management/permissions') }}/${roleId}/${permissionId}/toggle`, {
-                            method: 'PATCH',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                            },
-                        })
-                        .then(async (res) => {
-                            const data = await res.json();
-                            if (!res.ok) throw new Error(data.message || 'Gagal menyimpan perubahan.');
-                            itemData.active = data.active;
-                            this.showNotice('Hak akses berhasil diperbarui.');
-                        })
-                        .catch((err) => this.showNotice(err.message, 'error'))
-                        .finally(() => done());
-                },
-
-                toggleDivisionPermission(divisionId, permissionId, itemData, done) {
-                    fetch(`{{ url('roles-management/division-permissions') }}/${divisionId}/${permissionId}/toggle`, {
-                            method: 'PATCH',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                            },
-                        })
-                        .then(async (res) => {
-                            const data = await res.json();
-                            if (!res.ok) throw new Error(data.message || 'Gagal menyimpan perubahan.');
-                            itemData.active = data.active;
-                            this.showNotice('Hak akses divisi berhasil diperbarui.');
-                        })
-                        .catch((err) => this.showNotice(err.message, 'error'))
-                        .finally(() => done());
-                },
-
                 updateUserField(userId, field, value) {
-                    fetch(`{{ url('roles-management/users') }}/${userId}`, {
+                    fetch(`{{ url('peran-akses/pengguna') }}/${userId}`, {
                             method: 'PATCH',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -434,7 +367,7 @@
                 },
 
                 resetPassword(userId) {
-                    fetch(`{{ url('roles-management/users') }}/${userId}/reset-password`, {
+                    fetch(`{{ url('peran-akses/pengguna') }}/${userId}/atur-ulang-sandi`, {
                             method: 'PATCH',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -451,7 +384,7 @@
                 },
 
                 deleteUser(userId, buttonEl) {
-                    fetch(`{{ url('roles-management/users') }}/${userId}`, {
+                    fetch(`{{ url('peran-akses/pengguna') }}/${userId}`, {
                             method: 'DELETE',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -468,6 +401,162 @@
                         .catch((err) => this.showNotice(err.message, 'error'));
                 },
             }
+        }
+            // Hak akses per peran: satu level per modul, tersimpan otomatis.
+        function roleAccess() {
+            return {
+                features: @json($roleFeaturesUi),
+                access: @json($roleAccess),
+                roleId: {{ $editableRoles->first()->id ?? 'null' }},
+                busy: false,
+
+                get groups() {
+                    const map = {};
+                    this.features.forEach((f) => {
+                        const name = f.group || 'Lainnya';
+                        (map[name] = map[name] || { name, features: [] }).features.push(f);
+                    });
+                    return Object.values(map);
+                },
+
+                level(feature) {
+                    return (this.access[this.roleId] || {})[feature.key] || 'none';
+                },
+
+                tierLabel(feature, tier) {
+                    if (feature.tiers.length === 1) return 'Aktif';
+                    if (tier === 'view') return 'Lihat';
+                    if (tier === 'manage') return 'Kelola';
+                    return feature.tiers.includes('manage') ? 'Penuh (+ hapus)' : 'Lihat + hapus';
+                },
+
+                setLevel(feature, level) {
+                    const roleId = this.roleId;
+                    const previous = this.level(feature);
+                    this.access[roleId][feature.key] = level;
+                    this.busy = true;
+
+                    fetch(`{{ url('peran-akses/peran') }}/${roleId}/akses/${feature.key}`, {
+                            method: 'PUT',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ level }),
+                        })
+                        .then(async (res) => {
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.message || 'Gagal menyimpan perubahan.');
+                            this.access[roleId][feature.key] = data.level;
+                            this.$dispatch('notice', { message: 'Hak akses berhasil diperbarui.', type: 'success' });
+                        })
+                        .catch((err) => {
+                            this.access[roleId][feature.key] = previous;
+                            this.$dispatch('notice', { message: err.message, type: 'error' });
+                        })
+                        .finally(() => (this.busy = false));
+                },
+            };
+        }
+
+        // Hak akses per divisi: satu level + siapa yang boleh, tersimpan otomatis.
+        function divisionAccess() {
+            const csrf = () => document.querySelector('meta[name="csrf-token"]').content;
+            const headers = () => ({
+                'X-CSRF-TOKEN': csrf(),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            });
+
+            return {
+                features: @json($divisionFeaturesUi),
+                access: @json($divisionAccess),
+                divisions: @json($divisionsUi),
+                divisionId: {{ $divisions->first()->id }},
+                copyFrom: '',
+                busy: false,
+
+                get otherDivisions() {
+                    return this.divisions.filter((d) => d.id !== this.divisionId);
+                },
+
+                notify(message, type = 'success') {
+                    this.$dispatch('notice', { message, type });
+                },
+
+                current(feature) {
+                    return this.access[this.divisionId][feature.key];
+                },
+
+                tierLabel(feature, tier) {
+                    if (feature.tiers.length === 1) return 'Aktif';
+                    if (tier === 'view') return 'Lihat';
+                    if (tier === 'manage') return 'Kelola';
+                    return feature.tiers.includes('manage') ? 'Penuh (+ hapus)' : 'Lihat + hapus';
+                },
+
+                setLevel(feature, level) {
+                    const state = { ...this.current(feature), level };
+                    // Pertama kali dinyalakan: default Kadiv & Sekdiv saja.
+                    if (level !== 'none' && !state.kadiv && !state.sekdiv && !state.anggota) {
+                        state.kadiv = true;
+                        state.sekdiv = true;
+                    }
+                    this.save(feature, state);
+                },
+
+                setScope(feature, who, checked) {
+                    this.save(feature, { ...this.current(feature), [who]: checked });
+                },
+
+                save(feature, state) {
+                    const divisionId = this.divisionId;
+                    const previous = { ...this.access[divisionId][feature.key] };
+                    this.access[divisionId][feature.key] = state;
+                    this.busy = true;
+
+                    fetch(`{{ url('peran-akses/divisi') }}/${divisionId}/akses/${feature.key}`, {
+                            method: 'PUT',
+                            headers: headers(),
+                            body: JSON.stringify(state),
+                        })
+                        .then(async (res) => {
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.message || 'Gagal menyimpan perubahan.');
+                            this.access[divisionId][feature.key] = data;
+                            this.notify('Hak akses divisi berhasil diperbarui.');
+                        })
+                        .catch((err) => {
+                            this.access[divisionId][feature.key] = previous;
+                            this.notify(err.message, 'error');
+                        })
+                        .finally(() => (this.busy = false));
+                },
+
+                copyAccess() {
+                    if (!this.copyFrom) return;
+                    if (!confirm('Pengaturan akses divisi ini akan ditimpa dengan milik divisi yang dipilih. Lanjutkan?')) return;
+
+                    const divisionId = this.divisionId;
+                    this.busy = true;
+
+                    fetch(`{{ url('peran-akses/divisi') }}/${divisionId}/salin-akses`, {
+                            method: 'POST',
+                            headers: headers(),
+                            body: JSON.stringify({ from_division_id: this.copyFrom }),
+                        })
+                        .then(async (res) => {
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.message || 'Gagal menyalin hak akses.');
+                            this.access[divisionId] = data.access;
+                            this.copyFrom = '';
+                            this.notify('Hak akses divisi berhasil disalin.');
+                        })
+                        .catch((err) => this.notify(err.message, 'error'))
+                        .finally(() => (this.busy = false));
+                },
+            };
         }
     </script>
 @endsection

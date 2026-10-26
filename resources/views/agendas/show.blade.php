@@ -10,7 +10,7 @@
                 <h1 class="text-2xl font-bold text-slate-800 dark:text-white">{{ $agenda->name }}</h1>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     Kode: <span class="font-medium text-slate-700 dark:text-slate-300">{{ $agenda->agenda_code }}</span>
-                    &bull; Tanggal: <span class="font-medium text-slate-700 dark:text-slate-300">{{ \Carbon\Carbon::parse($agenda->date)->format('d M Y') }}</span>
+                    &bull; Tanggal: <span class="font-medium text-slate-700 dark:text-slate-300">{{ \Carbon\Carbon::parse($agenda->date)->translatedFormat('d M Y') }}</span>
                 </p>
             </div>
             <a href="{{ route('agendas.index') }}"

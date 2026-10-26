@@ -30,9 +30,9 @@ class RolePermissionSeeder extends Seeder
             ['slug' => 'view_members', 'label' => 'Lihat Pengurus', 'group' => 'Pengurus'],
             ['slug' => 'manage_members', 'label' => 'Kelola Pengurus', 'group' => 'Pengurus'],
             ['slug' => 'delete_members', 'label' => 'Hapus Pengurus', 'group' => 'Pengurus'],
-            ['slug' => 'view_non_pengurus', 'label' => 'Lihat Anggota Non-Pengurus', 'group' => 'Pengurus'],
-            ['slug' => 'manage_non_pengurus', 'label' => 'Kelola Anggota Non-Pengurus', 'group' => 'Pengurus'],
-            ['slug' => 'delete_non_pengurus', 'label' => 'Hapus Anggota Non-Pengurus', 'group' => 'Pengurus'],
+            ['slug' => 'view_non_officers', 'label' => 'Lihat Anggota Non-Pengurus', 'group' => 'Pengurus'],
+            ['slug' => 'manage_non_officers', 'label' => 'Kelola Anggota Non-Pengurus', 'group' => 'Pengurus'],
+            ['slug' => 'delete_non_officers', 'label' => 'Hapus Anggota Non-Pengurus', 'group' => 'Pengurus'],
             ['slug' => 'view_committees', 'label' => 'Lihat Kepanitiaan', 'group' => 'Kepanitiaan'],
             ['slug' => 'manage_committees', 'label' => 'Kelola Kepanitiaan', 'group' => 'Kepanitiaan'],
             ['slug' => 'delete_committees', 'label' => 'Hapus Kepanitiaan', 'group' => 'Kepanitiaan'],
@@ -54,6 +54,10 @@ class RolePermissionSeeder extends Seeder
             ['slug' => 'view_outgoing_letters', 'label' => 'Lihat Surat Keluar', 'group' => 'Persuratan'],
             ['slug' => 'manage_outgoing_letters', 'label' => 'Kelola Surat Keluar', 'group' => 'Persuratan'],
             ['slug' => 'delete_outgoing_letters', 'label' => 'Hapus Surat Keluar', 'group' => 'Persuratan'],
+
+            ['slug' => 'view_inventory_items', 'label' => 'Lihat Inventaris', 'group' => 'Inventaris'],
+            ['slug' => 'manage_inventory_items', 'label' => 'Kelola Inventaris', 'group' => 'Inventaris'],
+            ['slug' => 'delete_inventory_items', 'label' => 'Hapus Inventaris', 'group' => 'Inventaris'],
 
             ['slug' => 'view_audit_logs', 'label' => 'Akses Audit Log', 'group' => 'Sistem'],
             ['slug' => 'manage_roles', 'label' => 'Manajemen Peran & Akses', 'group' => 'Sistem'],
@@ -82,6 +86,10 @@ class RolePermissionSeeder extends Seeder
         foreach ($permissions as $permission) {
             Permission::updateOrCreate(['slug' => $permission['slug']], $permission);
         }
+
+        // Fitur "Event Unggulan" sudah dihapus — buang izin sisanya (relasi ke
+        // peran & divisi ikut terhapus lewat cascade).
+        Permission::whereIn('slug', ['view_events', 'manage_events', 'delete_events'])->delete();
 
         $superAdmin = Role::updateOrCreate(
             ['slug' => 'super-admin'],
@@ -138,6 +146,18 @@ class RolePermissionSeeder extends Seeder
                 Permission::whereIn('slug', [
                     'view_news', 'manage_news', 'delete_news',
                     'view_gallery', 'manage_gallery', 'delete_gallery',
+                ])->pluck('id')
+            );
+        }
+
+        // Default awal untuk Divisi Inventaris (singkatan "Invent"): hak penuh
+        // atas menu Inventaris — hanya dipasang sekali saat divisinya belum
+        // punya hak ekstra apa pun, sama seperti kasus Infokom di atas.
+        $invent = Division::where('abbreviation', 'Invent')->first();
+        if ($invent && $invent->permissions()->count() === 0) {
+            $invent->permissions()->syncWithoutDetaching(
+                Permission::whereIn('slug', [
+                    'view_inventory_items', 'manage_inventory_items', 'delete_inventory_items',
                 ])->pluck('id')
             );
         }
