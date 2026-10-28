@@ -36,11 +36,17 @@ class OutgoingLetterController extends Controller
             });
         }
 
-        // Pengurutan dinamis: 'asc' (terlama dulu) atau 'desc' (terbaru dulu, default).
-        // Nilai ini juga dipakai apa adanya oleh Excel/PDF di bawah supaya berkas yang
-        // diunduh selalu menghormati urutan yang sedang aktif di layar.
         $sort = $request->get('sort', 'desc') === 'asc' ? 'asc' : 'desc';
-        $filteredLetters = $query->orderBy('date', $sort)->orderBy('id', $sort)->get();
+        $dir = $sort === 'asc' ? 1 : -1;
+
+        // Urut: tanggal, lalu nomor urut surat (angka di depan nomor, mis. 014 dari "014/A/..."),
+        // terakhir id. Jadi urutan tidak bergantung pada siapa yang diinput lebih dulu.
+        $filteredLetters = $query->get()->sort(function ($a, $b) use ($dir) {
+            return $dir * (
+                [(string) $a->date, (int) $a->reference_number, $a->id]
+                <=> [(string) $b->date, (int) $b->reference_number, $b->id]
+            );
+        })->values();
 
         // 2. Logika Export Excel
         if ($request->export === 'excel') {
