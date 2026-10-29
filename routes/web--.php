@@ -29,11 +29,11 @@ use App\Http\Controllers\CommitteeController;
 use App\Http\Controllers\CommitteeFieldController;
 
 // ============ SITEMAP.XML & ROBOTS.TXT (SEO) ============
-// Di luar grup "track.visit" — ini feed untuk mesin pencari, bukan halaman
+// Di luar grup "track.visit" - ini feed untuk mesin pencari, bukan halaman
 // yang dikunjungi manusia, jadi tidak perlu ikut tercatat sebagai kunjungan.
 // robots.txt sengaja dibuat sebagai ROUTE (bukan file statis di public/)
 // supaya baris "Sitemap:" di dalamnya otomatis mengikuti domain yang
-// sedang dipakai — tidak perlu diedit manual saat pindah dari domain
+// sedang dipakai - tidak perlu diedit manual saat pindah dari domain
 // development ke domain production.
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
@@ -58,7 +58,7 @@ Route::middleware('track.visit')->group(function () {
 
     Route::get('/kontak-aspirasi', [PublicController::class, 'contact'])->name('public.contact');
     // Formulir ini publik dan sebagian modenya boleh anonim, jadi rawan
-    // disasar bot spam — dibatasi maksimal 5 kali kirim per jam per IP.
+    // disasar bot spam - dibatasi maksimal 5 kali kirim per jam per IP.
     Route::post('/kontak-aspirasi', [PublicController::class, 'contactStore'])
         ->middleware('throttle:5,60')->name('public.contact.store');
 });
@@ -72,14 +72,14 @@ Route::middleware('guest')->group(function () {
     Route::redirect('/login', '/masuk');
     Route::get('/masuk', [AuthController::class, 'showLoginForm'])->name('login');
     // Lapisan pertahanan tambahan di level route (di luar rate limiting
-    // per-email di AuthController::login) — membatasi request POST /login
+    // per-email di AuthController::login) - membatasi request POST /login
     // secara umum per-IP, supaya request brute force tidak bisa dikirim
     // bertubi-tubi walau mencoba banyak alamat email berbeda.
     Route::post('/masuk', [AuthController::class, 'login'])->middleware('throttle:20,1');
 });
 
 Route::middleware('auth')->group(function () {
-    // Pengaturan Akun (ranah privat) — semua pengguna login boleh akses profilnya sendiri,
+    // Pengaturan Akun (ranah privat) - semua pengguna login boleh akses profilnya sendiri,
     // tidak perlu permission khusus.
     Route::get('/pengaturan-akun', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/pengaturan-akun', [ProfileController::class, 'update'])->name('profile.update');
@@ -108,7 +108,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('pengurus', MemberController::class)->names('members')->parameters(['pengurus' => 'member'])->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_members');
     Route::resource('pengurus', MemberController::class)->names('members')->parameters(['pengurus' => 'member'])->only(['destroy'])->middleware('can:delete_members');
 
-    // Statistik individu (histori kepanitiaan + kehadiran) — dipakai bersama
+    // Statistik individu (histori kepanitiaan + kehadiran) - dipakai bersama
     // oleh menu Pengurus maupun Anggota Non-Pengurus, jadi izinnya cukup
     // salah satu dari kedua hak "Lihat" (dicek lagi di dalam controller).
     Route::get('/pengurus/{member}/statistik', [MemberController::class, 'statistics'])
@@ -129,7 +129,7 @@ Route::middleware('auth')->group(function () {
     // Non-Pengurus, dan bisa dikaitkan ke beberapa agenda (rapat + hari-H).
     // Urutan di bawah ini sengaja: rute statis (/kepanitiaan/tambah) HARUS
     // didaftarkan sebelum rute berwildcard (/kepanitiaan/{committee}) dari
-    // 'show' — kalau tidak, Laravel akan mencocokkan "create" sebagai ID
+    // 'show' - kalau tidak, Laravel akan mencocokkan "create" sebagai ID
     // kepanitiaan lebih dulu (karena didaftarkan lebih awal) dan berakhir 404.
     Route::resource('kepanitiaan', CommitteeController::class)->names('committees')->parameters(['kepanitiaan' => 'committee'])->only(['index'])->middleware('can:view_committees');
     Route::resource('kepanitiaan', CommitteeController::class)->names('committees')->parameters(['kepanitiaan' => 'committee'])->only(['create', 'store'])->middleware('can:manage_committees');
@@ -147,7 +147,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/kepanitiaan-anggota-baru', [CommitteeController::class, 'quickCreateMember'])
         ->name('committees.members.quick-create')->middleware('can:manage_committees');
 
-    // Master bidang panitia (Sie Acara, Sie Konsumsi, dst) — dikelola dari
+    // Master bidang panitia (Sie Acara, Sie Konsumsi, dst) - dikelola dari
     // dalam halaman Kepanitiaan, dipakai berulang lintas kepanitiaan.
     Route::resource('bidang-panitia', CommitteeFieldController::class)->names('committee-fields')->parameters(['bidang-panitia' => 'committee_field'])->only(['index'])->middleware('can:view_committees');
     Route::resource('bidang-panitia', CommitteeFieldController::class)->names('committee-fields')->parameters(['bidang-panitia' => 'committee_field'])->only(['store', 'update'])->middleware('can:manage_committees');
@@ -206,7 +206,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('galeri', GalleryController::class)->names('galleries')->parameters(['galeri' => 'gallery'])->only(['create', 'store', 'edit', 'update'])->middleware('can:manage_gallery');
     Route::resource('galeri', GalleryController::class)->names('galleries')->parameters(['galeri' => 'gallery'])->only(['destroy'])->middleware('can:delete_gallery');
 
-    // Pengaturan Beranda (Hero & Sambutan Ketua Umum) — singleton, tidak perlu resource penuh.
+    // Pengaturan Beranda (Hero & Sambutan Ketua Umum) - singleton, tidak perlu resource penuh.
     Route::get('/pengaturan-beranda', [SettingController::class, 'edit'])
         ->name('settings.edit')->middleware('can:manage_settings');
     Route::put('/pengaturan-beranda', [SettingController::class, 'update'])
@@ -246,7 +246,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/pengguna/{user}/atur-ulang-sandi', [RoleManagementController::class, 'resetPassword'])->name('reset-password');
     });
 
-    // Khusus Super Admin — dicek eksplisit di dalam controller (bukan lewat
+    // Khusus Super Admin - dicek eksplisit di dalam controller (bukan lewat
     // sistem permission role/divisi biasa), karena berisi seluruh data
     // organisasi termasuk hash password akun.
     Route::prefix('cadangan-data')->name('backups.')->group(function () {

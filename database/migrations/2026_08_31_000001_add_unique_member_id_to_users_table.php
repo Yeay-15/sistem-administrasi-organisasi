@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // Penguat di level database untuk aturan "satu pengurus maksimal satu
-        // akun login" — sebelumnya cuma dijaga lewat validasi aplikasi di
+        // akun login" - sebelumnya cuma dijaga lewat validasi aplikasi di
         // RoleManagementController::storeUser(). Kolom ini nullable (banyak
         // baris NULL tetap diperbolehkan oleh index unique), jadi tidak
         // memengaruhi akun lama yang belum terhubung ke data pengurus.

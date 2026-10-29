@@ -124,8 +124,8 @@ class PostController extends Controller
 
         while (
             Post::where('slug', $slug)
-                ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
-                ->exists()
+            ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
+            ->exists()
         ) {
             $slug = $base . '-' . $counter;
             $counter++;
@@ -143,7 +143,7 @@ class PostController extends Controller
     /**
      * Menangani upload gambar yang disisipkan LANGSUNG di dalam body editor
      * Quill (bukan cover). Sebelumnya Quill meng-encode gambar ini sebagai
-     * base64 dan menyimpannya utuh di kolom `content` (longText) — bikin
+     * base64 dan menyimpannya utuh di kolom `content` (longText) - bikin
      * baris database membengkak & tidak ada kompresi sama sekali.
      *
      * Sekarang file-nya disimpan ke storage/app/public/posts/content dan

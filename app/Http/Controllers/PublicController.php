@@ -48,7 +48,7 @@ class PublicController extends Controller
     // Profil > Tentang Kami
     public function about()
     {
-        // Estafet Kepemimpinan — dikelola dari dashboard admin (menu
+        // Estafet Kepemimpinan - dikelola dari dashboard admin (menu
         // "Estafet Kepemimpinan"), diurutkan sesuai kolom "order" lalu
         // tahun mulai menjabat.
         // Bisa disembunyikan lewat toggle di halaman admin Estafet Kepemimpinan.
@@ -89,7 +89,7 @@ class PublicController extends Controller
     public function agenda(Request $request)
     {
         // Portal Publik hanya boleh menampilkan agenda yang ditandai
-        // is_public — agenda internal (mis. rapat pembentukan panitia)
+        // is_public - agenda internal (mis. rapat pembentukan panitia)
         // tetap ada di kalender admin tapi disaring di sini.
         $query = Agenda::publicOnly();
 
@@ -107,7 +107,7 @@ class PublicController extends Controller
             ->paginate(6, ['*'], 'terlaksana')
             ->withQueryString();
 
-        // Untuk tampilan kalender publik — memakai skema warna yang sama dengan admin
+        // Untuk tampilan kalender publik - memakai skema warna yang sama dengan admin
         $allAgendas = Agenda::publicOnly()->orderBy('date')->get();
         $calendarEvents = Agenda::buildCalendarEvents($allAgendas);
 
@@ -218,7 +218,7 @@ class PublicController extends Controller
         ]);
 
         // Mode "Hanya Pengurus" hanya membatasi SIAPA yang boleh membuka
-        // formulir (harus login) — bukan berarti melarang kirim anonim.
+        // formulir (harus login) - bukan berarti melarang kirim anonim.
         // Login di sini berfungsi sebagai gerbang akses, bukan syarat
         // keterbukaan identitas, supaya pengurus tetap bisa menyampaikan
         // aspirasi internal secara anonim bila diperlukan.

@@ -1,7 +1,8 @@
 @extends('layouts.public')
 
 @section('title', 'Tentang Kami - KATIBER')
-@section('meta_description', 'Mengenal KATIBER — sejarah, tujuan, jargon, dan estafet kepemimpinan Keluarga Mahasiswa
+@section('meta_description',
+    'Mengenal KATIBER - sejarah, tujuan, jargon, dan estafet kepemimpinan Keluarga Mahasiswa
     Tebing Tinggi Bersatu sejak 2014.')
 
 @section('content')
@@ -16,7 +17,7 @@
                 Tentang Kami</h1>
             <p class="reveal mx-auto mt-4 max-w-2xl text-base leading-relaxed text-navy-100 sm:text-lg"
                 style="--reveal-delay:160ms">
-                KATIBER — Keluarga Mahasiswa Tebing Tinggi Bersatu — adalah organisasi berbentuk kekeluargaan yang
+                KATIBER - Keluarga Mahasiswa Tebing Tinggi Bersatu - adalah organisasi berbentuk kekeluargaan yang
                 menaungi mahasiswa asal Kota Tebing Tinggi dan sekitarnya yang menempuh pendidikan di wilayah
                 Lhokseumawe dan Aceh Utara. Kami hadir di tanah rantau untuk menjalin persatuan serta persaudaraan
                 lahiriah maupun batiniah antar sesama anggota. Lebih dari sekadar ruang silaturahmi dan pengembangan
@@ -99,85 +100,85 @@
 
         {{-- ============ ESTAFET KEPEMIMPINAN (TIMELINE) ============ --}}
         @if ($showLeaders)
-        <div class="reveal mt-14">
-            <div class="mb-8 text-center">
-                <span class="text-xs font-bold uppercase tracking-wider text-navy-700 dark:text-navy-400">Sejak
-                    2014</span>
-                <h2 class="mt-1.5 text-2xl font-extrabold text-slate-800 dark:text-white">Estafet Kepemimpinan</h2>
-                <p class="mx-auto mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
-                    Generasi-generasi penggerak yang telah membawa KATIBER ke arah yang lebih baik.
-                </p>
-            </div>
+            <div class="reveal mt-14">
+                <div class="mb-8 text-center">
+                    <span class="text-xs font-bold uppercase tracking-wider text-navy-700 dark:text-navy-400">Sejak
+                        2014</span>
+                    <h2 class="mt-1.5 text-2xl font-extrabold text-slate-800 dark:text-white">Estafet Kepemimpinan</h2>
+                    <p class="mx-auto mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
+                        Generasi-generasi penggerak yang telah membawa KATIBER ke arah yang lebih baik.
+                    </p>
+                </div>
 
-            <div class="relative">
-                @if ($leaders->isEmpty())
-                    <div
-                        class="theme-transition rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center dark:border-slate-800 dark:bg-slate-900">
-                        <p class="text-sm text-slate-400 dark:text-slate-500">Data estafet kepemimpinan belum
-                            ditambahkan.</p>
-                    </div>
-                @else
-                    {{-- Garis vertikal penghubung --}}
-                    <div
-                        class="absolute bottom-2 left-[27px] top-2 w-0.5 bg-gradient-to-b from-navy-700 via-navy-300 to-navy-50 dark:from-navy-500 dark:via-navy-800 dark:to-slate-900">
-                    </div>
+                <div class="relative">
+                    @if ($leaders->isEmpty())
+                        <div
+                            class="theme-transition rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center dark:border-slate-800 dark:bg-slate-900">
+                            <p class="text-sm text-slate-400 dark:text-slate-500">Data estafet kepemimpinan belum
+                                ditambahkan.</p>
+                        </div>
+                    @else
+                        {{-- Garis vertikal penghubung --}}
+                        <div
+                            class="absolute bottom-2 left-[27px] top-2 w-0.5 bg-gradient-to-b from-navy-700 via-navy-300 to-navy-50 dark:from-navy-500 dark:via-navy-800 dark:to-slate-900">
+                        </div>
 
-                    <div class="space-y-6">
-                        @foreach ($leaders as $i => $leader)
-                            <div class="reveal relative flex items-start gap-5"
-                                style="--reveal-delay: {{ $i * 60 }}ms">
-                                {{-- Foto Ketua Umum, dengan fallback logo/siluet bila belum ada foto --}}
-                                <div
-                                    class="relative z-10 h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-100 shadow-md ring-4 ring-white dark:bg-slate-800 dark:ring-slate-950">
-                                    @if ($leader->photo_url)
-                                        <img src="{{ $leader->photo_url }}" alt="{{ $leader->name }}" loading="lazy"
-                                            class="h-full w-full object-cover">
-                                    @elseif ($homeSettings->logo_url ?? null)
-                                        <img src="{{ $homeSettings->logo_url }}" alt="Logo KATIBER"
-                                            class="h-full w-full object-contain p-1.5">
-                                    @else
-                                        <div
-                                            class="flex h-full w-full items-center justify-center bg-gradient-to-br from-navy-100 to-navy-200 text-navy-500 dark:from-slate-800 dark:to-slate-800 dark:text-slate-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="h-7 w-7">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                {{-- Kartu --}}
-                                <div
-                                    class="theme-transition group flex-1 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 {{ $loop->last ? 'ring-1 ring-amber-300/60 dark:ring-amber-400/20' : '' }}">
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <span
-                                            class="inline-block rounded-full bg-navy-50 px-2.5 py-0.5 text-xs font-bold text-navy-700 dark:bg-navy-500/10 dark:text-navy-400">
-                                            {{ $leader->period_label }}
-                                        </span>
-                                        @if ($loop->last)
-                                            <span
-                                                class="inline-block rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
-                                                Periode Terkini
-                                            </span>
+                        <div class="space-y-6">
+                            @foreach ($leaders as $i => $leader)
+                                <div class="reveal relative flex items-start gap-5"
+                                    style="--reveal-delay: {{ $i * 60 }}ms">
+                                    {{-- Foto Ketua Umum, dengan fallback logo/siluet bila belum ada foto --}}
+                                    <div
+                                        class="relative z-10 h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-100 shadow-md ring-4 ring-white dark:bg-slate-800 dark:ring-slate-950">
+                                        @if ($leader->photo_url)
+                                            <img src="{{ $leader->photo_url }}" alt="{{ $leader->name }}" loading="lazy"
+                                                class="h-full w-full object-cover">
+                                        @elseif ($homeSettings->logo_url ?? null)
+                                            <img src="{{ $homeSettings->logo_url }}" alt="Logo KATIBER"
+                                                class="h-full w-full object-contain p-1.5">
+                                        @else
+                                            <div
+                                                class="flex h-full w-full items-center justify-center bg-gradient-to-br from-navy-100 to-navy-200 text-navy-500 dark:from-slate-800 dark:to-slate-800 dark:text-slate-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor" class="h-7 w-7">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                            </div>
                                         @endif
                                     </div>
-                                    <p class="mt-2 text-base font-bold text-slate-800 dark:text-white">
-                                        {{ $leader->name }}</p>
-                                    @if ($leader->major)
-                                        <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                                            {{ $leader->major }}</p>
-                                    @else
-                                        <p class="mt-0.5 text-sm italic text-slate-400 dark:text-slate-600">
-                                            Jurusan/Kampus belum tersedia</p>
-                                    @endif
+
+                                    {{-- Kartu --}}
+                                    <div
+                                        class="theme-transition group flex-1 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 {{ $loop->last ? 'ring-1 ring-amber-300/60 dark:ring-amber-400/20' : '' }}">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span
+                                                class="inline-block rounded-full bg-navy-50 px-2.5 py-0.5 text-xs font-bold text-navy-700 dark:bg-navy-500/10 dark:text-navy-400">
+                                                {{ $leader->period_label }}
+                                            </span>
+                                            @if ($loop->last)
+                                                <span
+                                                    class="inline-block rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+                                                    Periode Terkini
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <p class="mt-2 text-base font-bold text-slate-800 dark:text-white">
+                                            {{ $leader->name }}</p>
+                                        @if ($leader->major)
+                                            <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                                                {{ $leader->major }}</p>
+                                        @else
+                                            <p class="mt-0.5 text-sm italic text-slate-400 dark:text-slate-600">
+                                                Jurusan/Kampus belum tersedia</p>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
             </div>
-        </div>
         @endif
 
         {{-- ============ NAVIGASI CEPAT ============ --}}

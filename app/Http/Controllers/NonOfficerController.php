@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 /**
  * Mengelola data orang yang ikut berkegiatan (mis. kepanitiaan) tapi bukan
- * bagian dari struktur Pengurus organisasi — dosen pembimbing, alumni,
+ * bagian dari struktur Pengurus organisasi - dosen pembimbing, alumni,
  * mahasiswa lain, atau relawan lepas. Disimpan di tabel `members` yang sama
  * (kolom `membership_type` = 'Non-Pengurus') supaya histori kepanitiaan &
  * statistiknya tetap konsisten dengan data Pengurus, tapi punya menu &

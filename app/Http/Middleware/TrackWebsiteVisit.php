@@ -11,7 +11,7 @@ class TrackWebsiteVisit
 {
     /**
      * Mencatat kunjungan ke halaman publik secara ringan (path, nama route,
-     * referrer, dan "visitor_key" ter-hash) — dipakai untuk menyusun
+     * referrer, dan "visitor_key" ter-hash) - dipakai untuk menyusun
      * Statistik Website di Dashboard admin. Dijalankan setelah response
      * terbentuk supaya tidak menambah latensi pada request pengunjung, dan
      * dibungkus try/catch agar kegagalan pencatatan tidak pernah mengganggu
@@ -31,7 +31,7 @@ class TrackWebsiteVisit
                     'created_at' => now(),
                 ]);
             } catch (\Throwable $e) {
-                // Diamkan — pelacakan kunjungan tidak boleh mengganggu situs.
+                // Diamkan - pelacakan kunjungan tidak boleh mengganggu situs.
             }
         }
 

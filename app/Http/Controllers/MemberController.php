@@ -20,7 +20,7 @@ class MemberController extends Controller
     public function index(Request $request)
     {
         // 1. Inisialisasi Query Builder dengan relasi.
-        // Menu "Pengurus" hanya menampilkan membership_type = Pengurus —
+        // Menu "Pengurus" hanya menampilkan membership_type = Pengurus -
         // anggota Non-Pengurus punya menu & controller terpisah (lihat
         // NonOfficerController) walau sama-sama menyimpan datanya di
         // tabel members.
@@ -93,7 +93,7 @@ class MemberController extends Controller
         ]);
 
         $data = $request->except('photo');
-        // Form ini khusus alur Pengurus — dipaksa terlepas dari input apa pun,
+        // Form ini khusus alur Pengurus - dipaksa terlepas dari input apa pun,
         // supaya tidak bisa disusupi jadi Non-Pengurus lewat form yang salah.
         $data['membership_type'] = 'Pengurus';
 
@@ -157,7 +157,7 @@ class MemberController extends Controller
     }
 
     /**
-     * Halaman statistik individu — dipakai bersama oleh menu Pengurus
+     * Halaman statistik individu - dipakai bersama oleh menu Pengurus
      * maupun Anggota Non-Pengurus (tombol "Lihat Statistik" di kedua
      * daftar mengarah ke sini), karena keduanya sama-sama row di tabel
      * members. Menampilkan histori kepanitiaan (dikelompokkan Teras
@@ -178,7 +178,7 @@ class MemberController extends Controller
         $committeeMemberships = $member->committeeMemberships()
             ->with(['committee', 'committeeField'])
             ->get()
-            ->sortByDesc(fn ($cm) => $cm->committee->start_date ?? $cm->created_at);
+            ->sortByDesc(fn($cm) => $cm->committee->start_date ?? $cm->created_at);
 
         $committeeLeadership = $committeeMemberships->filter->isCommitteeLeadership();
         $fieldMembers = $committeeMemberships->reject->isCommitteeLeadership();
@@ -202,7 +202,7 @@ class MemberController extends Controller
         $totalPresent = (int) ($attendanceByStatus['H'] ?? 0);
         $attendancePercentage = $totalAgenda > 0 ? round(($totalPresent / $totalAgenda) * 100, 1) : 0;
 
-        // Breakdown per jenis agenda (mis. Rapat vs Kegiatan) — memakai
+        // Breakdown per jenis agenda (mis. Rapat vs Kegiatan) - memakai
         // kolom `type` yang sudah ada di tabel agendas supaya insight-nya
         // lebih tajam daripada cuma satu angka total.
         $attendanceByType = Attendance::where('attendances.member_id', $member->id)
@@ -231,7 +231,7 @@ class MemberController extends Controller
                 'total_agenda' => $agendaIds->count(),
                 'present' => $present,
             ];
-        })->unique(fn ($row) => $row['committee']->id)->values();
+        })->unique(fn($row) => $row['committee']->id)->values();
 
         return view('members.statistics', compact(
             'member',
@@ -248,7 +248,7 @@ class MemberController extends Controller
     }
 
     /**
-     * Form konfirmasi sebelum menjadikan seseorang Pengurus — perlu
+     * Form konfirmasi sebelum menjadikan seseorang Pengurus - perlu
      * melengkapi divisi & jabatan dulu, jadi tidak bisa langsung toggle
      * lewat satu klik tombol seperti arah sebaliknya (Pengurus -> Non-Pengurus).
      */
@@ -267,8 +267,8 @@ class MemberController extends Controller
      * Saat dipindah jadi Pengurus, divisi & jabatan WAJIB dilengkapi lewat
      * form ini (karena kolomnya nullable di DB, tapi tetap wajib secara
      * fungsional untuk pengurus). Saat dipindah jadi Non-Pengurus, data
-     * divisi/jabatan sengaja TIDAK dihapus — hanya disembunyikan dari
-     * tampilan Pengurus aktif — supaya kalau orang itu jadi pengurus lagi
+     * divisi/jabatan sengaja TIDAK dihapus - hanya disembunyikan dari
+     * tampilan Pengurus aktif - supaya kalau orang itu jadi pengurus lagi
      * nanti, datanya tidak perlu diisi ulang dari nol. Histori kepanitiaan
      * & kehadiran tidak pernah ikut berubah karena tetap merujuk ke
      * member_id yang sama.

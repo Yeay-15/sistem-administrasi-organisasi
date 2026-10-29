@@ -23,7 +23,7 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        // 2. Proteksi brute force — kunci sementara (per kombinasi email + IP)
+        // 2. Proteksi brute force - kunci sementara (per kombinasi email + IP)
         // kalau sudah gagal 5 kali beruntun, supaya password tidak bisa
         // ditebak ribuan kali per detik lewat script otomatis.
         $throttleKey = Str::lower($credentials['email']) . '|' . $request->ip();

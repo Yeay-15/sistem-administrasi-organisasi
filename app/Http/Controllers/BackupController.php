@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 class BackupController extends Controller
 {
     /**
-     * Halaman ini KHUSUS Super Admin — bukan lewat sistem permission
+     * Halaman ini KHUSUS Super Admin - bukan lewat sistem permission
      * biasa (role/divisi), karena isi backup adalah SELURUH data
      * organisasi (database + foto/dokumen) termasuk hash password akun.
      * Sengaja tidak dibuat jadi permission yang bisa didelegasikan ke
@@ -24,18 +24,18 @@ class BackupController extends Controller
         // spatie/laravel-backup menyimpan tiap cadangan sebagai satu file
         // .zip (database + storage/app/public dibungkus jadi satu) di
         // dalam folder bernama sesuai config('backup.backup.name') pada
-        // disk 'local' — daftar di bawah ini murni membaca folder itu.
+        // disk 'local' - daftar di bawah ini murni membaca folder itu.
         $disk = Storage::disk('local');
         $backupName = config('backup.backup.name');
 
         $backups = collect($disk->exists($backupName) ? $disk->files($backupName) : [])
-            ->filter(fn ($path) => str_ends_with($path, '.zip'))
-            ->map(fn ($path) => [
+            ->filter(fn($path) => str_ends_with($path, '.zip'))
+            ->map(fn($path) => [
                 'name' => basename($path),
                 'size' => $disk->size($path),
                 // Carbon::createFromTimestamp() TANPA parameter timezone selalu
                 // dianggap UTC, beda dengan Carbon::now() yang otomatis ikut
-                // timezone aplikasi (config('app.timezone')) — makanya jam yang
+                // timezone aplikasi (config('app.timezone')) - makanya jam yang
                 // tampil di tabel selisih 7 jam dari jam sebenarnya (WIB).
                 // Timezone-nya harus disebutkan eksplisit di sini.
                 'modified_at' => Carbon::createFromTimestamp($disk->lastModified($path), config('app.timezone')),
@@ -99,7 +99,7 @@ class BackupController extends Controller
     }
 
     /**
-     * Mencegah path traversal — $filename datang dari parameter URL, jadi
+     * Mencegah path traversal - $filename datang dari parameter URL, jadi
      * harus dipastikan benar-benar cuma nama file polos (tidak mengandung
      * '/' atau '..') sebelum dipakai membentuk path ke disk.
      */

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Avatar akun (ranah privat pengguna) — TERPISAH dari 'photo_path'
+            // Avatar akun (ranah privat pengguna) - TERPISAH dari 'photo_path'
             // di tabel members (foto resmi/PDH pengurus yang dikelola Sekretariat
             // dan tampil di portal publik). Keduanya sengaja tidak digabung.
             $table->string('avatar_path')->nullable()->after('password');

@@ -1,7 +1,8 @@
 @extends('layouts.public')
 
 @section('title', 'Agenda Kegiatan - KATIBER')
-@section('meta_description', 'Jadwal agenda dan kalender kegiatan KATIBER — Keluarga Mahasiswa Tebing Tinggi Bersatu — yang akan dan telah berlangsung.')
+@section('meta_description', 'Jadwal agenda dan kalender kegiatan KATIBER - Keluarga Mahasiswa Tebing Tinggi Bersatu -
+    yang akan dan telah berlangsung.')
 
 @section('content')
     <div x-data="publicAgendaView()">
@@ -10,14 +11,17 @@
             <div class="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div class="reveal">
-                        <span class="inline-block rounded-full bg-white/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-white ring-1 ring-inset ring-white/15">Kalender Kegiatan</span>
+                        <span
+                            class="inline-block rounded-full bg-white/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-white ring-1 ring-inset ring-white/15">Kalender
+                            Kegiatan</span>
                         <h1 class="mt-3 text-3xl font-extrabold text-white">Agenda Kegiatan</h1>
                         <p class="mt-2 text-sm text-navy-100">Jadwal kegiatan KATIBER Lhokseumawe - Aceh Utara yang akan dan
                             telah berlangsung.</p>
                     </div>
 
                     {{-- Toggle Kalender / Daftar --}}
-                    <div class="reveal flex w-fit rounded-lg bg-white p-1 shadow-sm dark:bg-slate-800" style="--reveal-delay:120ms">
+                    <div class="reveal flex w-fit rounded-lg bg-white p-1 shadow-sm dark:bg-slate-800"
+                        style="--reveal-delay:120ms">
                         <button @click="tab = 'calendar'" type="button"
                             class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold transition"
                             :class="tab === 'calendar' ? 'bg-navy-700 text-white shadow-sm' :
@@ -214,7 +218,7 @@
                 isToday(date) {
                     const today = new Date();
                     return new Date(this.year, this.month, date).toDateString() === today
-                .toDateString();
+                        .toDateString();
                 },
 
                 getNoOfDays() {

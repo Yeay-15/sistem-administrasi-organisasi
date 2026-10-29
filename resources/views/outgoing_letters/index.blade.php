@@ -3,12 +3,29 @@
 @section('title', 'Surat Keluar - KATIBER')
 
 @section('content')
+    @php $pdfOk = app(\App\Services\LetterGenerator::class)->pdfAvailable(); @endphp
+    @if (session('error'))
+        <div class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:bg-red-500/10 dark:text-red-400">{{ session('error') }}</div>
+    @endif
+    @if (session('download'))
+        {{-- Memulai unduhan .docx otomatis setelah surat dibuat lewat Surat Generator --}}
+        <iframe src="{{ session('download') }}" class="hidden" title="unduhan"></iframe>
+        <div class="mb-4 text-sm text-slate-500 dark:text-slate-400">
+            Unduhan tidak mulai? <a href="{{ session('download') }}" class="font-semibold text-indigo-600 hover:underline dark:text-indigo-400">Unduh Word (.docx)</a>
+        </div>
+    @endif
+
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Manajemen Surat Keluar</h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Penomoran dan pencatatan surat internal/eksternal.</p>
         </div>
         @can('manage_outgoing_letters')
+        <div class="flex flex-col gap-2 sm:flex-row">
+        <a href="{{ route('letter-generator.index') }}"
+            class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+            Surat dari Template
+        </a>
         <a href="{{ route('outgoing-letters.create') }}"
             class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md hover:shadow-blue-600/20">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
@@ -16,6 +33,7 @@
             </svg>
             Buat Surat Keluar
         </a>
+        </div>
         @endcan
     </div>
 
@@ -145,6 +163,14 @@
                             </td>
                             <td class="px-5 py-4">
                                 <div class="flex items-center justify-center gap-1.5">
+                                    @if ($letter->isGenerated())
+                                    <a href="{{ route('outgoing-letters.download-docx', $letter->id) }}" title="Unduh Word (.docx)"
+                                        class="rounded-lg px-2 py-2 text-xs font-bold text-indigo-600 transition hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10">DOCX</a>
+                                    @if ($pdfOk)
+                                    <a href="{{ route('outgoing-letters.download-pdf', $letter->id) }}" title="Unduh PDF"
+                                        class="rounded-lg px-2 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10">PDF</a>
+                                    @endif
+                                    @endif
                                     @can('manage_outgoing_letters')
                                     <a href="{{ route('outgoing-letters.edit', $letter->id) }}" title="Edit"
                                         class="rounded-lg p-2 text-amber-600 transition hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10">

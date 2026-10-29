@@ -9,7 +9,7 @@ return new class extends Migration
      * Migration DATA (bukan skema): menyamakan slug permission lama
      * (view/manage/delete_non_pengurus) ke Inggris (..._non_officers).
      *
-     * Sengaja UPDATE baris yang sudah ada, BUKAN hapus+buat baru — supaya
+     * Sengaja UPDATE baris yang sudah ada, BUKAN hapus+buat baru - supaya
      * kalau di database ini sudah ada role yang di-assign salah satu
      * permission tsb (lewat tabel pivot role_permission), assignment itu
      * TETAP nempel ke baris yang sama (cuma slug & labelnya yang berubah)

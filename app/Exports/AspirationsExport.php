@@ -39,7 +39,7 @@ class AspirationsExport implements FromCollection, WithHeadings, WithMapping, Sh
         return [
             $aspiration->created_at->format('d/m/Y H:i'),
             // display_name otomatis jadi "Anonim" kalau pengirim memilih kirim
-            // anonim — jadi file export ini tidak membocorkan identitas asli
+            // anonim - jadi file export ini tidak membocorkan identitas asli
             // pengirim anonim, konsisten dengan yang ditampilkan di dashboard.
             $aspiration->display_name,
             $aspiration->is_anonymous ? '-' : ($aspiration->contact ?: '-'),

@@ -37,20 +37,20 @@ return [
 
     /*
      * Dipakai oleh App\Listeners\UploadBackupToGoogleDrive untuk mengunggah
-     * cadangan (.zip) ke Google Drive lewat Service Account — bukan lewat
+     * cadangan (.zip) ke Google Drive lewat Service Account - bukan lewat
      * OAuth (Client ID/Secret/Refresh Token), supaya tidak ada risiko token
      * kedaluwarsa dan tidak perlu proses OAuth Playground yang ribet.
-     * Kosongkan berdua kalau belum mau dipakai — unggah ke Google Drive
+     * Kosongkan berdua kalau belum mau dipakai - unggah ke Google Drive
      * otomatis dilewati (backup lokal tetap jalan normal).
      */
     /*
      * Dipakai oleh App\Listeners\UploadBackupToGoogleDrive untuk
-     * mengunggah cadangan (.zip) ke Google Drive lewat OAuth — BUKAN
+     * mengunggah cadangan (.zip) ke Google Drive lewat OAuth - BUKAN
      * Service Account (Service Account tidak punya kuota penyimpanan
      * sendiri di akun Google/Gmail biasa, jadi selalu gagal dengan error
      * "storageQuotaExceeded"). Dengan OAuth, file yang diunggah numpang
      * di kuota 15GB gratis akun Gmail yang dipakai autentikasi. Kosongkan
-     * semuanya kalau belum mau dipakai — unggah ke Google Drive otomatis
+     * semuanya kalau belum mau dipakai - unggah ke Google Drive otomatis
      * dilewati (backup lokal tetap jalan normal).
      */
     'google_drive' => [
@@ -58,6 +58,13 @@ return [
         'client_secret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
         'refresh_token' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
         'folder_id' => env('GOOGLE_DRIVE_FOLDER_ID'),
+    ],
+
+
+    // Konversi .docx -> PDF untuk Surat Generator. Isi LIBREOFFICE_BIN di .env bila
+    // `soffice` tidak ada di PATH (mis. /usr/bin/soffice atau /opt/libreoffice/program/soffice).
+    'libreoffice' => [
+        'binary' => env('LIBREOFFICE_BIN', 'soffice'),
     ],
 
 ];

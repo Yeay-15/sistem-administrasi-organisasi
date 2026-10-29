@@ -9,17 +9,17 @@ class DatabaseDumpBinaryResolver
 {
     /**
      * Menyuntikkan path folder tempat "mysqldump"/"pg_dump" berada ke
-     * config koneksi database yang sedang aktif — dipakai oleh
+     * config koneksi database yang sedang aktif - dipakai oleh
      * spatie/laravel-backup (lewat spatie/db-dumper) saat mem-backup
      * database. Ini mengatasi kasus umum di Windows/Laragon: binary-nya
      * memang ada, tapi tidak "terlihat" lewat PATH oleh proses PHP.
      *
      * PENTING: dipanggil di SETIAP request (lihat AppServiceProvider::boot()),
-     * bukan cuma saat CLI — karena tombol "Buat Cadangan Sekarang" di
+     * bukan cuma saat CLI - karena tombol "Buat Cadangan Sekarang" di
      * dashboard men-trigger backup:run dari REQUEST WEB biasa (lewat
      * Artisan::call() di dalam controller), bukan dari terminal. Supaya
      * tetap murah dijalankan tiap request, hasil pencariannya di-cache 1
-     * hari (lihat resolve()) — jadi exec()/glob() cuma benar-benar
+     * hari (lihat resolve()) - jadi exec()/glob() cuma benar-benar
      * dijalankan sesekali, bukan di setiap page load.
      */
     public static function applyToConfig(): void

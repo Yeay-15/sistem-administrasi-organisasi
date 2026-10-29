@@ -1,7 +1,8 @@
 @extends('layouts.public')
 
 @section('title', 'Galeri Kegiatan - KATIBER')
-@section('meta_description', 'Dokumentasi visual kegiatan dan momen kebersamaan KATIBER — Keluarga Mahasiswa Tebing Tinggi Bersatu.')
+@section('meta_description', 'Dokumentasi visual kegiatan dan momen kebersamaan KATIBER - Keluarga Mahasiswa Tebing
+    Tinggi Bersatu.')
 
 @section('content')
     <section class="relative overflow-hidden bg-gradient-to-br from-navy-800 via-navy-900 to-navy-950">
@@ -17,7 +18,7 @@
         @if ($galleries->isEmpty())
             <p class="text-center text-sm text-slate-400 dark:text-slate-500">Belum ada foto di galeri.</p>
         @else
-            {{-- Grid masonry menggunakan CSS columns — foto mengalir otomatis mengikuti tinggi aslinya --}}
+            {{-- Grid masonry menggunakan CSS columns - foto mengalir otomatis mengikuti tinggi aslinya --}}
             <div class="columns-2 gap-4 sm:columns-3 lg:columns-4 [&>*]:mb-4">
                 @foreach ($galleries as $item)
                     <button type="button" @click="active = @js([

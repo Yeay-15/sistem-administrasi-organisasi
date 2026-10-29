@@ -10,15 +10,18 @@
         </div>
 
         @if (session('success'))
-            <div class="theme-transition rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800/60 dark:bg-green-500/10 dark:text-green-400">
+            <div
+                class="theme-transition rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-800/60 dark:bg-green-500/10 dark:text-green-400">
                 {{ session('success') }}
             </div>
         @endif
 
         {{-- ============ INFORMASI AKUN (Avatar & Nama) ============ --}}
-        <div class="theme-transition rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+        <div
+            class="theme-transition rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
             <h2 class="text-base font-semibold text-slate-800 dark:text-white">Informasi Akun</h2>
-            <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">Avatar ini bersifat pribadi — hanya tampil di panel admin, tidak dipakai di portal publik.</p>
+            <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">Avatar ini bersifat pribadi - hanya tampil di panel
+                admin, tidak dipakai di portal publik.</p>
 
             <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="mt-5"
                 x-data="{ preview: @js($user->avatar_url), removed: false }">
@@ -26,12 +29,14 @@
                 @method('PATCH')
 
                 <div class="flex items-center gap-5">
-                    <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
+                    <div
+                        class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
                         <template x-if="preview && !removed">
                             <img :src="preview" alt="Avatar" class="h-full w-full object-cover">
                         </template>
                         <template x-if="!preview || removed">
-                            <span class="text-xl font-bold text-slate-400 dark:text-slate-600">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
+                            <span
+                                class="text-xl font-bold text-slate-400 dark:text-slate-600">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                         </template>
                     </div>
                     <div class="flex-1">
@@ -67,7 +72,8 @@
                     @if ($user->isSuperAdmin())
                         <input type="email" name="email" value="{{ old('email', $user->email) }}" required
                             class="w-full max-w-sm rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
-                        <p class="mt-1 text-xs text-slate-400">Sebagai Super Admin, Anda dapat mengubah email login sendiri di sini.</p>
+                        <p class="mt-1 text-xs text-slate-400">Sebagai Super Admin, Anda dapat mengubah email login sendiri
+                            di sini.</p>
                         @error('email')
                             <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                         @enderror
@@ -88,16 +94,19 @@
         </div>
 
         {{-- ============ UBAH SANDI ============ --}}
-        <div class="theme-transition rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+        <div
+            class="theme-transition rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
             <h2 class="text-base font-semibold text-slate-800 dark:text-white">Ubah Sandi</h2>
-            <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">Masukkan sandi lama untuk konfirmasi sebelum menyimpan sandi baru.</p>
+            <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">Masukkan sandi lama untuk konfirmasi sebelum
+                menyimpan sandi baru.</p>
 
             <form action="{{ route('profile.update-password') }}" method="POST" class="mt-5 max-w-sm space-y-4">
                 @csrf
                 @method('PUT')
 
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Sandi Saat Ini</label>
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Sandi Saat
+                        Ini</label>
                     <input type="password" name="current_password" required
                         class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                     @error('current_password')
@@ -116,7 +125,8 @@
                 </div>
 
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Konfirmasi Sandi Baru</label>
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Konfirmasi Sandi
+                        Baru</label>
                     <input type="password" name="password_confirmation" required minlength="8"
                         class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                 </div>
@@ -132,22 +142,28 @@
 
         {{-- ============ DATA KEPENGURUSAN (READ-ONLY) ============ --}}
         @if ($user->member)
-            <div class="theme-transition rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+            <div
+                class="theme-transition rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
                 <h2 class="text-base font-semibold text-slate-800 dark:text-white">Data Kepengurusan</h2>
                 <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
-                    Ini adalah data resmi organisasi (tampil di portal publik) — dikelola oleh Sekretariat lewat menu Kelola Pengurus, bukan dari sini.
+                    Ini adalah data resmi organisasi (tampil di portal publik) - dikelola oleh Sekretariat lewat menu Kelola
+                    Pengurus, bukan dari sini.
                 </p>
 
                 <div class="mt-5 flex items-center gap-4">
-                    <div class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div
+                        class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                         @if ($user->member->photo_url)
-                            <img src="{{ $user->member->photo_url }}" alt="{{ $user->member->name }}" class="h-full w-full object-cover">
+                            <img src="{{ $user->member->photo_url }}" alt="{{ $user->member->name }}"
+                                class="h-full w-full object-cover">
                         @else
-                            <span class="text-lg font-bold text-slate-400 dark:text-slate-600">{{ strtoupper(substr($user->member->name, 0, 1)) }}</span>
+                            <span
+                                class="text-lg font-bold text-slate-400 dark:text-slate-600">{{ strtoupper(substr($user->member->name, 0, 1)) }}</span>
                         @endif
                     </div>
                     <div class="min-w-0">
-                        <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $user->member->name }}</p>
+                        <p class="truncate text-sm font-semibold text-slate-800 dark:text-white">{{ $user->member->name }}
+                        </p>
                         <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                             {{ $user->member->position }} &middot; {{ $user->member->division->name ?? '-' }}
                         </p>

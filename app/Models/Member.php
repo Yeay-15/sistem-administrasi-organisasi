@@ -32,7 +32,7 @@ class Member extends Model
     /**
      * Posisi orang ini di dalam divisinya untuk keperluan hak akses divisi:
      * 'kadiv' (Ketua Divisi), 'sekdiv' (Sekretaris Divisi), selain itu 'anggota'
-     * (termasuk jabatan BPH seperti Ketua/Sekretaris/Bendahara Umum — hak akses
+     * (termasuk jabatan BPH seperti Ketua/Sekretaris/Bendahara Umum - hak akses
      * mereka diatur lewat Peran, bukan lewat hak akses divisi).
      */
     public function divisionScope(): string

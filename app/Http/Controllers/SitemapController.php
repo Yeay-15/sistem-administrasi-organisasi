@@ -19,12 +19,12 @@ class SitemapController extends Controller
     /**
      * Nama-nama rute yang sengaja dikecualikan dari deteksi otomatis
      * robots.txt (bukan halaman admin, tapi juga bukan konten untuk
-     * di-index — jadi tidak perlu masuk Disallow maupun sitemap).
+     * di-index - jadi tidak perlu masuk Disallow maupun sitemap).
      */
     private const IGNORED_ROUTE_NAMES = ['sitemap', 'robots'];
 
     /**
-     * Prioritas & frekuensi update khusus untuk beberapa halaman utama —
+     * Prioritas & frekuensi update khusus untuk beberapa halaman utama -
      * di luar daftar ini, halaman publik baru otomatis dapat nilai default
      * yang wajar (lihat defaultRouteMeta()). Jadi menambah rute publik baru
      * TIDAK PERNAH butuh sentuhan manual di sini supaya muncul di sitemap;
@@ -46,7 +46,7 @@ class SitemapController extends Controller
     /**
      * Menghasilkan robots.txt secara dinamis (rute, bukan file statis)
      * dengan daftar Disallow yang OTOMATIS mengikuti rute yang benar-benar
-     * terdaftar saat ini — bukan daftar yang ditulis tangan. Jadi kalau
+     * terdaftar saat ini - bukan daftar yang ditulis tangan. Jadi kalau
      * nanti ditambah fitur/rute admin baru, ia otomatis ikut ter-Disallow
      * di sini selama nama rutenya TIDAK diawali "public." (konvensi yang
      * sudah dipakai konsisten sejak awal untuk semua rute Portal Publik).
@@ -59,7 +59,7 @@ class SitemapController extends Controller
             'User-agent: *',
             '',
             '# Izinkan foto kegiatan, poster agenda, logo, dan foto pengurus untuk',
-            '# dirayapi supaya bisa muncul di Google Images — KECUALI dua folder di',
+            '# dirayapi supaya bisa muncul di Google Images - KECUALI dua folder di',
             '# bawah ini, karena berisi lampiran surat masuk/keluar organisasi yang',
             '# sifatnya internal (bukan untuk publik / mesin pencari). Ini murni soal',
             '# folder penyimpanan file, bukan rute, jadi tidak bisa dideteksi otomatis',
@@ -68,7 +68,7 @@ class SitemapController extends Controller
             'Disallow: /storage/incoming_letters/',
             'Disallow: /storage/outgoing_letters/',
             '',
-            '# Halaman admin & autentikasi — terdeteksi OTOMATIS dari semua rute',
+            '# Halaman admin & autentikasi - terdeteksi OTOMATIS dari semua rute',
             '# yang namanya TIDAK diawali "public." (lihat SitemapController).',
         ];
 
@@ -83,7 +83,7 @@ class SitemapController extends Controller
     }
 
     /**
-     * Menghasilkan sitemap.xml — berisi (1) semua rute publik STATIS
+     * Menghasilkan sitemap.xml - berisi (1) semua rute publik STATIS
      * (tanpa parameter di URL-nya) yang terdeteksi otomatis dari daftar
      * rute bernama "public.*", ditambah (2) setiap Artikel & Berita /
      * Laporan Kegiatan yang sudah dipublikasikan (rute berparameter,
@@ -102,7 +102,7 @@ class SitemapController extends Controller
 
     /**
      * Memindai seluruh rute terdaftar, ambil yang namanya diawali "public."
-     * DAN tidak punya parameter di URL-nya (mis. {post}) — rute berparameter
+     * DAN tidak punya parameter di URL-nya (mis. {post}) - rute berparameter
      * butuh data konkret (lihat publishedPostUrls()) jadi tidak bisa asal
      * dipanggil route() tanpa argumen.
      */
@@ -117,7 +117,7 @@ class SitemapController extends Controller
                     && in_array('GET', $route->methods())
                     && ! str_contains($route->uri(), '{');
             })
-            ->unique(fn ($route) => $route->getName())
+            ->unique(fn($route) => $route->getName())
             ->map(function ($route) {
                 $meta = self::ROUTE_META_OVERRIDES[$route->getName()] ?? $this->defaultRouteMeta();
 
@@ -160,7 +160,7 @@ class SitemapController extends Controller
     /**
      * Memindai seluruh rute terdaftar, kembalikan segmen path PALING DEPAN
      * dari setiap rute yang namanya TIDAK diawali "public." (dan bukan
-     * rute sitemap/robots itu sendiri) — dipakai sebagai baris Disallow.
+     * rute sitemap/robots itu sendiri) - dipakai sebagai baris Disallow.
      * Cukup segmen pertama karena itu sudah memblokir seluruh rute di
      * bawah prefix yang sama (mis. "members" memblokir "/members",
      * "/members/5/edit", dst sekaligus).

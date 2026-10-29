@@ -3,7 +3,7 @@
 # Sistem Administrasi & Absensi Terpadu KATIBER
 
 **Aplikasi web terpadu untuk pengelolaan SDM, absensi kegiatan, dan digitalisasi administrasi surat-menyurat**
-di lingkungan organisasi **Keluarga Mahasiswa Tebing Tinggi Bersatu (KATIBER)** — Lhokseumawe, Aceh Utara.
+di lingkungan organisasi **Keluarga Mahasiswa Tebing Tinggi Bersatu (KATIBER)** - Lhokseumawe, Aceh Utara.
 
 <br/>
 
@@ -17,7 +17,7 @@ di lingkungan organisasi **Keluarga Mahasiswa Tebing Tinggi Bersatu (KATIBER)** 
 ![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Web-informational?style=for-the-badge)
 
-<p><i>Dibangun untuk penggunaan lokal/internal organisasi — fokus pada kecepatan, keamanan data,<br/>dan kemudahan pembuatan Lembar Pertanggungjawaban (LPJ).</i></p>
+<p><i>Dibangun untuk penggunaan lokal/internal organisasi - fokus pada kecepatan, keamanan data,<br/>dan kemudahan pembuatan Lembar Pertanggungjawaban (LPJ).</i></p>
 
 </div>
 
@@ -179,12 +179,12 @@ php artisan storage:link
 
 Buka dua tab terminal:
 
-**Terminal 1** — Menjalankan server backend:
+**Terminal 1** - Menjalankan server backend:
 ```bash
 php artisan serve
 ```
 
-**Terminal 2** — Men-compile asset Tailwind CSS secara realtime:
+**Terminal 2** - Men-compile asset Tailwind CSS secara realtime:
 ```bash
 npm run dev
 ```
@@ -217,6 +217,6 @@ Gunakan akun berikut untuk masuk ke dalam sistem pertama kali:
 
 <div align="center">
 
-Dikembangkan untuk kebutuhan internal **KATIBER** — Keluarga Mahasiswa Tebing Tinggi Bersatu
+Dikembangkan untuk kebutuhan internal **KATIBER** - Keluarga Mahasiswa Tebing Tinggi Bersatu
 
 </div>

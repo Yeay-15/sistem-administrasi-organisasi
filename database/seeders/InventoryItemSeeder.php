@@ -24,7 +24,7 @@ class InventoryItemSeeder extends Seeder
      * - Tanggal "exp MM/YY" disimpan sebagai tanggal terakhir bulan tsb, dan
      *   dipindah dari nama/keterangan ke kolom Kedaluwarsa.
      * - "Oxygen (exp 12/08)" TIDAK dikonversi ke tanggal karena formatnya tidak
-     *   sama dengan yang lain (belum jelas 12/2028 atau 12 Agustus) — tetap
+     *   sama dengan yang lain (belum jelas 12/2028 atau 12 Agustus) - tetap
      *   disimpan apa adanya di keterangan. Silakan koreksi lewat menu Ubah.
      */
     public function run(): void

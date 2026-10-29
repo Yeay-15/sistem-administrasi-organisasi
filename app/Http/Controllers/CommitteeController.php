@@ -40,11 +40,18 @@ class CommitteeController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'type' => ['nullable', 'string', 'max:100'],
+            'theme' => ['nullable', 'string', 'max:255'],
+            'venue' => ['nullable', 'string', 'max:255'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'start_time' => ['nullable', 'date_format:H:i'],
+            'event_dates' => ['nullable', 'array', 'max:62'],
+            'event_dates.*' => ['required', 'date_format:Y-m-d', 'distinct'],
             'description' => ['nullable', 'string'],
             'status' => ['required', 'string', 'in:Persiapan,Berjalan,Selesai'],
         ]);
+
+        $validated['event_dates'] = $this->normalizedEventDates($request);
 
         $committee = Committee::create($validated);
 
@@ -53,19 +60,28 @@ class CommitteeController extends Controller
         return redirect()->route('committees.show', $committee)->with('success', 'Kepanitiaan berhasil dibuat. Sekarang tambahkan anggota panitianya.');
     }
 
+    /** Tanggal acara terurut tanpa duplikat; null bila kosong. */
+    private function normalizedEventDates(Request $request): ?array
+    {
+        $dates = collect($request->input('event_dates', []))->filter()->unique()->sort()->values()->all();
+
+        return $dates ?: null;
+    }
+
     public function show(Committee $committee)
     {
         $committee->load([
-            'committeeMembers' => fn ($q) => $q->with(['member', 'committeeField'])->orderBy('position_category'),
+            'committeeMembers' => fn($q) => $q->with(['member', 'committeeField'])->orderBy('position_category'),
             'agendas',
+            'outgoingLetters' => fn($q) => $q->orderByDesc('date')->orderByDesc('id'),
         ]);
 
         $committeeLeadership = $committee->committeeMembers->filter->isCommitteeLeadership();
-        $fieldMembers = $committee->committeeMembers->reject->isCommitteeLeadership()->groupBy(fn ($cm) => $cm->committeeField->name ?? 'Tanpa Bidang');
+        $fieldMembers = $committee->committeeMembers->reject->isCommitteeLeadership()->groupBy(fn($cm) => $cm->committeeField->name ?? 'Tanpa Bidang');
 
         $fields = CommitteeField::orderBy('name')->get();
 
-        // Untuk dropdown "pilih orang yang sudah ada" — semua members (Pengurus
+        // Untuk dropdown "pilih orang yang sudah ada" - semua members (Pengurus
         // & Non-Pengurus) yang BELUM terdaftar sebagai anggota di kepanitiaan ini,
         // supaya tidak bisa ditambahkan dobel lewat form yang sama.
         $existingMemberIds = $committee->committeeMembers->pluck('member_id')->unique();
@@ -74,7 +90,7 @@ class CommitteeController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'membership_type', 'student_id']);
 
-        // Untuk mengaitkan agenda (rapat persiapan + hari-H) — agenda yang
+        // Untuk mengaitkan agenda (rapat persiapan + hari-H) - agenda yang
         // belum ditautkan ke kepanitiaan ini, terbaru dulu.
         $linkedAgendaIds = $committee->agendas->pluck('id');
         $availableAgendas = Agenda::whereNotIn('id', $linkedAgendaIds)->orderByDesc('date')->limit(100)->get();
@@ -99,11 +115,19 @@ class CommitteeController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'type' => ['nullable', 'string', 'max:100'],
+            'theme' => ['nullable', 'string', 'max:255'],
+            'venue' => ['nullable', 'string', 'max:255'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'start_time' => ['nullable', 'date_format:H:i'],
+            'event_dates' => ['nullable', 'array', 'max:62'],
+            'event_dates.*' => ['required', 'date_format:Y-m-d', 'distinct'],
             'description' => ['nullable', 'string'],
             'status' => ['required', 'string', 'in:Persiapan,Berjalan,Selesai'],
         ]);
+
+        // Tanpa input dates (semua tanggal dihapus) harus tersimpan sebagai kosong.
+        $validated['event_dates'] = $this->normalizedEventDates($request);
 
         $committee->update($validated);
 
@@ -124,14 +148,14 @@ class CommitteeController extends Controller
     /**
      * Tambah satu baris anggota panitia (member + peran [+ bidang]).
      * member_id boleh berasal dari orang yang sudah ada di sistem
-     * (Pengurus atau Non-Pengurus) — untuk mendaftarkan orang yang
+     * (Pengurus atau Non-Pengurus) - untuk mendaftarkan orang yang
      * benar-benar baru, form memakai quickCreateMember() lebih dulu.
      */
     public function addMember(Request $request, Committee $committee)
     {
         $validated = $request->validate([
             'member_id' => ['required', 'exists:members,id'],
-            // Tidak dibatasi Rule::in lagi — peran boleh dari daftar siap pakai
+            // Tidak dibatasi Rule::in lagi - peran boleh dari daftar siap pakai
             // ATAU diketik bebas lewat opsi "Lainnya" di form (lihat
             // Committee::positionCategories() untuk daftar siap pakainya).
             'position_category' => ['required', 'string', 'max:100'],
@@ -177,7 +201,7 @@ class CommitteeController extends Controller
     }
 
     /**
-     * "+ Tambah Orang Baru" dari form anggota panitia — membuat record
+     * "+ Tambah Orang Baru" dari form anggota panitia - membuat record
      * Member baru dengan membership_type Non-Pengurus secara instan (tanpa
      * pindah halaman), supaya orang luar (dosen pembimbing, panitia dari
      * kampus lain, dsb) tidak perlu didaftarkan lebih dulu lewat menu

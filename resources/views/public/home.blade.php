@@ -1,7 +1,8 @@
 @extends('layouts.public')
 
 @section('title', 'KATIBER - Keluarga Mahasiswa Tebing Tinggi Bersatu')
-@section('meta_description', 'Portal resmi KATIBER — Keluarga Mahasiswa Tebing Tinggi Bersatu, wadah silaturahmi dan pengembangan diri mahasiswa asal Tebing Tinggi di Lhokseumawe, Aceh Utara.')
+@section('meta_description', 'Portal resmi KATIBER - Keluarga Mahasiswa Tebing Tinggi Bersatu, wadah silaturahmi dan
+    pengembangan diri mahasiswa asal Tebing Tinggi di Lhokseumawe, Aceh Utara.')
 
 @section('content')
     {{-- ============ HERO ============ --}}
@@ -15,14 +16,18 @@
         @else
             <div class="navy-dot-pattern absolute inset-0"></div>
             <div class="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-navy-600/30 blur-3xl"></div>
-            <div class="pointer-events-none absolute -bottom-32 left-0 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl"></div>
+            <div class="pointer-events-none absolute -bottom-32 left-0 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl">
+            </div>
         @endif
         <div class="relative mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
             <div class="reveal max-w-2xl">
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/15">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3.5 w-3.5">
+                <span
+                    class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white ring-1 ring-inset ring-white/15">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="h-3.5 w-3.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                     </svg>
                     Lhokseumawe, Aceh Utara
                 </span>
@@ -40,8 +45,10 @@
                     <a href="{{ route('public.news.index') }}"
                         class="inline-flex items-center gap-2 rounded-lg border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10">
                         Baca Berita Terbaru
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="h-4 w-4">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
                         </svg>
                     </a>
                 </div>
@@ -76,7 +83,8 @@
                 class="reveal theme-transition relative grid grid-cols-1 items-center gap-10 overflow-hidden rounded-3xl border border-slate-100 bg-slate-50 p-8 dark:border-slate-800 dark:bg-slate-900/40 sm:p-12 lg:grid-cols-5">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                     class="pointer-events-none absolute -right-6 -top-6 h-40 w-40 text-navy-700/5 dark:text-navy-400/5">
-                    <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
+                    <path
+                        d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
                 </svg>
                 <div class="relative flex flex-col items-center text-center lg:col-span-2">
                     <div
@@ -113,9 +121,12 @@
         <section class="border-y border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40">
             <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
                 <div class="reveal mb-10 text-center">
-                    <span class="text-xs font-bold uppercase tracking-wider text-navy-700 dark:text-navy-400">Kebanggaan Kami</span>
-                    <h2 class="mt-1.5 text-2xl font-extrabold text-slate-800 dark:text-white sm:text-3xl">Prestasi Mahasiswa</h2>
-                    <p class="mx-auto mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">Kebanggaan yang ditorehkan oleh mahasiswa dan
+                    <span class="text-xs font-bold uppercase tracking-wider text-navy-700 dark:text-navy-400">Kebanggaan
+                        Kami</span>
+                    <h2 class="mt-1.5 text-2xl font-extrabold text-slate-800 dark:text-white sm:text-3xl">Prestasi Mahasiswa
+                    </h2>
+                    <p class="mx-auto mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">Kebanggaan yang ditorehkan
+                        oleh mahasiswa dan
                         pengurus KATIBER Lhokseumawe - Aceh Utara</p>
                 </div>
 
@@ -124,12 +135,14 @@
                         <div class="reveal" style="--reveal-delay: {{ $loop->index * 60 }}ms">
                             <div
                                 class="theme-transition group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 transition duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-navy-900/10 dark:bg-slate-900 dark:ring-slate-800">
-                                <div class="absolute left-0 top-0 z-10 rounded-br-xl bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-navy-950">
+                                <div
+                                    class="absolute left-0 top-0 z-10 rounded-br-xl bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-navy-950">
                                     Juara
                                 </div>
                                 <div class="aspect-square w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                                     @if ($achievement->photo_url)
-                                        <img src="{{ $achievement->photo_url }}" alt="{{ $achievement->title }}" loading="lazy"
+                                        <img src="{{ $achievement->photo_url }}" alt="{{ $achievement->title }}"
+                                            loading="lazy"
                                             class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
                                     @else
                                         <div
@@ -166,9 +179,11 @@
         <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
             <div class="reveal mb-8 flex items-end justify-between">
                 <div>
-                    <span class="text-xs font-bold uppercase tracking-wider text-navy-700 dark:text-navy-400">Rekam Jejak</span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-navy-700 dark:text-navy-400">Rekam
+                        Jejak</span>
                     <h2 class="mt-1 text-2xl font-extrabold text-slate-800 dark:text-white">Laporan Kegiatan Terbaru</h2>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Dokumentasi kegiatan KATIBER yang telah terlaksana.</p>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Dokumentasi kegiatan KATIBER yang telah
+                        terlaksana.</p>
                 </div>
                 <a href="{{ route('public.reports.index') }}"
                     class="hidden shrink-0 text-sm font-semibold text-navy-700 hover:underline dark:text-navy-400 sm:inline-flex">
@@ -184,10 +199,12 @@
                             class="theme-transition h-full overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition duration-300 group-hover:-translate-y-1 group-hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
                             <div class="aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                                 @if ($post->cover_path)
-                                    <img src="{{ asset('storage/' . $post->cover_path) }}" alt="{{ $post->title }}" loading="lazy"
+                                    <img src="{{ asset('storage/' . $post->cover_path) }}" alt="{{ $post->title }}"
+                                        loading="lazy"
                                         class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
                                 @else
-                                    <div class="flex h-full w-full items-center justify-center text-slate-300 dark:text-slate-700">
+                                    <div
+                                        class="flex h-full w-full items-center justify-center text-slate-300 dark:text-slate-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="h-10 w-10">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -224,9 +241,12 @@
             <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
                 <div class="reveal mb-8 flex items-end justify-between">
                     <div>
-                        <span class="text-xs font-bold uppercase tracking-wider text-navy-700 dark:text-navy-400">Suara Mahasiswa</span>
-                        <h2 class="mt-1 text-2xl font-extrabold text-slate-800 dark:text-white">Artikel & Berita Terkini</h2>
-                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Opini, tips, dan kabar seputar KATIBER.</p>
+                        <span class="text-xs font-bold uppercase tracking-wider text-navy-700 dark:text-navy-400">Suara
+                            Mahasiswa</span>
+                        <h2 class="mt-1 text-2xl font-extrabold text-slate-800 dark:text-white">Artikel & Berita Terkini
+                        </h2>
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Opini, tips, dan kabar seputar KATIBER.
+                        </p>
                     </div>
                     <a href="{{ route('public.news.index') }}"
                         class="hidden shrink-0 text-sm font-semibold text-navy-700 hover:underline dark:text-navy-400 sm:inline-flex">
@@ -242,10 +262,12 @@
                                 class="theme-transition h-full overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition duration-300 group-hover:-translate-y-1 group-hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
                                 <div class="aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                                     @if ($post->cover_path)
-                                        <img src="{{ asset('storage/' . $post->cover_path) }}" alt="{{ $post->title }}" loading="lazy"
+                                        <img src="{{ asset('storage/' . $post->cover_path) }}" alt="{{ $post->title }}"
+                                            loading="lazy"
                                             class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
                                     @else
-                                        <div class="flex h-full w-full items-center justify-center text-slate-300 dark:text-slate-700">
+                                        <div
+                                            class="flex h-full w-full items-center justify-center text-slate-300 dark:text-slate-700">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor" class="h-10 w-10">
                                                 <path stroke-linecap="round" stroke-linejoin="round"

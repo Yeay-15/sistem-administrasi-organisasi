@@ -41,7 +41,7 @@ class AppServiceProvider extends ServiceProvider
         // (lihat DatabaseDumpBinaryResolver). Dipanggil di SETIAP request
         // (bukan cuma CLI) karena tombol "Buat Cadangan Sekarang" di
         // dashboard memicu backup:run lewat request web biasa, bukan
-        // terminal — resolver-nya sendiri sudah pakai cache 1 hari supaya
+        // terminal - resolver-nya sendiri sudah pakai cache 1 hari supaya
         // tetap murah dijalankan berulang-ulang.
         DatabaseDumpBinaryResolver::applyToConfig();
 
@@ -58,12 +58,12 @@ class AppServiceProvider extends ServiceProvider
         // - Ability lainnya dicek lewat User::hasPermission(), yang sudah
         //   menggabungkan hak akses dari Role MAUPUN dari Division secara
         //   otomatis (lihat App\Models\User::hasPermission()). Ini sengaja
-        //   tidak lagi hardcode nama divisi tertentu (mis. "Infokom") — hak
+        //   tidak lagi hardcode nama divisi tertentu (mis. "Infokom") - hak
         //   akses per-divisi sepenuhnya diatur lewat tabel division_permission
         //   via halaman Manajemen Peran & Akses.
         Gate::before(function (?User $user, string $ability) {
             if (! $user) {
-                return null; // Tidak ada keputusan — biarkan guard 'auth' yang menangani.
+                return null; // Tidak ada keputusan - biarkan guard 'auth' yang menangani.
             }
 
             if ($user->isSuperAdmin()) {
@@ -75,12 +75,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Logo, WhatsApp, Instagram, dan email resmi dipakai bersama oleh
         // navbar & footer di semua halaman publik, dan juga oleh sidebar admin
-        // (logo + tombol "Lihat Situs Publik") — dibagikan lewat View Composer.
+        // (logo + tombol "Lihat Situs Publik") - dibagikan lewat View Composer.
         //
         // Sengaja pakai wildcard '*' (bukan cuma 'layouts.public'/'layouts.app'):
         // saat sebuah view child (mis. public.contact) di-@extends ke sebuah
         // layout, isi @section-nya dirender memakai data milik view child itu
-        // sendiri — BUKAN data milik view layout — jadi composer yang cuma
+        // sendiri - BUKAN data milik view layout - jadi composer yang cuma
         // ditarget ke nama layout tidak akan sampai ke variabel di dalam
         // @section milik child-nya. Wildcard memastikan $homeSettings selalu
         // tersedia di mana pun ia dipakai. Query DB cukup sekali per request
@@ -90,7 +90,7 @@ class AppServiceProvider extends ServiceProvider
         //
         // Dibungkus try/catch dengan sengaja: kalau database sedang tidak
         // bisa diakses (mis. server down), $homeSettings jatuh ke null
-        // alih-alih ikut melemparkan error — supaya halaman error custom
+        // alih-alih ikut melemparkan error - supaya halaman error custom
         // (resources/views/errors/500.blade.php dkk) tetap bisa tampil
         // dengan baik alih-alih malah gagal render karena composer ini.
         View::composer('*', function ($view) {
@@ -110,7 +110,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Badge "Aspirasi Mahasiswa" di sidebar + dropdown notifikasi di
-        // header admin — jumlah aspirasi yang belum dibaca pengurus.
+        // header admin - jumlah aspirasi yang belum dibaca pengurus.
         // Ditarget ke 'layouts.app' saja (bukan wildcard '*') karena kedua
         // variabel ini cuma dipakai di markup milik layout itu sendiri
         // (sidebar & header), bukan di dalam @section milik view child.

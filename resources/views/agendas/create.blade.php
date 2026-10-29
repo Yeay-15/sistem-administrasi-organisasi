@@ -73,15 +73,26 @@
                     </div>
                 </div>
 
-                <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-3">
-                    <div>
-                        <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Tanggal</label>
-                        <input type="date" name="date" value="{{ old('date') }}" required
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:[color-scheme:dark]">
-                        @error('date')
-                            <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <div class="mt-5">
+                    <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Tanggal
+                        <span class="font-normal text-slate-400">(boleh lebih dari satu / rentang)</span></label>
+                    <x-multi-date-picker name="dates" :selected="old('dates', [])" />
+                    @error('dates')
+                        <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                    @error('dates.*')
+                        <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                    <label class="mt-3 flex cursor-pointer items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                        <input type="hidden" name="number_names" value="0">
+                        <input type="checkbox" name="number_names" value="1" @checked(old('number_names', '1') !== '0')
+                            class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800">
+                        Jika lebih dari satu tanggal, tambahkan penomoran "(1/3)" di nama agenda &amp; akhiran "-01" di kode
+                    </label>
+                </div>
+
+                <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+                    
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Jenis
                             Agenda</label>
@@ -212,7 +223,7 @@
                         class="mt-0.5 h-4.5 w-4.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 dark:border-slate-600 dark:bg-slate-800">
                     <label for="is_public" class="cursor-pointer text-sm">
                         <span class="block font-medium text-slate-700 dark:text-slate-300">Tampilkan ke publik</span>
-                        <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Jika dicentang, agenda ini muncul di kalender Portal Publik. Matikan untuk agenda internal seperti rapat pembentukan panitia — tetap tercatat di kalender pengurus.</span>
+                        <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Jika dicentang, agenda ini muncul di kalender Portal Publik. Matikan untuk agenda internal seperti rapat pembentukan panitia - tetap tercatat di kalender pengurus.</span>
                     </label>
                 </div>
 

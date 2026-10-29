@@ -27,7 +27,7 @@
                     code: '{{ old('agenda_code', $agenda->agenda_code) }}',
                     collabDivisions: [],
                     attendanceScope: '{{ old('attendance_scope', $agenda->attendance_scope ?? 'all') }}',
-                    attendanceDivisions: {{ json_encode(old('division_ids', $agenda->divisions->pluck('id')->map(fn ($id) => (string) $id)->all())) }},
+                    attendanceDivisions: {{ json_encode(old('division_ids', $agenda->divisions->pluck('id')->map(fn($id) => (string) $id)->all())) }},
                     init() {
                         // Cek apakah data lama adalah kolaborasi (mengandung ' x ')
                         if (this.initialPic.includes(' x ')) {
@@ -134,8 +134,9 @@
                     <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">Penanggung Jawab
                         (PIC)</label>
                     <x-dropdown-select placeholder="-- Pilih Penanggung Jawab / Divisi --" :required="true"
-                        :selected="$picSelected" on-select="pic = value; updatePrefix()"
-                        :options="$divisions->pluck('name', 'name')->put('Kolaborasi / Lintas Divisi', 'Kolaborasi / Lintas Divisi')" />
+                        :selected="$picSelected" on-select="pic = value; updatePrefix()" :options="$divisions
+                            ->pluck('name', 'name')
+                            ->put('Kolaborasi / Lintas Divisi', 'Kolaborasi / Lintas Divisi')" />
                     @error('person_in_charge')
                         <p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>
                     @enderror
@@ -167,9 +168,10 @@
                     <p class="mb-2.5 text-xs text-slate-500 dark:text-slate-400">Menentukan siapa saja yang muncul di
                         daftar absensi & terhitung di statistik kehadirannya untuk agenda ini.</p>
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <label
-                            class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
-                            :class="attendanceScope === 'all' ? 'border-blue-500 bg-blue-50/60 dark:border-blue-500 dark:bg-blue-500/10' : 'border-slate-200 dark:border-slate-700'">
+                        <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
+                            :class="attendanceScope === 'all' ?
+                                'border-blue-500 bg-blue-50/60 dark:border-blue-500 dark:bg-blue-500/10' :
+                                'border-slate-200 dark:border-slate-700'">
                             <input type="radio" name="attendance_scope" value="all" x-model="attendanceScope"
                                 class="mt-0.5 h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800">
                             <span>
@@ -179,9 +181,10 @@
                                     aktif diabsen & masuk statistik kehadiran mereka.</span>
                             </span>
                         </label>
-                        <label
-                            class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
-                            :class="attendanceScope === 'division' ? 'border-blue-500 bg-blue-50/60 dark:border-blue-500 dark:bg-blue-500/10' : 'border-slate-200 dark:border-slate-700'">
+                        <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition"
+                            :class="attendanceScope === 'division' ?
+                                'border-blue-500 bg-blue-50/60 dark:border-blue-500 dark:bg-blue-500/10' :
+                                'border-slate-200 dark:border-slate-700'">
                             <input type="radio" name="attendance_scope" value="division" x-model="attendanceScope"
                                 class="mt-0.5 h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800">
                             <span>
@@ -225,13 +228,16 @@
                         class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500">{{ old('notes', $agenda->notes) }}</textarea>
                 </div>
 
-                <div class="mt-5 flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                <div
+                    class="mt-5 flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
                     <input type="checkbox" id="is_public" name="is_public" value="1"
                         {{ old('is_public', $agenda->is_public) ? 'checked' : '' }}
                         class="mt-0.5 h-4.5 w-4.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 dark:border-slate-600 dark:bg-slate-800">
                     <label for="is_public" class="cursor-pointer text-sm">
                         <span class="block font-medium text-slate-700 dark:text-slate-300">Tampilkan ke publik</span>
-                        <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Jika dicentang, agenda ini muncul di kalender Portal Publik. Matikan untuk agenda internal seperti rapat pembentukan panitia — tetap tercatat di kalender pengurus.</span>
+                        <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">Jika dicentang, agenda ini
+                            muncul di kalender Portal Publik. Matikan untuk agenda internal seperti rapat pembentukan
+                            panitia - tetap tercatat di kalender pengurus.</span>
                     </label>
                 </div>
 

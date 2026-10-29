@@ -14,8 +14,12 @@ class Committee extends Model
     protected $fillable = [
         'name',
         'type',
+        'theme',
+        'venue',
         'start_date',
         'end_date',
+        'event_dates',
+        'start_time',
         'description',
         'status',
     ];
@@ -23,6 +27,7 @@ class Committee extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'event_dates' => 'array', // tanggal pelaksanaan acara, ["2026-10-17", "2026-10-18"]
     ];
 
     /**
@@ -51,6 +56,14 @@ class Committee extends Model
     public function agendas(): BelongsToMany
     {
         return $this->belongsToMany(Agenda::class, 'committee_agenda')->withTimestamps();
+    }
+
+    /**
+     * Surat keluar yang dibuat lewat Surat Generator untuk kepanitiaan ini.
+     */
+    public function outgoingLetters(): HasMany
+    {
+        return $this->hasMany(OutgoingLetter::class);
     }
 
     /**

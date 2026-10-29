@@ -21,7 +21,7 @@ class Aspiration extends Model
     ];
 
     /**
-     * Nama tampilan pengirim — menyembunyikan identitas jika dikirim secara anonim,
+     * Nama tampilan pengirim - menyembunyikan identitas jika dikirim secara anonim,
      * meski data aslinya tetap tersimpan di database untuk keperluan tindak lanjut internal.
      */
     public function getDisplayNameAttribute(): string

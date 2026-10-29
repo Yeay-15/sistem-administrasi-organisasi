@@ -32,7 +32,7 @@ class Agenda extends Model
 
     /**
      * Divisi yang menjadi cakupan absensi agenda ini. Hanya relevan ketika
-     * attendance_scope = 'division' — lihat scopeRelevantForMember() &
+     * attendance_scope = 'division' - lihat scopeRelevantForMember() &
      * helper isForAllMembers()/isForDivision() di bawah.
      */
     public function divisions()
@@ -46,7 +46,7 @@ class Agenda extends Model
     }
 
     /**
-     * True jika agenda ini relevan untuk anggota dari $divisionId — dipakai
+     * True jika agenda ini relevan untuk anggota dari $divisionId - dipakai
      * saat menyaring daftar absensi (AgendaController::show) maupun
      * penyebut (denominator) statistik kehadiran per pengurus
      * (MemberController::statistik), supaya pengurus divisi lain tidak
@@ -67,7 +67,7 @@ class Agenda extends Model
 
     /**
      * Scope query: agenda yang relevan untuk seorang pengurus, dilihat dari
-     * divisinya — agenda scope 'all', ATAU agenda scope 'division' yang
+     * divisinya - agenda scope 'all', ATAU agenda scope 'division' yang
      * memang mencantumkan divisi pengurus tersebut.
      */
     public function scopeRelevantForDivision($query, ?int $divisionId)
@@ -85,7 +85,7 @@ class Agenda extends Model
 
     /**
      * Hanya agenda yang boleh ditampilkan ke halaman publik (is_public = true).
-     * Dipakai oleh PublicController — agenda internal seperti "Rapat
+     * Dipakai oleh PublicController - agenda internal seperti "Rapat
      * Pembentukan Panitia" tetap ada di kalender admin tapi disaring dari
      * sini.
      */

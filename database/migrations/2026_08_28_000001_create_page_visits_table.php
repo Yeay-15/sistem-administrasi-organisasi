@@ -18,7 +18,7 @@ return new class extends Migration
             $table->id();
             $table->string('path', 255);
             $table->string('route_name', 100)->nullable();
-            // Hash dari IP + User Agent + tanggal — dipakai untuk menghitung
+            // Hash dari IP + User Agent + tanggal - dipakai untuk menghitung
             // "pengunjung unik per hari" tanpa menyimpan IP mentah pengunjung.
             $table->string('visitor_key', 64);
             $table->string('referrer', 255)->nullable();

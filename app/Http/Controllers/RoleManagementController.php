@@ -22,12 +22,12 @@ class RoleManagementController extends Controller
         $roles = Role::with('permissions')->orderBy('id')->get();
         $roleFeatures = $this->featuresFrom(Permission::orderBy('group')->orderBy('label')->get());
         $roleFeaturesUi = $roleFeatures
-            ->map(fn (array $f) => Arr::only($f, ['key', 'label', 'group', 'tiers']))
+            ->map(fn(array $f) => Arr::only($f, ['key', 'label', 'group', 'tiers']))
             ->values();
         $roleAccess = $roles
-            ->reject(fn (Role $role) => $role->isSuperAdmin())
-            ->mapWithKeys(fn (Role $role) => [$role->id => $this->roleLevels($role, $roleFeatures)]);
-        $editableRoles = $roles->reject(fn (Role $role) => $role->isSuperAdmin())->values();
+            ->reject(fn(Role $role) => $role->isSuperAdmin())
+            ->mapWithKeys(fn(Role $role) => [$role->id => $this->roleLevels($role, $roleFeatures)]);
+        $editableRoles = $roles->reject(fn(Role $role) => $role->isSuperAdmin())->values();
 
         // Hak akses per-Divisi hanya menampilkan permission grup "Konten" dan
         // "Inventaris" (permission lain, mis. Kelola Agenda, memang hanya diatur
@@ -40,18 +40,18 @@ class RoleManagementController extends Controller
         $divisions = Division::with('permissions')->orderBy('name')->get();
 
         $divisionFeaturesUi = $divisionFeatures
-            ->map(fn (array $f) => Arr::only($f, ['key', 'label', 'group', 'tiers']))
+            ->map(fn(array $f) => Arr::only($f, ['key', 'label', 'group', 'tiers']))
             ->values();
-        $divisionsUi = $divisions->map(fn (Division $d) => ['id' => $d->id, 'name' => $d->name])->values();
+        $divisionsUi = $divisions->map(fn(Division $d) => ['id' => $d->id, 'name' => $d->name])->values();
 
         $divisionAccess = $divisions->mapWithKeys(
-            fn (Division $division) => [$division->id => $this->accessFor($division, $divisionFeatures)]
+            fn(Division $division) => [$division->id => $this->accessFor($division, $divisionFeatures)]
         );
 
         $users = User::with(['role', 'member.division'])->orderBy('name')->get();
         $members = Member::where('status', 'Aktif')->orderBy('name')->get();
 
-        // Hanya pengurus aktif yang BELUM punya akun login — jadi dropdown
+        // Hanya pengurus aktif yang BELUM punya akun login - jadi dropdown
         // "Buatkan Akun Login" tidak akan pernah menampilkan orang yang
         // sudah punya akun (mencegah satu pengurus punya 2 akun sekaligus).
         $membersWithoutAccount = Member::where('status', 'Aktif')
@@ -60,9 +60,9 @@ class RoleManagementController extends Controller
             ->get();
 
         // Peran "Super Admin" sengaja tidak ditawarkan di form pembuatan
-        // akun cepat ini — mencegah akun setingkat Super Admin dibuat tanpa
+        // akun cepat ini - mencegah akun setingkat Super Admin dibuat tanpa
         // sengaja lewat jalur pintas.
-        $assignableRoles = $roles->reject(fn ($role) => $role->isSuperAdmin());
+        $assignableRoles = $roles->reject(fn($role) => $role->isSuperAdmin());
 
         return view('roles_management.index', compact(
             'roles',
@@ -84,7 +84,7 @@ class RoleManagementController extends Controller
     /**
      * Susun daftar permission menjadi baris-baris matrix: satu baris untuk
      * trio 'view_xxx' + 'manage_xxx' + 'delete_xxx' (ditampilkan sebagai
-     * hingga tiga toggle — "Lihat", "Kelola", "Hapus"), atau baris dengan
+     * hingga tiga toggle - "Lihat", "Kelola", "Hapus"), atau baris dengan
      * lebih sedikit toggle untuk permission yang tidak lengkap trio-nya
      * (mis. 'manage_roles' yang cuma berdiri sendiri).
      *
@@ -229,17 +229,17 @@ class RoleManagementController extends Controller
         return $this->buildPermissionMatrix($permissions)
             ->flatten(1)
             ->map(function (array $row) {
-                $tiers = array_values(array_filter(self::TIERS, fn ($tier) => $row[$tier] !== null));
+                $tiers = array_values(array_filter(self::TIERS, fn($tier) => $row[$tier] !== null));
 
                 return [
                     'key' => $row['key'],
                     'label' => $row['label'],
                     'group' => $row['group'],
                     'tiers' => $tiers,
-                    'permissions' => collect($tiers)->mapWithKeys(fn ($tier) => [$tier => $row[$tier]])->all(),
+                    'permissions' => collect($tiers)->mapWithKeys(fn($tier) => [$tier => $row[$tier]])->all(),
                 ];
             })
-            ->filter(fn (array $feature) => $feature['tiers'] !== [])
+            ->filter(fn(array $feature) => $feature['tiers'] !== [])
             ->values();
     }
 
@@ -349,7 +349,7 @@ class RoleManagementController extends Controller
 
     /**
      * Menyalin seluruh pengaturan akses (fitur Konten & Inventaris) dari
-     * divisi lain — menimpa pengaturan divisi tujuan.
+     * divisi lain - menimpa pengaturan divisi tujuan.
      */
     public function copyDivisionAccess(Request $request, Division $division)
     {
@@ -365,7 +365,7 @@ class RoleManagementController extends Controller
         $features = $this->divisionFeatures();
 
         $featurePermissionIds = $features
-            ->flatMap(fn (array $feature) => collect($feature['permissions'])->pluck('id'))
+            ->flatMap(fn(array $feature) => collect($feature['permissions'])->pluck('id'))
             ->all();
 
         $attach = [];
@@ -398,7 +398,7 @@ class RoleManagementController extends Controller
      * Membuat akun login baru untuk pengurus yang sudah tercatat di Data
      * Pengurus tapi belum bisa login. Sandi awal di-generate otomatis (sama
      * seperti "Reset Sandi") dan hanya ditampilkan SEKALI lewat flash
-     * session setelah redirect — Super Admin bertanggung jawab
+     * session setelah redirect - Super Admin bertanggung jawab
      * menyampaikannya langsung ke pengurus yang bersangkutan.
      */
     public function storeUser(Request $request)
@@ -455,7 +455,7 @@ class RoleManagementController extends Controller
         }
 
         // Mengganti email login pengguna lain sengaja dibatasi ke Super Admin
-        // saja — field lain (role_id/member_id) tetap terbuka untuk siapa
+        // saja - field lain (role_id/member_id) tetap terbuka untuk siapa
         // pun yang punya akses "manage_roles", seperti sebelumnya.
         if ($request->has('email') && ! Auth::user()->isSuperAdmin()) {
             return response()->json([
@@ -482,7 +482,7 @@ class RoleManagementController extends Controller
 
     /**
      * Menghapus akun login (mis. akun uji coba). Data pengurus di tabel
-     * `members` TIDAK ikut terhapus — hanya akses loginnya yang dicabut.
+     * `members` TIDAK ikut terhapus - hanya akses loginnya yang dicabut.
      * Kalau kelak pengurus itu perlu login lagi, tinggal buatkan akun baru
      * lewat "Buatkan Akun Login" seperti biasa.
      */
@@ -508,7 +508,7 @@ class RoleManagementController extends Controller
     }
 
     /**
-     * "Reset by Admin" — Super Admin mengembalikan sandi akun pengguna ke
+     * "Reset by Admin" - Super Admin mengembalikan sandi akun pengguna ke
      * sandi acak baru (menghindari kerumitan konfigurasi email reset-password
      * di fase awal). Sandi baru ditampilkan SEKALI di respons ini supaya
      * Super Admin bisa menyampaikannya langsung ke pengguna.

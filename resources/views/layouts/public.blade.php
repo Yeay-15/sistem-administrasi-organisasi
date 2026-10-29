@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'KATIBER - Keluarga Mahasiswa Tebing Tinggi Bersatu')</title>
-    <meta name="description" content="@yield('meta_description', 'Portal resmi KATIBER — Keluarga Mahasiswa Tebing Tinggi Bersatu, Lhokseumawe, Aceh Utara.')">
+    <meta name="description" content="@yield('meta_description', 'Portal resmi KATIBER - Keluarga Mahasiswa Tebing Tinggi Bersatu, Lhokseumawe, Aceh Utara.')">
 
     {{-- ============ FAVICON DINAMIS ============
          Otomatis pakai logo dari Pengaturan Beranda kalau sudah diunggah,
@@ -26,7 +26,7 @@
     <meta property="og:locale" content="id_ID">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="@yield('og_title', 'KATIBER - Keluarga Mahasiswa Tebing Tinggi Bersatu')">
-    <meta property="og:description" content="@yield('meta_description', 'Portal resmi KATIBER — Keluarga Mahasiswa Tebing Tinggi Bersatu, Lhokseumawe, Aceh Utara.')">
+    <meta property="og:description" content="@yield('meta_description', 'Portal resmi KATIBER - Keluarga Mahasiswa Tebing Tinggi Bersatu, Lhokseumawe, Aceh Utara.')">
     @hasSection('og_image')
         <meta property="og:image" content="@yield('og_image')">
     @elseif ($ogImageFallback)
@@ -70,7 +70,7 @@
     <header
         class="theme-transition sticky top-0 z-40 border-b border-slate-100 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
         <nav class="mx-auto flex h-18 max-w-6xl items-center justify-between px-4 py-2.5 sm:px-6 lg:px-8">
-            {{-- Logo — pojok kiri atas, ambil dari Pengaturan Beranda bila sudah diunggah --}}
+            {{-- Logo - pojok kiri atas, ambil dari Pengaturan Beranda bila sudah diunggah --}}
             <a href="{{ route('public.home') }}" class="flex items-center gap-3">
                 @if ($homeSettings->logo_url ?? null)
                     <img src="{{ $homeSettings->logo_url }}" alt="Logo KATIBER"

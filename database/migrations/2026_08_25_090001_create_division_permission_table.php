@@ -14,7 +14,7 @@ return new class extends Migration
         // Pivot ini memberi Divisi (bukan Role) hak akses tambahan yang tidak
         // tergantung pada peran anggotanya. Contoh: Divisi Infokom diberi hak
         // 'manage_news' & 'manage_gallery' secara langsung di sini, sehingga
-        // TIDAK ADA nama divisi yang di-hardcode di kode aplikasi — cukup
+        // TIDAK ADA nama divisi yang di-hardcode di kode aplikasi - cukup
         // toggle lewat halaman Manajemen Peran & Akses.
         Schema::create('division_permission', function (Blueprint $table) {
             $table->id();

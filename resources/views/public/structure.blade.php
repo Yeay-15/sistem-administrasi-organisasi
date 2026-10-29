@@ -1,15 +1,20 @@
 @extends('layouts.public')
 
 @section('title', 'Struktur Pengurus - KATIBER')
-@section('meta_description', 'Kenali para pengurus aktif KATIBER — Keluarga Mahasiswa Tebing Tinggi Bersatu — yang menjalankan roda organisasi per divisi.')
+@section('meta_description', 'Kenali para pengurus aktif KATIBER - Keluarga Mahasiswa Tebing Tinggi Bersatu - yang
+    menjalankan roda organisasi per divisi.')
 
 @section('content')
     <section class="relative overflow-hidden bg-gradient-to-br from-navy-800 via-navy-900 to-navy-950">
         <div class="navy-dot-pattern absolute inset-0"></div>
         <div class="relative mx-auto max-w-6xl px-4 py-20 text-center sm:px-6 lg:px-8">
-            <span class="reveal inline-block rounded-full bg-white/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-white ring-1 ring-inset ring-white/15">Struktur Organisasi</span>
-            <h1 class="reveal mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-5xl" style="--reveal-delay:80ms">Struktur Pengurus</h1>
-            <p class="reveal mx-auto mt-4 max-w-2xl text-base leading-relaxed text-navy-100 sm:text-lg" style="--reveal-delay:160ms">
+            <span
+                class="reveal inline-block rounded-full bg-white/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-white ring-1 ring-inset ring-white/15">Struktur
+                Organisasi</span>
+            <h1 class="reveal mt-4 text-3xl font-extrabold tracking-tight text-white sm:text-5xl" style="--reveal-delay:80ms">
+                Struktur Pengurus</h1>
+            <p class="reveal mx-auto mt-4 max-w-2xl text-base leading-relaxed text-navy-100 sm:text-lg"
+                style="--reveal-delay:160ms">
                 Mengenal lebih dekat para pengurus aktif yang menjalankan roda organisasi KATIBER.
             </p>
         </div>

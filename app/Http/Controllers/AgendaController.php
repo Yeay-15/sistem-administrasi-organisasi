@@ -6,7 +6,9 @@ use App\Models\Agenda;
 use App\Models\Member;
 use App\Models\Division;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class AgendaController extends Controller
@@ -37,9 +39,12 @@ class AgendaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'agenda_code' => ['required', 'string', 'max:50', 'unique:agendas,agenda_code'],
-            'name' => ['required', 'string', 'max:255'],
-            'date' => ['required', 'date'],
+            'agenda_code' => ['required', 'string', 'max:50'],
+            'name' => ['required', 'string', 'max:240'],
+            // Boleh banyak tanggal (dan rentang): form mengirim satu input dates[] per hari.
+            'dates' => ['required', 'array', 'min:1', 'max:62'],
+            'dates.*' => ['required', 'date_format:Y-m-d', 'distinct'],
+            'number_names' => ['nullable', 'boolean'],
             'type' => ['required', 'string', 'max:100'],
             'person_in_charge' => ['required', 'string', 'max:255'],
             'status' => ['required', 'string'],
@@ -49,18 +54,47 @@ class AgendaController extends Controller
             'division_ids.*' => ['exists:divisions,id'],
         ]);
 
-        $agenda = Agenda::create(array_merge($validated, [
-            // Checkbox HTML tidak mengirim apa pun saat tidak dicentang,
-            // jadi statusnya dihitung eksplisit di sini alih-alih ikut
-            // $request->all() begitu saja.
-            'is_public' => $request->boolean('is_public', true),
-        ]));
+        $dates = collect($validated['dates'])->sort()->values();
+        $total = $dates->count();
+        $numbered = $total > 1 && $request->boolean('number_names', true);
 
-        $agenda->divisions()->sync(
-            $validated['attendance_scope'] === 'division' ? ($validated['division_ids'] ?? []) : []
-        );
+        // Satu tanggal -> kode apa adanya. Banyak tanggal -> KODE-01, KODE-02, ...
+        $codes = $dates->map(fn($d, $i) => $total > 1
+            ? $validated['agenda_code'] . '-' . str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT)
+            : $validated['agenda_code']);
 
-        return redirect()->route('agendas.index')->with('success', 'Agenda berhasil ditambahkan.');
+        $taken = Agenda::whereIn('agenda_code', $codes)->pluck('agenda_code');
+        if ($taken->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'agenda_code' => 'Kode sudah dipakai: ' . $taken->implode(', ') . '. Ganti kode agenda.',
+            ]);
+        }
+
+        $divisionIds = $validated['attendance_scope'] === 'division' ? ($validated['division_ids'] ?? []) : [];
+
+        DB::transaction(function () use ($dates, $codes, $total, $numbered, $validated, $request, $divisionIds) {
+            foreach ($dates as $i => $date) {
+                $agenda = Agenda::create([
+                    'agenda_code' => $codes[$i],
+                    'name' => $numbered ? $validated['name'] . ' (' . ($i + 1) . '/' . $total . ')' : $validated['name'],
+                    'date' => $date,
+                    'type' => $validated['type'],
+                    'person_in_charge' => $validated['person_in_charge'],
+                    'status' => $validated['status'],
+                    'notes' => $validated['notes'] ?? null,
+                    'attendance_scope' => $validated['attendance_scope'],
+                    // Checkbox HTML tidak mengirim apa pun saat tidak dicentang,
+                    // jadi statusnya dihitung eksplisit di sini.
+                    'is_public' => $request->boolean('is_public', true),
+                ]);
+
+                $agenda->divisions()->sync($divisionIds);
+            }
+        });
+
+        return redirect()->route('agendas.index')->with('success', $total > 1
+            ? "{$total} agenda berhasil ditambahkan (satu per tanggal)."
+            : 'Agenda berhasil ditambahkan.');
     }
 
     public function show(Agenda $agenda)
@@ -68,7 +102,7 @@ class AgendaController extends Controller
         $agenda->load('divisions');
 
         // Kalau cakupannya 'division', daftar absensi hanya berisi anggota
-        // dari divisi yang dicantumkan — bukan seluruh pengurus aktif —
+        // dari divisi yang dicantumkan - bukan seluruh pengurus aktif -
         // supaya pengurus divisi lain yang memang tidak diundang tidak ikut
         // "kena absen alpha" di statistik kehadirannya.
         $members = Member::with('division')->where('status', 'Aktif');
@@ -117,7 +151,7 @@ class AgendaController extends Controller
     }
 
     /**
-     * Toggle cepat status tampil-ke-publik lewat ikon mata di daftar agenda —
+     * Toggle cepat status tampil-ke-publik lewat ikon mata di daftar agenda -
      * tanpa perlu masuk ke form edit.
      */
     public function togglePublic(Agenda $agenda)
@@ -136,7 +170,7 @@ class AgendaController extends Controller
         // Contoh Gate::authorize eksplisit di level controller (Tahap 3).
         // Seluruh resource 'agendas' sudah dilindungi middleware 3-tier
         // (can:view_agendas / can:manage_agendas / can:delete_agendas) di
-        // routes/web.php, jadi baris ini sifatnya defense-in-depth — pola yang
+        // routes/web.php, jadi baris ini sifatnya defense-in-depth - pola yang
         // sama bisa dipakai di controller lain untuk aturan yang lebih spesifik per-aksi.
         Gate::authorize('delete_agendas');
 
@@ -179,5 +213,4 @@ class AgendaController extends Controller
 
         return $pdf->download('Rekap_Agenda_KATIBER.pdf');
     }
-
 }

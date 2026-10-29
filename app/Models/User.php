@@ -83,10 +83,10 @@ class User extends Authenticatable
      * Sebuah akses diizinkan jika salah satu dari ini benar:
      * 1. Peran (Role) pengguna memiliki permission tersebut secara langsung.
      * 2. Divisi (Division) pengguna memiliki permission tersebut secara langsung
-     *    (lihat Division::permissions() — dipakai untuk kasus seperti Infokom
+     *    (lihat Division::permissions() - dipakai untuk kasus seperti Infokom
      *    yang boleh mengelola Berita/Galeri tanpa perlu peran khusus).
      * 3. Untuk permission bertipe 'view_xxx': secara otomatis diizinkan jika
-     *    pengguna sudah memiliki 'manage_xxx' ATAU 'delete_xxx' — karena
+     *    pengguna sudah memiliki 'manage_xxx' ATAU 'delete_xxx' - karena
      *    hak Kelola maupun Hapus sudah pasti mencakup hak Lihat.
      *
      * PENTING: 'manage_xxx' (tambah & ubah) TIDAK secara otomatis mencakup
@@ -137,8 +137,8 @@ class User extends Authenticatable
 
             $this->cachedDivisionPermissionSlugs = $member?->division
                 ? $member->division->permissions
-                    ->filter(fn ($permission) => (bool) $permission->pivot->{$column})
-                    ->pluck('slug')
+                ->filter(fn($permission) => (bool) $permission->pivot->{$column})
+                ->pluck('slug')
                 : collect();
         }
 

@@ -32,7 +32,7 @@ class HomeSetting extends Model
     ];
 
     /**
-     * Pengaturan Beranda bersifat singleton — selalu hanya ada 1 baris data
+     * Pengaturan Beranda bersifat singleton - selalu hanya ada 1 baris data
      * (id = 1). Method ini mengambil baris tersebut, atau membuatnya dengan
      * nilai kosong jika belum pernah diisi sama sekali.
      */

@@ -15,7 +15,7 @@ class ProfileController extends Controller
 {
     /**
      * Halaman "Pengaturan Akun" milik pengguna sendiri. Ini murni ranah privat
-     * (avatar kasual, nama tampilan, sandi) — TERPISAH dari Data Pengurus
+     * (avatar kasual, nama tampilan, sandi) - TERPISAH dari Data Pengurus
      * (foto resmi PDH, jabatan) yang hanya bisa diubah Sekretariat lewat
      * menu Kelola Pengurus.
      */
@@ -28,7 +28,7 @@ class ProfileController extends Controller
 
     /**
      * Update data akun: nama tampilan & avatar. Email login hanya bisa
-     * diubah lewat sini oleh Super Admin sendiri — untuk peran lain, email
+     * diubah lewat sini oleh Super Admin sendiri - untuk peran lain, email
      * tetap terkunci dan harus dimintakan ke Super Admin lewat menu
      * Manajemen Peran & Akses.
      */

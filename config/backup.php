@@ -17,7 +17,7 @@ return [
 
                 /*
                  * Kode aplikasi (app/, config/, dst) SENGAJA tidak
-                 * disertakan lagi — itu sudah tersimpan dan bisa
+                 * disertakan lagi - itu sudah tersimpan dan bisa
                  * dipulihkan lewat Git, tidak perlu ikut di-backup
                  * berulang setiap hari. Yang benar-benar TIDAK BISA
                  * direkonstruksi kalau hilang cuma dua: isi database
@@ -36,7 +36,7 @@ return [
                 'ignore_unreadable_directories' => false,
 
                 /*
-                 * Diisi eksplisit ke base_path() — supaya spatie/laravel-backup
+                 * Diisi eksplisit ke base_path() - supaya spatie/laravel-backup
                  * tahu persis folder mana yang jadi "akar bersama" dari semua
                  * entri 'include' di atas (app/, config/, storage/app/public/,
                  * dst), lalu memangkas prefix path itu dari setiap nama file
@@ -51,7 +51,7 @@ return [
 
             /*
              * Koneksi database yang akan di-dump. Otomatis ikut koneksi
-             * default di .env (DB_CONNECTION) — tidak perlu diubah manual
+             * default di .env (DB_CONNECTION) - tidak perlu diubah manual
              * kalau kamu ganti dari MySQL ke koneksi lain.
              */
             'databases' => [
@@ -76,13 +76,13 @@ return [
             'filename_prefix' => '',
 
             /*
-             * Cuma "local" di sini — bukan berarti Google Drive tidak
+             * Cuma "local" di sini - bukan berarti Google Drive tidak
              * dipakai! Karena Flysystem tidak punya adapter Google Drive
              * yang kompatibel dengan versi Guzzle yang dipakai Laravel di
              * project ini, unggah ke Google Drive dilakukan lewat jalur
              * terpisah: App\Listeners\UploadBackupToGoogleDrive (memakai
              * SDK resmi google/apiclient), yang otomatis jalan setiap kali
-             * file .zip backup ini selesai dibuat — lihat AppServiceProvider.
+             * file .zip backup ini selesai dibuat - lihat AppServiceProvider.
              */
             'disks' => [
                 'local',
@@ -102,7 +102,7 @@ return [
 
     /*
      * Notifikasi HANYA dikirim untuk kejadian yang perlu ditindaklanjuti
-     * (backup gagal, backup tidak sehat, cleanup gagal) — bukan tiap kali
+     * (backup gagal, backup tidak sehat, cleanup gagal) - bukan tiap kali
      * backup sukses, supaya tidak membanjiri email dengan notifikasi
      * "semua baik-baik saja" setiap hari.
      */

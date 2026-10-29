@@ -11,7 +11,7 @@ return new class extends Migration
      * Kadiv (Ketua Divisi), Sekdiv (Sekretaris Divisi), dan/atau Anggota.
      *
      * Default TRUE untuk ketiganya, jadi semua baris lama tetap berlaku
-     * untuk seluruh anggota divisi — perilaku sebelum migration ini TIDAK
+     * untuk seluruh anggota divisi - perilaku sebelum migration ini TIDAK
      * berubah sampai admin sendiri mempersempitnya lewat halaman Peran & Akses.
      */
     public function up(): void

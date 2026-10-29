@@ -13,16 +13,16 @@ class UploadBackupToGoogleDrive
     /**
      * Mengunggah file .zip backup yang baru saja dibuat ke Google Drive.
      *
-     * Memakai OAuth (autentikasi sebagai akun Gmail biasa) — BUKAN Service
+     * Memakai OAuth (autentikasi sebagai akun Gmail biasa) - BUKAN Service
      * Account. Sempat dicoba pakai Service Account, tapi Google menolak
      * dengan error "storageQuotaExceeded": Service Account tidak punya
      * kuota penyimpanan sendiri di akun Google/Gmail biasa (cuma tersedia
      * kalau pakai Shared Drive dari Google Workspace berbayar). Dengan
      * OAuth, file yang diunggah numpang di kuota 15GB gratis akun Gmail
-     * yang dipakai autentikasi — jadi tidak kena batasan itu.
+     * yang dipakai autentikasi - jadi tidak kena batasan itu.
      *
      * Tetap TIDAK memakai SDK resmi google/apiclient (riwayat masalah
-     * bentrok versi Guzzle) — dipanggil langsung lewat REST API Google,
+     * bentrok versi Guzzle) - dipanggil langsung lewat REST API Google,
      * pakai HTTP client bawaan Laravel.
      */
     public function handle(BackupZipWasCreated $event): void
@@ -48,16 +48,16 @@ class UploadBackupToGoogleDrive
 
             Log::info('Google Drive: backup "' . basename($event->pathToZip) . '" berhasil diunggah.');
         } catch (Throwable $e) {
-            // Sengaja tidak dilempar ulang (rethrow) — kalau upload ke
+            // Sengaja tidak dilempar ulang (rethrow) - kalau upload ke
             // Google Drive gagal, backup LOKAL yang sudah berhasil dibuat
             // tetap dianggap sukses. Kegagalan ini cukup dicatat ke log.
-            Log::error('Google Drive: gagal mengunggah backup — ' . $e->getMessage());
+            Log::error('Google Drive: gagal mengunggah backup - ' . $e->getMessage());
         }
     }
 
     /**
      * Menukar refresh token (yang tidak pernah kedaluwarsa, SELAMA
-     * consent screen di Google Cloud Console statusnya "In production" —
+     * consent screen di Google Cloud Console statusnya "In production" -
      * bukan "Testing") dengan access token yang berlaku sementara,
      * lewat endpoint token resmi Google.
      */
@@ -78,7 +78,7 @@ class UploadBackupToGoogleDrive
     }
 
     /**
-     * "Multipart upload" ke Google Drive API v3 — satu request berisi 2
+     * "Multipart upload" ke Google Drive API v3 - satu request berisi 2
      * bagian: metadata (nama file + folder tujuan) dalam JSON, lalu isi
      * file .zip-nya dalam bentuk mentah.
      */

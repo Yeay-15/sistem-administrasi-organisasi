@@ -1,5 +1,6 @@
 services:
   app:
+    build: .
     image: katiber-app:custom
     container_name: katiber_app
     restart: unless-stopped

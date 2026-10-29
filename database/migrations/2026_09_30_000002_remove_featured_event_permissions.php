@@ -27,6 +27,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Tidak dikembalikan — fitur Event Unggulan sudah tidak ada.
+        // Tidak dikembalikan - fitur Event Unggulan sudah tidak ada.
     }
 };

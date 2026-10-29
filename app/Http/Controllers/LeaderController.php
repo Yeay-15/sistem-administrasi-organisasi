@@ -22,7 +22,7 @@ class LeaderController extends Controller
 
     /**
      * Menyalakan/mematikan tampilnya timeline "Estafet Kepemimpinan" di
-     * halaman publik (Tentang Kami). Data ketua umum tidak dihapus — hanya
+     * halaman publik (Tentang Kami). Data ketua umum tidak dihapus - hanya
      * disembunyikan dari pengunjung.
      */
     public function updateVisibility(Request $request)
@@ -111,7 +111,7 @@ class LeaderController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            // Sengaja nullable — sesuai permintaan, jurusan/kampus boleh
+            // Sengaja nullable - sesuai permintaan, jurusan/kampus boleh
             // dikosongkan dulu kalau belum diketahui.
             'major' => ['nullable', 'string', 'max:255'],
             'period_start' => ['required', 'string', 'max:9'],

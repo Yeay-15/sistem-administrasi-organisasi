@@ -18,7 +18,7 @@ class RolePermissionSeeder extends Seeder
     public function run(): void
     {
         // Sistem hak akses 3-tingkat: 'view_x' (lihat), 'manage_x' (tambah &
-        // ubah — TIDAK termasuk hapus), 'delete_x' (hapus — toggle terpisah
+        // ubah - TIDAK termasuk hapus), 'delete_x' (hapus - toggle terpisah
         // & eksklusif). Ini sengaja dipisah supaya pengguna yang hanya diberi
         // hak "Kelola" tidak bisa menghapus arsip secara tidak sengaja.
         $permissions = [
@@ -87,7 +87,7 @@ class RolePermissionSeeder extends Seeder
             Permission::updateOrCreate(['slug' => $permission['slug']], $permission);
         }
 
-        // Fitur "Event Unggulan" sudah dihapus — buang izin sisanya (relasi ke
+        // Fitur "Event Unggulan" sudah dihapus - buang izin sisanya (relasi ke
         // peran & divisi ikut terhapus lewat cascade).
         Permission::whereIn('slug', ['view_events', 'manage_events', 'delete_events'])->delete();
 
@@ -109,9 +109,9 @@ class RolePermissionSeeder extends Seeder
         // Super Admin selalu mendapat SEMUA permission yang ada.
         $superAdmin->permissions()->sync(Permission::pluck('id'));
 
-        // Default awal untuk Kadiv & Anggota — HANYA dipasang sekali saat role
+        // Default awal untuk Kadiv & Anggota - HANYA dipasang sekali saat role
         // baru pertama kali dibuat (permissions masih kosong). Kadiv sengaja
-        // TIDAK diberi hak 'delete_*' secara default — sesuai prinsip 3-tier,
+        // TIDAK diberi hak 'delete_*' secara default - sesuai prinsip 3-tier,
         // hak hapus harus dinyalakan manual oleh Super Admin lewat halaman
         // Manajemen Peran & Akses bila memang dibutuhkan.
         if ($kadiv->permissions()->count() === 0) {
@@ -137,27 +137,33 @@ class RolePermissionSeeder extends Seeder
 
         // Hak akses per-Divisi (bukan per-Role). Secara default, Divisi Infokom
         // diberi hak penuh (Lihat+Kelola+Hapus) atas Berita & Galeri di sini
-        // SEKALI SAJA — supaya perilaku tetap sama seperti sebelum fitur
+        // SEKALI SAJA - supaya perilaku tetap sama seperti sebelum fitur
         // "Hak Akses per Divisi" ini dipasang. Setelahnya, semua diatur lewat
         // toggle di halaman Manajemen Peran & Akses, bukan lewat kode.
         $infokom = Division::where('abbreviation', 'Infokom')->first();
         if ($infokom && $infokom->permissions()->count() === 0) {
             $infokom->permissions()->sync(
                 Permission::whereIn('slug', [
-                    'view_news', 'manage_news', 'delete_news',
-                    'view_gallery', 'manage_gallery', 'delete_gallery',
+                    'view_news',
+                    'manage_news',
+                    'delete_news',
+                    'view_gallery',
+                    'manage_gallery',
+                    'delete_gallery',
                 ])->pluck('id')
             );
         }
 
         // Default awal untuk Divisi Inventaris (singkatan "Invent"): hak penuh
-        // atas menu Inventaris — hanya dipasang sekali saat divisinya belum
+        // atas menu Inventaris - hanya dipasang sekali saat divisinya belum
         // punya hak ekstra apa pun, sama seperti kasus Infokom di atas.
         $invent = Division::where('abbreviation', 'Invent')->first();
         if ($invent && $invent->permissions()->count() === 0) {
             $invent->permissions()->syncWithoutDetaching(
                 Permission::whereIn('slug', [
-                    'view_inventory_items', 'manage_inventory_items', 'delete_inventory_items',
+                    'view_inventory_items',
+                    'manage_inventory_items',
+                    'delete_inventory_items',
                 ])->pluck('id')
             );
         }
