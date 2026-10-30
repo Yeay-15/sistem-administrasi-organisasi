@@ -7,7 +7,7 @@
         <div>
             <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Anggota Non-Pengurus</h1>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Orang yang ikut kegiatan/kepanitiaan tapi bukan
-                bagian struktur Pengurus - dosen pembimbing, alumni, relawan lepas, dsb.</p>
+                bagian struktur Pengurus</p>
         </div>
         @can('manage_non_officers')
             <a href="{{ route('non-officers.create') }}"

@@ -1,0 +1,6 @@
+# Alias nama: untuk nama di daftar panitia yang tidak ketemu / ambigu.
+# Format (satu per baris):   nama di daftar = nama lengkap di data  ATAU  NIM
+# Contoh:
+#   Rizky = Rizky Aditya Pratama
+#   Riswana = 240120055
+# Baris berawalan # diabaikan. Isi lalu jalankan ulang: php artisan panitia:import ... --aliases=database/data/panitia-aliases.txt

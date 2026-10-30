@@ -71,17 +71,32 @@ class CommitteeController extends Controller
     public function show(Committee $committee)
     {
         $committee->load([
-            'committeeMembers' => fn($q) => $q->with(['member', 'committeeField'])->orderBy('position_category'),
+            'committeeMembers' => fn ($q) => $q->with(['member', 'committeeField'])->orderBy('position_category'),
             'agendas',
-            'outgoingLetters' => fn($q) => $q->orderByDesc('date')->orderByDesc('id'),
+            'outgoingLetters' => fn ($q) => $q->orderByDesc('date')->orderByDesc('id'),
         ]);
 
-        $committeeLeadership = $committee->committeeMembers->filter->isCommitteeLeadership();
-        $fieldMembers = $committee->committeeMembers->reject->isCommitteeLeadership()->groupBy(fn($cm) => $cm->committeeField->name ?? 'Tanpa Bidang');
+        // Urutan peran mengikuti Committee::positionCategories():
+        // Ketua, Sekretaris, Bendahara Panitia, Bendahara Peserta, lalu Ketua Bidang sebelum Anggota Bidang.
+        // (Sebelumnya orderBy('position_category') = urut abjad, jadi Bendahara muncul sebelum Ketua.)
+        $roleOrder = array_flip(Committee::positionCategories());
+        $sorted = $committee->committeeMembers
+            ->sortBy(fn ($cm) => [$roleOrder[$cm->position_category] ?? 99, mb_strtolower($cm->member->name ?? '')])
+            ->values();
 
-        $fields = CommitteeField::orderBy('name')->get();
+        $committeeLeadership = $sorted->filter->isCommitteeLeadership()->values();
+        $fieldMembers = $sorted->reject->isCommitteeLeadership()
+            ->groupBy(fn ($cm) => $cm->committeeField->name ?? 'Tanpa Bidang')
+            // Bidang mengikuti kolom "Urutan" di master Bidang Panitia (lalu abjad), "Tanpa Bidang" paling akhir;
+            // urutan anggota di dalam bidang tetap (Ketua Bidang dulu).
+            ->sortBy(fn ($list, $name) => [
+                $name === 'Tanpa Bidang' ? 100000 : ($list->first()->committeeField->sort_order ?? 100),
+                mb_strtolower($name),
+            ]);
 
-        // Untuk dropdown "pilih orang yang sudah ada" - semua members (Pengurus
+        $fields = CommitteeField::orderBy('sort_order')->orderBy('name')->get();
+
+        // Untuk dropdown "pilih orang yang sudah ada" — semua members (Pengurus
         // & Non-Pengurus) yang BELUM terdaftar sebagai anggota di kepanitiaan ini,
         // supaya tidak bisa ditambahkan dobel lewat form yang sama.
         $existingMemberIds = $committee->committeeMembers->pluck('member_id')->unique();
@@ -90,7 +105,7 @@ class CommitteeController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'membership_type', 'student_id']);
 
-        // Untuk mengaitkan agenda (rapat persiapan + hari-H) - agenda yang
+        // Untuk mengaitkan agenda (rapat persiapan + hari-H) — agenda yang
         // belum ditautkan ke kepanitiaan ini, terbaru dulu.
         $linkedAgendaIds = $committee->agendas->pluck('id');
         $availableAgendas = Agenda::whereNotIn('id', $linkedAgendaIds)->orderByDesc('date')->limit(100)->get();
@@ -148,14 +163,14 @@ class CommitteeController extends Controller
     /**
      * Tambah satu baris anggota panitia (member + peran [+ bidang]).
      * member_id boleh berasal dari orang yang sudah ada di sistem
-     * (Pengurus atau Non-Pengurus) - untuk mendaftarkan orang yang
+     * (Pengurus atau Non-Pengurus) — untuk mendaftarkan orang yang
      * benar-benar baru, form memakai quickCreateMember() lebih dulu.
      */
     public function addMember(Request $request, Committee $committee)
     {
         $validated = $request->validate([
             'member_id' => ['required', 'exists:members,id'],
-            // Tidak dibatasi Rule::in lagi - peran boleh dari daftar siap pakai
+            // Tidak dibatasi Rule::in lagi — peran boleh dari daftar siap pakai
             // ATAU diketik bebas lewat opsi "Lainnya" di form (lihat
             // Committee::positionCategories() untuk daftar siap pakainya).
             'position_category' => ['required', 'string', 'max:100'],
@@ -201,7 +216,7 @@ class CommitteeController extends Controller
     }
 
     /**
-     * "+ Tambah Orang Baru" dari form anggota panitia - membuat record
+     * "+ Tambah Orang Baru" dari form anggota panitia — membuat record
      * Member baru dengan membership_type Non-Pengurus secara instan (tanpa
      * pindah halaman), supaya orang luar (dosen pembimbing, panitia dari
      * kampus lain, dsb) tidak perlu didaftarkan lebih dulu lewat menu

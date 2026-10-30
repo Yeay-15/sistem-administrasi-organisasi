@@ -14,8 +14,32 @@ class CommitteeField extends Model
 
     protected $fillable = [
         'name',
+        'sort_order',
         'description',
     ];
+
+    /** Urutan awal bidang baru yang namanya dikenal (kelipatan 10). Selain ini = 100. */
+    private const PRESET_ORDER = [
+        'korlap' => 10,
+        'acara' => 20,
+        'perlengkapan' => 30,
+        'konsumsi' => 40,
+        'medis' => 50,
+        'publikasi dan dokumentasi' => 60,
+        'keamanan' => 70,
+        'transportasi' => 80,
+        'keamanan transportasi' => 90,
+        'keamanan dan transportasi' => 90,
+    ];
+
+    /** Urutan bawaan untuk sebuah nama bidang ("Sie Acara" == "Acara"). */
+    public static function presetOrder(string $name): int
+    {
+        $key = trim(preg_replace('/[^a-z0-9]+/', ' ', mb_strtolower($name)));
+        $key = trim(preg_replace('/^(sie|seksi|bidang)\s+/', '', $key));
+
+        return self::PRESET_ORDER[$key] ?? 100;
+    }
 
     public function committeeMembers(): HasMany
     {

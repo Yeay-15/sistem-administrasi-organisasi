@@ -29,6 +29,7 @@
                     <tr class="border-b border-slate-100 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/40">
                         <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Nama Bidang</th>
                         <th class="px-5 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Keterangan</th>
+                        <th class="px-5 py-3.5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400" title="Urutan tampil di halaman kepanitiaan (kecil = di atas)">Urutan</th>
                         <th class="px-5 py-3.5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Dipakai</th>
                         @can('manage_committees')
                             <th class="px-5 py-3.5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Aksi</th>
@@ -47,6 +48,11 @@
                                 <span x-show="!editing">{{ $field->description ?? '-' }}</span>
                                 <input x-show="editing" x-cloak type="text" name="description" form="edit-field-{{ $field->id }}" value="{{ $field->description }}"
                                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                            </td>
+                            <td class="px-5 py-3.5 text-center align-top text-sm text-slate-500 dark:text-slate-400">
+                                <span x-show="!editing">{{ $field->sort_order }}</span>
+                                <input x-show="editing" x-cloak type="number" min="0" max="9999" name="sort_order" form="edit-field-{{ $field->id }}" value="{{ $field->sort_order }}"
+                                    class="w-20 rounded-lg border border-slate-300 bg-white px-3 py-2 text-center text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                             </td>
                             <td class="px-5 py-3.5 text-center align-top text-sm text-slate-500 dark:text-slate-400">{{ $field->committee_members_count }}x</td>
                             @can('manage_committees')
@@ -84,7 +90,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-5 py-12 text-center text-sm text-slate-400 dark:text-slate-500">Belum ada bidang panitia.</td>
+                            <td colspan="5" class="px-5 py-12 text-center text-sm text-slate-400 dark:text-slate-500">Belum ada bidang panitia.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -110,6 +116,13 @@
                         <input type="text" name="name" value="{{ old('name') }}" required placeholder="mis. Sie Acara"
                             class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
                         @error('name')<p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Urutan (opsional)</label>
+                        <input type="number" min="0" max="9999" name="sort_order" value="{{ old('sort_order') }}" placeholder="kosong = urutan bawaan"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                        <p class="mt-1.5 text-xs text-slate-400">Angka kecil tampil di atas di halaman kepanitiaan.</p>
+                        @error('sort_order')<p class="mt-1.5 text-sm text-red-500 dark:text-red-400">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label class="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Keterangan (opsional)</label>
